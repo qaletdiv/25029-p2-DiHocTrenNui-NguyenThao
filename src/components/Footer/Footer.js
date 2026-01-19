@@ -1,5 +1,8 @@
 import React from "react";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import Image from "next/image";
+import logo from '@/assets/logo.jpg';
+
 
 export default function Footer() {
     return (
@@ -9,7 +12,7 @@ export default function Footer() {
                 {/* CTA Section */}
                 <div className="border-b border-white/10 pb-16 mb-16 flex flex-col md:flex-row justify-between items-center gap-8">
                     <h2 className="text-3xl md:text-4xl font-serif font-bold max-w-xl">
-                        Ready To Take Your Business Growth To The Next Level?
+                        Sống là cho đâu chỉ nhận riêng mình!
                     </h2>
                     {/* Decorative Sun Icon */}
                     <div className="text-yellow-400 hidden lg:block">
@@ -24,13 +27,20 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                                <span className="text-primary-900 font-bold">K</span>
-                            </div>
-                            <span className="font-serif text-2xl font-bold">KidHope</span>
+                            {/* Logo */}
+                            <a href="#home" className="flex-shrink-0 flex items-center gap-2">
+                                <Image
+                                    src={logo}
+                                    alt="Logo"
+                                    width={40}
+                                    height={40}
+                                    className="object-contain"
+                                />
+                            </a>
+                            <span className="font-serif text-2xl font-bold">ĐI HỌC TRÊN NÚI</span>
                         </div>
                         <p className="text-gray-400 text-sm">
-                            Copyright © 2024. Designed by You.
+                            Copyright © 2026 CLB Bạn Thương Nhau
                         </p>
                         <div className="flex gap-4">
                             <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Facebook size={16} /></a>
@@ -68,22 +78,22 @@ export default function Footer() {
                         <ul className="space-y-4 text-gray-400 text-sm">
                             <li className="flex items-start gap-3">
                                 <MapPin size={18} className="text-yellow-400 mt-0.5" />
-                                <span>4517 Washington Ave. Manchester, Kentucky 39495</span>
+                                <span>K36/18 Lê Duẩn, Phường Hải Châu, TP. Đà Nẵng, Việt Nam</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Phone size={18} className="text-yellow-400" />
-                                <span>(406) 555-0120</span>
+                                <span>+84 963.345.456</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail size={18} className="text-yellow-400" />
-                                <span>contact@kidhope.com</span>
+                                <span>btndihoctrennui@gmail.com</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-xs text-gray-500">
-                    <p>© 2024 KidHope Charity. All rights reserved.</p>
+                    <p>© 2026 Câu Lạc Bộ Bạn Thương Nhau</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
                         <a href="#" className="hover:text-white">Terms & Conditions</a>
                         <a href="#" className="hover:text-white">Privacy Policy</a>

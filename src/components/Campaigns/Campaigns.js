@@ -81,7 +81,7 @@ export default function Campaigns() {
                                     </div>
                                 </div>
 
-                                <Button variant="accent" fullWidth size="sm">DONATE NOW</Button>
+                                <Button variant="accent" fullWidth size="sm">ỦNG HỘ NGAY</Button>
                             </div>
                         </div>
                     ))}

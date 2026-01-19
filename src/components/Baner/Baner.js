@@ -20,30 +20,18 @@ export default function Baner() {
                         </svg>
                     </div>
 
-                    <p className="text-gray-300 font-bold tracking-[0.2em] text-xs uppercase">
-                        Non-Profit Charity
+                    <p className="text-gray-300 font-bold tracking-[0.2em] text-medium uppercase">
+                        DỰ ÁN CỘNG ĐỒNG
                     </p>
 
-                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold leading-[1.1]">
-                        Give <span className="relative inline-block">
-                            Hope
-                            {/* Yellow Underline SVG */}
-                            <svg className="absolute w-[110%] -bottom-2 -left-1" viewBox="0 0 100 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2 5C20 8 50 8 98 2" stroke="#facc15" strokeWidth="4" strokeLinecap="round" />
-                            </svg>
-                        </span> <br />
-                        To Children <br />
-                        In Need.
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-medium font-bold leading-[1.1]">
+                        Hỗ Trợ những bạn nhỏ <br />
+                        mồ côi, khó khăn ở vùng cao <br />
+                        đi học lâu dài.
                     </h1>
 
                     <div className="flex flex-wrap items-center gap-6 pt-4">
-                        <Button variant="accent" size="lg" className="rounded-full px-8">DONATE NOW</Button>
-                        <button className="flex items-center gap-3 text-white text-sm font-bold tracking-wider hover:text-yellow-400 transition-colors group uppercase">
-                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-primary-900 transition-colors">
-                                <Play size={16} fill="currentColor" />
-                            </div>
-                            VIDEO PLAYING THEME
-                        </button>
+                        <Button variant="accent" size="lg" className="rounded-full px-8">ỦNG HỘ NGAY</Button>
                     </div>
                 </div>
 

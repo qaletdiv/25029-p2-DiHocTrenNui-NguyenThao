@@ -1,15 +1,17 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import { Menu, Search, User, X } from "lucide-react";
 import Button from "../Button/Button";
+import logo from '@/assets/logo.jpg';
 
 const NAV_ITEMS = [
-    { label: 'Home', href: '#home' },
-    { label: 'Campaigns', href: '#campaigns' },
-    { label: 'About Us', href: '#about' },
-    { label: 'Pages', href: '#services' },
-    { label: 'News', href: '#news' },
-    { label: 'Contacts', href: '#footer' },
+    { label: 'Trang chủ', href: '#home' },
+    { label: 'Phương thức', href: '#campaigns' },
+    { label: 'Giới thiệu', href: '#about' },
+    { label: 'Hoạt động', href: '#services' },
+    { label: 'Tin tức', href: '#news' },
+    { label: 'Liên hệ', href: '#footer' },
 ]
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,13 +23,14 @@ export default function Navbar() {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
                         <a href="#home" className="flex-shrink-0 flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary-900 rounded-full flex items-center justify-center text-white">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="white" stroke="none" />
-                                    <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" className="text-primary-900" fill="currentColor" />
-                                </svg>
-                            </div>
-                            <span className="font-serif text-2xl font-bold text-primary-900">KidHope</span>
+                            <Image
+                                src={logo}
+                                alt="Logo"
+                                width={40}
+                                height={40}
+                                className="object-contain"
+                            />
+                            <span className="font-serif text-2xl font-bold text-primary-900">ĐI HỌC TRÊN NÚI</span>
                         </a>
 
                         {/* Desktop Menu */}
@@ -36,7 +39,7 @@ export default function Navbar() {
                                 <a
                                     key={item.label}
                                     href={item.href}
-                                    className="text-primary-900 font-medium text-sm hover:text-primary-700 transition-colors"
+                                    className="text-primary-900 font-medium text-lg hover:text-primary-700 transition-colors"
                                 >
                                     {item.label}
                                 </a>
@@ -51,7 +54,7 @@ export default function Navbar() {
                             <button className="text-primary-900 hover:text-primary-700 transition-colors">
                                 <User size={30} />
                             </button>
-                            <Button variant="primary" size="md">DONATE NOW</Button>
+                            <Button variant="primary" size="md">ỦNG HỘ NGAY</Button>
                         </div>
 
                         {/* Mobile Menu Button */}
@@ -85,7 +88,7 @@ export default function Navbar() {
                                     <button className="flex items-center gap-2 text-primary-900"><Search size={20} /> Search</button>
                                     <button className="flex items-center gap-2 text-primary-900"><User size={20} /> Login</button>
                                 </div>
-                                <Button variant="primary" fullWidth>DONATE NOW</Button>
+                                <Button variant="primary" fullWidth>ỦNG HỘ NGAY</Button>
                             </div>
                         </div>
                     </div>
