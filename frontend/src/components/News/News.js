@@ -5,8 +5,7 @@ export default function News() {
         <div className="py-24 bg-white" id="news">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
-                    <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">From Our News</span>
-                    <h2 className="text-4xl font-serif font-bold text-primary-900 mt-2">Latest News</h2>
+                    <h2 className="text-4xl font-serif font-bold text-primary-900 mt-2">Tin tức</h2>
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-12">

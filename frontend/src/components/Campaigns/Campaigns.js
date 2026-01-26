@@ -31,58 +31,31 @@ const CAMPAIGNS = [
     }
 ];
 
+const IMPACT_STATS = [
+    { value: "400+", label: "Học sinh", gradient: "from-[#65d666] to-[#3abb5c]" }, // Green
+    { value: "300+", label: "Người hỗ trợ", gradient: "from-[#ff9642] to-[#ff6a2b]" }, // Orange
+    { value: "10.000+", label: "Học bổng đã trao", gradient: "from-[#2bc2d5] to-[#3498db]" }, // Blue
+    { value: "3", label: "Năm hoạt động", gradient: "from-[#f566aa] to-[#f43f5e]" }, // Pink
+];
+
 export default function Campaigns() {
     return (
-        <div className="py-20 bg-gray-50" id="campaigns">
+        <div className="py-10 bg-gray-50" id="campaigns">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">We Need Your Help</span>
-                    <h2 className="text-4xl font-serif font-bold text-primary-900 mt-2">Featured Campaigns</h2>
+                    <h2 className="text-4xl font-serif font-bold text-primary-900 mt-2">Kết quả đến nay</h2>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {CAMPAIGNS.map((camp) => (
-                        <div key={camp.id} className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex flex-col">
-                            <div className="relative h-48">
-                                <img src={camp.image} alt={camp.title} className="w-full h-full object-cover" />
-
-                                {/* Circular Progress Overlay */}
-                                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1 shadow-md">
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                        <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="28" cy="28" r="26" stroke="#e5e7eb" strokeWidth="4" fill="none" />
-                                            <circle
-                                                cx="28" cy="28" r="26"
-                                                stroke="#14402a"
-                                                strokeWidth="4"
-                                                fill="none"
-                                                strokeDasharray={163}
-                                                strokeDashoffset={163 - (163 * camp.percentage) / 100}
-                                                className="transition-all duration-1000"
-                                            />
-                                        </svg>
-                                        <span className="absolute text-xs font-bold text-primary-900">{camp.percentage}%</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-12 pb-8 px-6 flex-1 flex flex-col text-center">
-                                <h3 className="text-xl font-bold font-serif text-primary-900 mb-3">{camp.title}</h3>
-                                <p className="text-gray-500 text-sm mb-6 line-clamp-2">{camp.description}</p>
-
-                                <div className="flex justify-between text-xs font-bold text-gray-500 mb-6 mt-auto border-t pt-4">
-                                    <div>
-                                        <span className="block text-primary-900 mb-1">Goal</span>
-                                        <span>${camp.goal.toLocaleString()}</span>
-                                    </div>
-                                    <div>
-                                        <span className="block text-primary-900 mb-1">Raised</span>
-                                        <span>${camp.raised.toLocaleString()}</span>
-                                    </div>
-                                </div>
-
-                                <Button variant="accent" fullWidth size="sm">ỦNG HỘ NGAY</Button>
-                            </div>
+                {/* Impact Statistics Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-32 lg:mb-40 justify-items-center items-start">
+                    {IMPACT_STATS.map((stat, idx) => (
+                        <div
+                            key={idx}
+                            className={`w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br ${stat.gradient} flex flex-col items-center justify-center text-white shadow-xl hover:scale-105 transition-transform duration-300 cursor-default ${idx % 2 !== 0 ? 'lg:mt-24' : ''}`}
+                        >
+                            <span className="text-3xl sm:text-4xl font-bold mb-1 shadow-black/10 drop-shadow-md">{stat.value}</span>
+                            <span className="text-sm sm:text-base font-medium opacity-95 text-center px-4">{stat.label}</span>
                         </div>
                     ))}
                 </div>

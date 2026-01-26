@@ -23,7 +23,7 @@ export default function Footer() {
                 </div>
 
                 {/* Links Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
                     {/* Brand */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-2">
@@ -43,26 +43,26 @@ export default function Footer() {
                             Copyright © 2026 CLB Bạn Thương Nhau
                         </p>
                         <div className="flex gap-4">
-                            <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Facebook size={16} /></a>
+                            <a href="https://www.facebook.com/binhnam.nguyen36" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Facebook size={16} /></a>
                             <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Twitter size={16} /></a>
                             <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Instagram size={16} /></a>
                             <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Linkedin size={16} /></a>
                         </div>
                     </div>
 
-                    {/* Links */}
+                    {/* Page sections */}
                     <div>
-                        <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Pages</h4>
+                        <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Liên kết</h4>
                         <ul className="space-y-4 text-gray-400 text-sm">
-                            <li><a href="#" className="hover:text-yellow-400">About Us</a></li>
-                            <li><a href="#" className="hover:text-yellow-400">Our Mission</a></li>
-                            <li><a href="#" className="hover:text-yellow-400">Our Causes</a></li>
-                            <li><a href="#" className="hover:text-yellow-400">Contact Us</a></li>
+                            <li><a href="#" className="hover:text-yellow-400">Tìm hiểu về chương trình</a></li>
+                            <li><a href="#" className="hover:text-yellow-400">Đăng ký tham gia</a></li>
+                            <li><a href="#" className="hover:text-yellow-400">Các hoạt động</a></li>
+                            <li><a href="#" className="hover:text-yellow-400">Thông tin liên hệ</a></li>
                         </ul>
                     </div>
 
-                    {/* Links 2 */}
-                    <div>
+                    {/* Help section */}
+                    {/* <div>
                         <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Help</h4>
                         <ul className="space-y-4 text-gray-400 text-sm">
                             <li><a href="#" className="hover:text-yellow-400">FAQ</a></li>
@@ -70,11 +70,11 @@ export default function Footer() {
                             <li><a href="#" className="hover:text-yellow-400">Terms & Conditions</a></li>
                             <li><a href="#" className="hover:text-yellow-400">Support</a></li>
                         </ul>
-                    </div>
+                    </div> */}
 
                     {/* Contact */}
                     <div>
-                        <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Contacts</h4>
+                        <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">LIÊN HỆ</h4>
                         <ul className="space-y-4 text-gray-400 text-sm">
                             <li className="flex items-start gap-3">
                                 <MapPin size={18} className="text-yellow-400 mt-0.5" />
@@ -92,11 +92,10 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-xs text-gray-500">
+                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-s text-gray-500">
                     <p>© 2026 Câu Lạc Bộ Bạn Thương Nhau</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-white">Terms & Conditions</a>
-                        <a href="#" className="hover:text-white">Privacy Policy</a>
+                        <p>Cùng chung tay xây dựng tương lai tươi sáng cho các em học sinh nghèo vùng cao.</p>                        
                     </div>
                 </div>
             </div>

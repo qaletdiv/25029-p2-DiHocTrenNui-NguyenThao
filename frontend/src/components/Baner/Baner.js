@@ -20,15 +20,16 @@ export default function Baner() {
                         </svg>
                     </div>
 
-                    <p className="text-gray-300 font-bold tracking-[0.2em] text-medium uppercase">
-                        DỰ ÁN CỘNG ĐỒNG
-                    </p>
-
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-medium font-bold leading-[1.1]">
+                    <p className="text-gray-300 font-bold tracking-[0.2em] text-medium">
                         Hỗ Trợ những bạn nhỏ <br />
                         mồ côi, khó khăn ở vùng cao <br />
                         đi học lâu dài.
+                    </p>
+
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-medium font-bold leading-[1.1]">
+                        DỰ ÁN "ĐI HỌC TRÊN NÚI"
                     </h1>
+
 
                     <div className="flex flex-wrap items-center gap-6 pt-4">
                         <Button variant="accent" size="lg" className="rounded-full px-8">ỦNG HỘ NGAY</Button>
@@ -41,8 +42,8 @@ export default function Baner() {
                         {/* Main Image */}
                         <div className="w-full h-full rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10">
                             <img
-                                src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1600&auto=format&fit=crop"
-                                alt="Smiling children group"
+                                src="/Images/baner2.jpg"
+                                alt="children group"
                                 className="w-full h-full object-cover"
                             />
                         </div>

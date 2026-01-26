@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { Menu, Search, User, X } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 import Button from "../Button/Button";
 import logo from '@/assets/logo.jpg';
 
@@ -47,10 +47,7 @@ export default function Navbar() {
                         </nav>
 
                         {/* Right Actions */}
-                        <div className="hidden lg:flex items-center gap-6">
-                            <button className="text-primary-900 hover:text-primary-700 transition-colors">
-                                <Search size={30} />
-                            </button>
+                        <div className="hidden lg:flex items-center gap-6">                            
                             <button className="text-primary-900 hover:text-primary-700 transition-colors">
                                 <User size={30} />
                             </button>
@@ -85,7 +82,6 @@ export default function Navbar() {
                             ))}
                             <div className="pt-4 flex flex-col gap-4 px-3 pb-4">
                                 <div className="flex gap-4">
-                                    <button className="flex items-center gap-2 text-primary-900"><Search size={20} /> Search</button>
                                     <button className="flex items-center gap-2 text-primary-900"><User size={20} /> Login</button>
                                 </div>
                                 <Button variant="primary" fullWidth>ỦNG HỘ NGAY</Button>

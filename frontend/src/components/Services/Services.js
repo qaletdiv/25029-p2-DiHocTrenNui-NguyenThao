@@ -5,33 +5,33 @@ import Button from '../Button/Button';
 const SERVICES = [
     {
         title: "Tiếp nhận thông tin",
-        desc: "Nhận thông tin về các em học sinh (thông tin cá nhân, hoàn cảnh gia đình và đề xuất ưu tiên) qua website dihoctrennui.com, Fb Nguyễn Bình Nam hoặc người giới thiệu khác.",
-        image: "https://picsum.photos/400/300?random=8"
+        desc: "CLB tiếp nhận thông tin các em học sinh mồ côi hoặc có hoàn cảnh khó khăn từ các Trường học, chọn lọc và đề xuất danh sách các em theo thứ tự ưu tiên theo mức độ khó khăn.",
+        image: "/icons/register.png"
     },
     {
         title: "Kêu gọi kinh phí",
-        desc: "CLB Bạn Thương Nhau chịu trách nhiệm xác nhận thông tin và hoàn cảnh các em học sinh, kêu gọi kinh phí, kết nối với Mạnh Thường Quân, các nhà hảo tâm để tham gia dự án.",
-        image: "https://picsum.photos/400/300?random=9",
+        desc: "CLB Bạn Thương Nhau chịu trách nhiệm kêu gọi kinh phí, kết nối với Mạnh Thường Quân, các nhà hảo tâm để tham gia dự án và hỗ trợ các em cho đến khi học hết các cấp học.",
+        image: "/icons/sponsor.png",
     },
     {
         title: "Thành lập mối liên kết",
-        desc: "Mỗi MTQ cam kết hỗ trợ ít nhất một em trong một năm, có thể kéo dài nếu dự án ổn định. Trong năm, CLB sẽ tổ chức chuyến thăm để các đại diện MTQ gặp gỡ các em tại trường học.",
-        image: "https://picsum.photos/400/300?random=10"
+        desc: "Mỗi em học sinh sẽ được đặt một mã số - gắn với 1 MTQ cụ thể. Mỗi một MTQ sẽ cam kết hỗ trợ cho 1 em trong ít nhất 1 năm, và nhiều năm sau nếu dự án vận hành ổn định.",
+        image: "/icons/family.png"
     },
     {
         title: "Chuyển tiền cho trường học",
-        desc: "Đại diện các Trường sau khi tiếp nhận kinh phí sẽ chuyển tiền cho những thầy cô giáo phụ trách hoặc dạy học của các em, nhờ các thầy cô chuyển tấm lòng của MTQ đến các em.",
-        image: "https://picsum.photos/400/300?random=11"
+        desc: "Định kỳ hằng tháng (hoặc 2 tháng 1 lần), CLB Bạn Thương Nhau sẽ chuyển khoản cho các Trường kinh phí theo số học sinh từng Trường tham gia dự án. (thông qua Tài khoản của Hiệu trưởng/GV phụ trách).",
+        image: "/icons/give-money.png"
     },
     {
         title: "Thực hiện hỗ trợ",
-        desc: "Các thầy cô khi trao quà hằng tháng cho các em hoặc gia đình thì chụp hình gửi về CLB cũng như báo cho thành viên CLB được phân công phụ trách, để tổng hợp và báo cáo MTQ.",
-        image: "https://picsum.photos/400/300?random=12"
+        desc: "Các thầy cô là Hiệu trưởng các Trường tiếp nhận khoản kinh phí nói trên, và chuyển tiền cho những thầy cô giáo phụ trách/dạy học các em ấy, nhờ các thầy cô chuyển tấm lòng của MTQ đến các em học sinh.",
+        image: "/icons/giving-gift.png"
     },
     {
         title: "Báo cáo kết quả",
         desc: "Các thầy cô khi trao quà hằng tháng cho các em hoặc gia đình thì chụp hình gửi về CLB cũng như báo cho thành viên CLB được phân công phụ trách, để tổng hợp và báo cáo MTQ.",
-        image: "https://picsum.photos/400/300?random=13"
+        image: "/icons/report.png"
     }
 ];
 
@@ -49,11 +49,10 @@ export default function Services() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
                     <div>
-                        <span className="text-yellow-400 text-xs font-bold tracking-widest uppercase mb-2 block">How We Help</span>
                         <h2 className="text-4xl md:text-5xl font-serif font-bold">Cách thức vận hành dự án</h2>
                     </div>
                     <p className="max-w-md text-gray-300 text-sm">
-                        We are a dedicated charity organization focused on creating sustainable impact in communities. Join us in our mission to build a better future.
+                        Chúng tôi hoạt động vì sự phát triển bền vững của cộng đồng. Đồng hành cùng chúng tôi để kiến tạo một tương lai tốt đẹp hơn.
                     </p>
                 </div>
 
@@ -63,20 +62,15 @@ export default function Services() {
                             key={idx}
                             className="rounded-xl p-6 transition-all duration-300 hover:-translate-y-2 bg-white text-primary-900"
                         >
-                            <div className="h-40 mb-6 rounded-lg overflow-hidden">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            <div className="h-20 mb-6 rounded-lg overflow-hidden">
+                                <img src={item.image} alt={item.title} className="w-full h-full object-contain" />
                             </div>
-                            <h3 className="text-xl font-bold font-serif mb-4 leading-tight">{item.title}</h3>
-                            <p className="text-sm mb-6 text-gray-600">{item.desc}</p>
+                            <h3 className="text-2xl text-center font-bold font-serif mb-4 leading-tight">{item.title}</h3>
+                            <p className="mb-6 text-gray-600">{item.desc}</p>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-12 text-center">
-                    <Button variant="outline" className="border-white/30 hover:bg-white hover:text-primary-900">
-                        EXPLORE MORE
-                    </Button>
-                </div>
             </div>
         </div>
     )
