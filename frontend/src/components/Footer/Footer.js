@@ -11,7 +11,7 @@ export default function Footer() {
 
                 {/* CTA Section */}
                 <div className="border-b border-white/10 pb-16 mb-16 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <h2 className="text-3xl md:text-4xl font-serif font-bold max-w-xl">
+                    <h2 className="text-2xl md:text-3xl font-sans font-bold max-w-xl">
                         Sống là cho đâu chỉ nhận riêng mình!
                     </h2>
                     {/* Decorative Sun Icon */}
@@ -37,11 +37,9 @@ export default function Footer() {
                                     className="object-contain"
                                 />
                             </a>
-                            <span className="font-serif text-2xl font-bold">ĐI HỌC TRÊN NÚI</span>
+                            <span className="font-sans text-2xl font-bold">ĐI HỌC TRÊN NÚI</span>
                         </div>
-                        <p className="text-gray-400 text-sm">
-                            Copyright © 2026 CLB Bạn Thương Nhau
-                        </p>
+                        
                         <div className="flex gap-4">
                             <a href="https://www.facebook.com/binhnam.nguyen36" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Facebook size={16} /></a>
                             <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-primary-900 transition-colors"><Twitter size={16} /></a>
@@ -60,17 +58,6 @@ export default function Footer() {
                             <li><a href="#" className="hover:text-yellow-400">Thông tin liên hệ</a></li>
                         </ul>
                     </div>
-
-                    {/* Help section */}
-                    {/* <div>
-                        <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Help</h4>
-                        <ul className="space-y-4 text-gray-400 text-sm">
-                            <li><a href="#" className="hover:text-yellow-400">FAQ</a></li>
-                            <li><a href="#" className="hover:text-yellow-400">Privacy Policy</a></li>
-                            <li><a href="#" className="hover:text-yellow-400">Terms & Conditions</a></li>
-                            <li><a href="#" className="hover:text-yellow-400">Support</a></li>
-                        </ul>
-                    </div> */}
 
                     {/* Contact */}
                     <div>
@@ -92,7 +79,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-s text-gray-500">
+                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-s text-gray-400">
                     <p>© 2026 Câu Lạc Bộ Bạn Thương Nhau</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
                         <p>Cùng chung tay xây dựng tương lai tươi sáng cho các em học sinh nghèo vùng cao.</p>                        

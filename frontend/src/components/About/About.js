@@ -20,7 +20,7 @@ export default function About() {
                                     className="rounded-2xl object-cover h-56 w-full shadow-lg"
                                 />
                                 <div className="bg-white p-6 shadow-xl rounded-2xl flex-1 flex flex-col justify-center">
-                                    <p className="text-gray-600 italic font-serif text-sm mb-4 leading-relaxed">
+                                    <p className="text-gray-600 italic font-sans text-sm mb-4 leading-relaxed">
                                         Trên những làng bản xa xôi lẫn khuất giữa đại ngàn Trường Sơn, hàng ngàn bạn nhỏ có hoàn cảnh khó khăn đang phải đi học qua những cung đường núi cheo leo. Những ngôi nhà tạm bợ nằm hút sâu trong núi, những đứa trẻ lem luốc nhưng lễ phép hiền lành. Hành trình học chữ hết sức gian nan. Đặc biệt đối với các bạn nhỏ mồ côi thì cơ cực hơn rất nhiều...
                                     </p>
                                 </div>
@@ -41,7 +41,7 @@ export default function About() {
                     <div className="lg:col-span-4">
                         {/* Right Content */}
                         <div className="lg:col-span-5 space-y-8 pt-4">
-                            <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary-900 leading-tight">
+                            <h2 className="text-4xl md:text-5xl font-sans font-bold text-primary-900 leading-tight">
                                 Giới thiệu dự án
                             </h2>
                             <p className="text-gray-600 leading-relaxed">

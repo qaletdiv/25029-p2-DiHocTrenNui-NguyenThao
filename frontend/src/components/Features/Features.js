@@ -37,10 +37,7 @@ export default function Features() {
                         <img src={feature.image} alt={feature.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
                             <div className="flex justify-between items-end">
-                                <h3 className="text-white text-xl font-serif font-bold max-w-[70%]">{feature.title}</h3>
-                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition-colors group-hover:bg-yellow-400">
-                                    <ArrowUpRight size={20} className="text-black" />
-                                </div>
+                                <h3 className="text-white text-xl font-sans font-bold max-w-[70%]">{feature.title}</h3>
                             </div>
                         </div>
                     </div>

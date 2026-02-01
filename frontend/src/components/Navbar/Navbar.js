@@ -6,11 +6,11 @@ import Button from "../Button/Button";
 import logo from '@/assets/logo.jpg';
 
 const NAV_ITEMS = [
-    { label: 'Trang chủ', href: '#home' },
-    { label: 'Phương thức', href: '#campaigns' },
-    { label: 'Giới thiệu', href: '#about' },
-    { label: 'Hoạt động', href: '#services' },
-    { label: 'Tin tức', href: '#news' },
+    { label: 'Trang chủ', href: '/#home' },
+    { label: 'Phương thức', href: '/#campaigns' },
+    { label: 'Giới thiệu', href: '/#about' },
+    { label: 'Hoạt động', href: '/#services' },
+    { label: 'Tin tức', href: '/#news' },
     { label: 'Liên hệ', href: '#footer' },
 ]
 export default function Navbar() {
@@ -22,7 +22,7 @@ export default function Navbar() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
-                        <a href="#home" className="flex-shrink-0 flex items-center gap-2">
+                        <a href="/" className="flex-shrink-0 flex items-center gap-2">
                             <Image
                                 src={logo}
                                 alt="Logo"
@@ -30,7 +30,7 @@ export default function Navbar() {
                                 height={40}
                                 className="object-contain"
                             />
-                            <span className="font-serif text-2xl font-bold text-primary-900">ĐI HỌC TRÊN NÚI</span>
+                            <span className="font-sans text-2xl font-bold text-primary-900">ĐI HỌC TRÊN NÚI</span>
                         </a>
 
                         {/* Desktop Menu */}
@@ -49,7 +49,7 @@ export default function Navbar() {
                         {/* Right Actions */}
                         <div className="hidden lg:flex items-center gap-6">                            
                             <button className="text-primary-900 hover:text-primary-700 transition-colors">
-                                <User size={30} />
+                                <User size={30} onClick={() => window.location.href = '/login'}/>
                             </button>
                             <Button variant="primary" size="md">ỦNG HỘ NGAY</Button>
                         </div>
@@ -82,7 +82,7 @@ export default function Navbar() {
                             ))}
                             <div className="pt-4 flex flex-col gap-4 px-3 pb-4">
                                 <div className="flex gap-4">
-                                    <button className="flex items-center gap-2 text-primary-900"><User size={20} /> Login</button>
+                                    <button className="flex items-center gap-2 text-primary-900" onClick={() => window.location.href = '/login'}><User size={20}  /> Login</button>
                                 </div>
                                 <Button variant="primary" fullWidth>ỦNG HỘ NGAY</Button>
                             </div>

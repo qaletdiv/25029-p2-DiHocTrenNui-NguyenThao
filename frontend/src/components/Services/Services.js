@@ -49,7 +49,7 @@ export default function Services() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold">Cách thức vận hành dự án</h2>
+                        <h2 className="text-4xl md:text-5xl font-sans font-bold">Cách thức vận hành dự án</h2>
                     </div>
                     <p className="max-w-md text-gray-300 text-sm">
                         Chúng tôi hoạt động vì sự phát triển bền vững của cộng đồng. Đồng hành cùng chúng tôi để kiến tạo một tương lai tốt đẹp hơn.
@@ -65,7 +65,7 @@ export default function Services() {
                             <div className="h-20 mb-6 rounded-lg overflow-hidden">
                                 <img src={item.image} alt={item.title} className="w-full h-full object-contain" />
                             </div>
-                            <h3 className="text-2xl text-center font-bold font-serif mb-4 leading-tight">{item.title}</h3>
+                            <h3 className="text-2xl text-center font-bold font-sans mb-4 leading-tight">{item.title}</h3>
                             <p className="mb-6 text-gray-600">{item.desc}</p>
                         </div>
                     ))}

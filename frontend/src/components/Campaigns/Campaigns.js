@@ -44,11 +44,11 @@ export default function Campaigns() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">We Need Your Help</span>
-                    <h2 className="text-4xl font-serif font-bold text-primary-900 mt-2">Kết quả đến nay</h2>
+                    <h2 className="text-4xl font-sans font-bold text-primary-900 mt-2">Kết quả đến nay</h2>
                 </div>
 
                 {/* Impact Statistics Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-32 lg:mb-40 justify-items-center items-start">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-15 lg:mb-20 justify-items-center items-start">
                     {IMPACT_STATS.map((stat, idx) => (
                         <div
                             key={idx}

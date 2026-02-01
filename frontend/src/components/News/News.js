@@ -5,7 +5,7 @@ export default function News() {
         <div className="py-24 bg-white" id="news">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-serif font-bold text-primary-900 mt-2">Tin tức</h2>
+                    <h2 className="text-4xl font-sans font-bold text-primary-900 mt-2">Tin tức</h2>
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-12">
@@ -14,7 +14,7 @@ export default function News() {
                         <div className="rounded-2xl overflow-hidden mb-6 h-80">
                             <img src="https://picsum.photos/800/600?random=21" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Main Blog" />
                         </div>
-                        <h3 className="text-2xl font-serif font-bold text-primary-900 mb-3 group-hover:text-primary-700">How To Engage Millennials In Charity Work</h3>
+                        <h3 className="text-2xl font-sans font-bold text-primary-900 mb-3 group-hover:text-primary-700">How To Engage Millennials In Charity Work</h3>
                         <p className="text-gray-500 text-sm mb-4 line-clamp-2">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                         </p>
@@ -31,7 +31,7 @@ export default function News() {
                             <div className="rounded-xl overflow-hidden mb-4 h-48">
                                 <img src="https://picsum.photos/400/300?random=22" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Blog 2" />
                             </div>
-                            <h3 className="text-lg font-serif font-bold text-primary-900 mb-2 leading-tight group-hover:text-primary-700">Creating Long-Term Partnerships with Donors</h3>
+                            <h3 className="text-lg font-sans font-bold text-primary-900 mb-2 leading-tight group-hover:text-primary-700">Creating Long-Term Partnerships with Donors</h3>
                             <p className="text-gray-500 text-xs mb-3 line-clamp-2">Developing sustainable relationships is key.</p>
                             <div className="flex items-center text-xs text-gray-400 gap-2">
                                 <span>By Admin</span>
@@ -53,7 +53,7 @@ export default function News() {
                                         <img src={`https://picsum.photos/150/150?random=${23 + i}`} className="w-full h-full object-cover" alt="Thumb" />
                                     </div>
                                     <div>
-                                        <h4 className="font-serif font-bold text-primary-900 text-sm leading-tight mb-1 group-hover:text-primary-700">{title}</h4>
+                                        <h4 className="font-sans font-bold text-primary-900 text-sm leading-tight mb-1 group-hover:text-primary-700">{title}</h4>
                                         <span className="text-[10px] text-gray-400">Oct 24, 2023</span>
                                     </div>
                                 </div>
