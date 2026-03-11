@@ -11,8 +11,9 @@ app.use(express.json());
 // Set global constant
 app.set('SECRET_KEY', 'dihoctrennui-example-secret-key-2026');
 
-const usersRoute = require('./routes/users');
 const loginRoute = require('./routes/login');
+const usersRoute = require('./routes/users');
+const studentsRoute = require('./routes/students');
 
 // Demo API
 app.get('/', (req, res) => {
@@ -34,24 +35,11 @@ const authenticateToken = (req, res, next) => {
     })
 }
 
-// app.post('/login', (req, res) => {
-//     console.log(req);
-//     const { email, password } = req.body;
-//     //kiểm tra email có tồn tại không
-//     const user = usersList.find(user => (user.email === email && user.password === password));
-//     if (user) {
-//         // { id: 'TNV0001', name: "Vu Lien", email: "lien@gmail.com", password: "123456", phone: "0905222222", role: "volunteer", status: 'active' }
-//         const currentUser = {id: user.id, email: user.email, role: user.role};
-//         const accessToken = jwt.sign(currentUser, SECRET_KEY, {expriseIn: '5h'});
-//         res.json(accessToken);
-//     } else {
-//         res.status(401).send('Email hoặc mật khẩu không đúng.');
-//     }
-// })
 
 // Nhúng các routes ở thư mục con vào app
 app.use('/login', loginRoute);
 app.use('/users', authenticateToken, usersRoute);
+app.use('/students', authenticateToken, studentsRoute);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
