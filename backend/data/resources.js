@@ -1,4 +1,4 @@
-export const RESOURCES = {
+const RESOURCES = {
   STUDENT: 'student',
   SPONSOR: 'sponsor',
   SCHOOL: 'school',
@@ -6,3 +6,5 @@ export const RESOURCES = {
   REPORT: 'report',
   USER: 'user',
 };
+
+module.exports = RESOURCES;

@@ -1,36 +1,42 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 const port = 5001;
 
 const app = express();
 app.use(cors({ credentials: true, origin: 'http://localhost:5000' }));
 app.use(express.json());
 
-
 // Set global constant
 app.set('SECRET_KEY', 'dihoctrennui-example-secret-key-2026');
 
+// Middlewares
+const { authenticateToken } = require('./middleware/auth');
+const { sendError } = require('./utils/responseHandler');
+
+// Route Imports
 const loginRoute = require('./routes/login');
-const usersRoute = require('./routes/users');
-const studentsRoute = require('./routes/students');
+const userRoutes = require('./routes/userRoutes');
+// const studentsRoute = require('./routes/students'); // Keep old one or refactor later
 
+// Public Routes
+app.use('/login', loginRoute);
 
-const { authenticateToken, authorize } = require('./middleware/auth');
+// Protected Routes
+app.use('/users', authenticateToken, userRoutes);
 
-// Demo API
+// Home Route
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('MVC Backend is running!');
 });
 
-
-// Nhúng các routes ở thư mục con vào app
-app.use('/login', loginRoute);
-app.use('/users', authenticateToken, usersRoute);
-app.use('/students', authenticateToken, studentsRoute);
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  return sendError(res, 'Something went wrong!', err.message, 500);
+});
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-module.exports = { app, authenticateToken, authorize };
+module.exports = app;

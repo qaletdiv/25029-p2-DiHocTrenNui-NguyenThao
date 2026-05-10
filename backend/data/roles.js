@@ -5,4 +5,4 @@ const ROLES = {
   TEACHER: 'teacher',
 };
 
-//module.exports = ROLES;
+module.exports = ROLES;
