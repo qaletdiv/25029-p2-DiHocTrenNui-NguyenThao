@@ -16,13 +16,20 @@ const { sendError } = require('./utils/responseHandler');
 // Route Imports
 const loginRoute = require('./routes/login');
 const userRoutes = require('./routes/userRoutes');
-// const studentsRoute = require('./routes/students'); // Keep old one or refactor later
+const studentRoutes = require('./routes/studentRoutes');
+const sponsorRoutes = require('./routes/sponsorRoutes');
+const schoolRoutes = require('./routes/schoolRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
 
 // Public Routes
 app.use('/login', loginRoute);
 
 // Protected Routes
 app.use('/users', authenticate, userRoutes);
+app.use('/students', authenticate, studentRoutes);
+app.use('/sponsors', authenticate, sponsorRoutes);
+app.use('/schools', authenticate, schoolRoutes);
+app.use('/transactions', authenticate, transactionRoutes);
 
 // Home Route
 app.get('/', (req, res) => {
