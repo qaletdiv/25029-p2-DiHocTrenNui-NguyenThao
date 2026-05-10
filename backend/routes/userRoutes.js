@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/UserController');
-const authorize = require('../middlewares/authorize');
+const { authorize } = require('../middlewares/authorize');
 const { ACTIONS, RESOURCES } = require('../data');
 
 // CRUD Routes for Users

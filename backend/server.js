@@ -10,7 +10,7 @@ app.use(express.json());
 app.set('SECRET_KEY', 'dihoctrennui-example-secret-key-2026');
 
 // Middlewares
-const { authenticateToken } = require('./middleware/auth');
+const { authenticate } = require('./middlewares/authorize');
 const { sendError } = require('./utils/responseHandler');
 
 // Route Imports
@@ -22,7 +22,7 @@ const userRoutes = require('./routes/userRoutes');
 app.use('/login', loginRoute);
 
 // Protected Routes
-app.use('/users', authenticateToken, userRoutes);
+app.use('/users', authenticate, userRoutes);
 
 // Home Route
 app.get('/', (req, res) => {

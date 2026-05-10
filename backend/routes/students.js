@@ -4,7 +4,7 @@ const router = express.Router(); //router này sẽ kế thừa middleware từ 
 
 const studentsList = require('./../data/students');
 const PERMISSIONS = require('./../data/permissions');
-const { authorize } = require('./../middleware/auth');
+const { authorize } = require('./../middlewares/authorize');
 
 // --- API Endpoints ---
 router.get('/', authorize(PERMISSIONS.STUDENT.READ), (req, res) => {
