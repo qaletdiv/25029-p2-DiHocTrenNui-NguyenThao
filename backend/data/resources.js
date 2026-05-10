@@ -5,6 +5,7 @@ const RESOURCES = {
   TRANSACTION: 'transaction',
   REPORT: 'report',
   USER: 'user',
+  IMAGE: 'image',
 };
 
 module.exports = RESOURCES;
