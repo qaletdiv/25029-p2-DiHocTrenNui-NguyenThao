@@ -3,13 +3,15 @@ const express = require('express');
 const router = express.Router(); //router này sẽ kế thừa middleware từ app chính khi được import
 
 const studentsList = require('./../data/students');
+const PERMISSIONS = require('./../data/permissions');
+const { authorize } = require('./../middleware/auth');
 
 // --- API Endpoints ---
-router.get('/', (req, res) => {
+router.get('/', authorize(PERMISSIONS.STUDENT.READ), (req, res) => {
   res.status(200).json(studentsList);
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', authorize(PERMISSIONS.STUDENT.READ), (req, res) => {
     const student = studentsList.find(student => student.id === req.params.id);
     if (student) {
         res.status(200).json(student);
@@ -39,7 +41,7 @@ router.get('/:id', (req, res) => {
     //     currentTeacher: 'GVN0003'
     // }
 
-router.post('/', (req, res) => {
+router.post('/', authorize(PERMISSIONS.STUDENT.CREATE), (req, res) => {
     const { name, address, birthday, people, situation, recommender, status, startDate, remark, currentClass, currentSchool } = req.body;
     //validate newUser
     if ((!name) || (!address) || (!birthday) || (!people) || (!situation) ||
@@ -79,7 +81,7 @@ router.post('/', (req, res) => {
     res.status(200).json(newStudent);
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', authorize(PERMISSIONS.STUDENT.UPDATE), (req, res) => {
     const id = req.params.id;
     const { name, address, birthday, people, situation, recommender, status, startDate, endDate, remark, currentClass, currentSchool, currentSponsor, currentVolunteer, currentTeacher } = req.body;
 
@@ -94,7 +96,7 @@ router.patch('/:id', (req, res) => {
     res.status(200).json(studentsList[index]);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authorize(PERMISSIONS.STUDENT.DELETE), (req, res) => {
     const id = req.params.id;
     const index = studentsList.findIndex(student => student.id === id);
     if (index === -1)

@@ -3,13 +3,15 @@ const express = require('express');
 const router = express.Router(); //router này sẽ kế thừa middleware từ app chính khi được import
 
 const usersList = require('./../data/users');
+const PERMISSIONS = require('./../data/permissions');
+const { authorize } = require('./../middleware/auth');
 
 // --- API Endpoints ---
-router.get('/', (req, res) => {
+router.get('/', authorize(PERMISSIONS.USER.READ), (req, res) => {
   res.status(200).json(usersList);
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', authorize(PERMISSIONS.USER.READ), (req, res) => {
     const user = usersList.find(user => user.id === req.params.id);
     if (user) {
         res.status(200).json(user);
@@ -18,7 +20,7 @@ router.get('/:id', (req, res) => {
     }
 });
 
-router.post('/', (req, res) => {
+router.post('/', authorize(PERMISSIONS.USER.CREATE), (req, res) => {
     const { name, email, password, phone, role } = req.body;
     //validate newUser
     if ((!name) || (!email) || (!password) || (!phone) || (!role)) {
@@ -38,7 +40,7 @@ router.post('/', (req, res) => {
     res.status(200).json(newUser);
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', authorize(PERMISSIONS.USER.UPDATE), (req, res) => {
     const id = req.params.id;
     const { name, password, phone, status } = req.body;
     const index = usersList.findIndex(user => user.id === id);
@@ -52,7 +54,7 @@ router.patch('/:id', (req, res) => {
     res.status(200).json(usersList[index]);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authorize(PERMISSIONS.USER.DELETE), (req, res) => {
     const id = req.params.id;
     const index = usersList.findIndex(user => user.id === id);
     if (index === -1)

@@ -16,8 +16,8 @@ router.post('/', (req, res) => {
     if (user) {
         // { id: 'TNV0001', name: "Vu Lien", email: "lien@gmail.com", password: "123456", phone: "0905222222", role: "volunteer", status: 'active' }
         const currentUser = {id: user.id, email: user.email, role: user.role};
-        const accessToken = jwt.sign(currentUser, req.app.get('SECRET_KEY'), {expiresIn: '5h'});
-        res.json(accessToken);
+        const accessToken = jwt.sign(currentUser, req.app.get('SECRET_KEY'), {expiresIn: '24h'});
+        res.json({accessToken});
     } else {
         res.status(401).send('Email hoặc mật khẩu không đúng.');
     }
