@@ -42,6 +42,11 @@ const authenticate = (req, res, next) => {
  */
 const authorize = (action, resource) => {
   return (req, res, next) => {
+    if (!action || !resource) {
+      console.error('Authorization middleware misconfigured: action or resource is missing');
+      return sendError(res, 'Internal Server Error: Authorization misconfigured', [], 500);
+    }
+
     const userPermissions = req.permissions || [];
 
     const hasPermission = userPermissions.some(p => 
@@ -54,6 +59,7 @@ const authorize = (action, resource) => {
     next();
   };
 };
+
 
 
 module.exports = {
