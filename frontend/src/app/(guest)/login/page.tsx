@@ -1,26 +1,26 @@
 "use client";
 import React, { useActionState } from "react";
-import { Lock, User} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Lock, User } from "lucide-react";
+import Image from "next/image";
+import heartBg from "@/assets/images/background/heart.jpg";
 import { loginAction } from "./actions";
 
 
-interface LoginPageProps {}
+interface LoginPageProps { }
 
-export default function LoginPage({}: LoginPageProps) {
-    const [ preState, formAction, isPending ] = useActionState(loginAction, {email: null, password: null, error: null});
+export default function LoginPage({ }: LoginPageProps) {
+    const [preState, formAction, isPending] = useActionState(loginAction, { email: null, password: null, error: null });
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-yellow-400 selection:text-primary-900">
-            
+
             <div className="flex items-center justify-center p-15">
                 {/* Main Card */}
                 <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px] animate-in fade-in zoom-in duration-300">
                     {/* Left Side - Image & Logo */}
                     <div className="relative w-full md:w-1/2 bg-primary-900 overflow-hidden flex items-center justify-center min-h-[200px] md:min-h-full">
-                        <img
-                            src="/images/background/heart.jpg"
+                        <Image
+                            src={heartBg}
                             alt="Leaves background"
                             className="absolute inset-0 w-full h-full object-cover opacity-80"
                         />
@@ -32,7 +32,7 @@ export default function LoginPage({}: LoginPageProps) {
                             <h2 className="text-3xl font-bold text-gray-800 text-center mb-5">Xin chào!</h2>
                             <p className="text-gray-800 text-left mb-10">
                                 Bạn đang đăng nhập vào hệ thống quản lý của chương trình <b>"Đi Học Trên Núi". </b>
-                                <br/>
+                                <br />
                                 Đây là nền tảng trực tuyến để lưu trữ thông tin, quản lý quá trình trao - nhận học bổng và các báo cáo thu/chi, hoạt động của chương trình.
                             </p>
                             <form className="space-y-6" action={formAction}>

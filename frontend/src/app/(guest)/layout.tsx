@@ -1,6 +1,6 @@
 import React from "react";
-import Navbar from "@/components/guest/common/Navbar/Navbar";
-import Footer from "@/components/guest/common/Footer/Footer";
+import Navbar from "@/components/guest/common/Navbar";
+import Footer from "@/components/guest/common/Footer";
 
 interface GuestLayoutProps {
     children: React.ReactNode;

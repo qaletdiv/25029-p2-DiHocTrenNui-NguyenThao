@@ -1,22 +1,19 @@
-import React from "react";
-// @ts-ignore
-import '@/app/globals.css';
-import { ThemeProvider } from "@/context/ThemeContext";
-import { SidebarProvider } from "@/context/SidebarContext";
+import type { Metadata } from "next";
+import "./globals.css";
 
+export const metadata: Metadata = {
+    title: "Đi Học Trên Núi",
+    description: "Hành trình kết nối yêu thương, nâng bước em tới trường",
+};
 
-interface RootLayoutProps {
+export default function RootLayout({
+    children,
+}: {
     children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}) {
     return (
-        <html lang="en">
-            <body>
-                <ThemeProvider>
-                    <SidebarProvider>{children}</SidebarProvider>
-                </ThemeProvider>
-            </body>
+        <html lang="vi">
+            <body className="antialiased">{children}</body>
         </html>
-    )
+    );
 }

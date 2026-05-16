@@ -1,11 +1,7 @@
-import React from "react";
-
-interface SettingsPageProps {}
-
-export default function SettingsPage({}: SettingsPageProps) {
+export default function SettingsPage() {
     return (
         <div>
-            <h1>Quản lý cài đặt</h1>
+            <h1>Settings</h1>
         </div>
     );
 }

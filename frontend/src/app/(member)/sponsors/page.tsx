@@ -1,13 +1,7 @@
-import React from "react";
-
-interface SponsorsPageProps {}
-
-
-export default function SponsorsPage({}: SponsorsPageProps) {
+export default function SponsorsPage() {
     return (
         <div>
-            <h1>Danh sách người hỗ trợ</h1>
-
+            <h1>Sponsors Page</h1>
         </div>
     );
 }

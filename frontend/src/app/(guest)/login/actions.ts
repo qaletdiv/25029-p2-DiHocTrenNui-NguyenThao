@@ -21,7 +21,8 @@ export async function loginAction(preState: any, formData: FormData) {
     }
 
     //Xac thuc thanh cong, luu token vao cookie
-    const { accessToken } = await res.json();
+    const response = await res.json();
+    const { accessToken } = response.data;
     const cookieStore = await cookies();
     cookieStore.set("accessToken", accessToken, { 
         httpOnly: true,

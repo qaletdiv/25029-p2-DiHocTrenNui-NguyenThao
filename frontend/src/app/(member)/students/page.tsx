@@ -1,11 +1,7 @@
-import React from "react";
-interface StudentsPageProps {}
-
-export default function StudentsPage({}: StudentsPageProps) {
+export default function StudentsPage() {
     return (
         <div>
-            <h1>Danh sách học sinh</h1>
-
+            <h1>Students Page</h1>
         </div>
     );
 }
