@@ -1,36 +1,54 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 const port = 5001;
 
 const app = express();
 app.use(cors({ credentials: true, origin: 'http://localhost:5000' }));
 app.use(express.json());
 
-
 // Set global constant
 app.set('SECRET_KEY', 'dihoctrennui-example-secret-key-2026');
 
+// Middlewares
+const { authenticate } = require('./middlewares/authorize');
+const { sendError } = require('./utils/responseHandler');
+
+// Route Imports
 const loginRoute = require('./routes/login');
-const usersRoute = require('./routes/users');
-const studentsRoute = require('./routes/students');
+const accountRoutes = require('./routes/accountRoutes');
+const studentRoutes = require('./routes/studentRoutes');
+const sponsorRoutes = require('./routes/sponsorRoutes');
+const schoolRoutes = require('./routes/schoolRoutes');
+const bankTransactionRoutes = require('./routes/bankTransactionRoutes');
+const imageRoutes = require('./routes/imageRoutes');
 
 
-const { authenticateToken, authorize } = require('./middleware/auth');
+// Public Routes
+app.use('/login', loginRoute);
 
-// Demo API
+// Protected Routes
+app.use('/accounts', authenticate, accountRoutes);
+app.use('/students', authenticate, studentRoutes);
+app.use('/sponsors', authenticate, sponsorRoutes);
+app.use('/schools', authenticate, schoolRoutes);
+app.use('/bank-transactions', authenticate, bankTransactionRoutes);
+
+app.use('/images', authenticate, imageRoutes);
+
+
+// Home Route
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('MVC Backend is running!');
 });
 
-
-// Nhúng các routes ở thư mục con vào app
-app.use('/login', loginRoute);
-app.use('/users', authenticateToken, usersRoute);
-app.use('/students', authenticateToken, studentsRoute);
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  return sendError(res, 'Something went wrong!', err.message, 500);
+});
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-module.exports = { app, authenticateToken, authorize };
+module.exports = app;
