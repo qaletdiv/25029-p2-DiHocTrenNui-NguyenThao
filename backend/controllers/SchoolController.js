@@ -14,13 +14,14 @@ class SchoolController {
 
   async getSchoolById(req, res) {
     try {
-      const school = await SchoolModel.findById(req.params.id);
+      const school = await SchoolModel.findById(parseInt(req.params.id));
       if (!school) return sendError(res, 'School not found', [], 404);
       return sendSuccess(res, school);
     } catch (error) {
       return sendError(res, 'Failed to fetch school', error.message);
     }
   }
+
 
   async createSchool(req, res) {
     try {
@@ -38,9 +39,9 @@ class SchoolController {
       const newId = await SchoolModel.generateNextId();
       const newSchool = await SchoolModel.create({
         id: newId,
-        student_count: 0,
         ...req.body
       });
+
 
       return sendSuccess(res, newSchool, 'School created successfully', 201);
     } catch (error) {
@@ -55,7 +56,7 @@ class SchoolController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const updatedSchool = await SchoolModel.update(req.params.id, req.body);
+      const updatedSchool = await SchoolModel.update(parseInt(req.params.id), req.body);
       if (!updatedSchool) return sendError(res, 'School not found', [], 404);
 
       return sendSuccess(res, updatedSchool, 'School updated successfully');
@@ -66,7 +67,7 @@ class SchoolController {
 
   async deleteSchool(req, res) {
     try {
-      const success = await SchoolModel.delete(req.params.id);
+      const success = await SchoolModel.delete(parseInt(req.params.id));
       if (!success) return sendError(res, 'School not found', [], 404);
       
       return sendSuccess(res, null, 'School deleted successfully');
@@ -74,6 +75,7 @@ class SchoolController {
       return sendError(res, 'Failed to delete school', error.message);
     }
   }
+
 }
 
 module.exports = new SchoolController();

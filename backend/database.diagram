@@ -1,0 +1,370 @@
+Table accounts {
+  id integer [primary key, increment]
+  username varchar [unique, not null]
+  password varchar [not null]
+  email varchar [unique]
+  avatar_url varchar
+  role_id integer [not null]
+  is_active boolean [default: true]
+  last_login_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table roles {
+  id integer [primary key, increment]
+  code varchar [unique, not null] // ADMIN, VOLUNTEER, TEACHER, SPONSOR
+  name varchar [not null]
+}
+
+Table resources {
+  id integer [primary key, increment]
+  code varchar [unique, not null]
+  name varchar [not null]
+}
+
+Table actions {
+  id integer [primary key, increment]
+  code varchar [unique, not null] // CREATE, READ, UPDATE, DELETE, APPROVE
+  name varchar [not null]
+}
+
+Table permissions {
+  id integer [primary key, increment]
+  resource_id integer [not null]
+  action_id integer [not null]
+  code varchar [unique]
+  indexes {
+    (resource_id, action_id) [unique]
+  }
+}
+
+Table role_permissions {
+  id integer [primary key, increment]
+  role_id integer [not null]
+  permission_id integer [not null]
+  indexes {
+    (role_id, permission_id) [unique]
+  }
+}
+
+Table audit_logs {
+  id bigint [primary key, increment]
+  account_id integer
+  action varchar
+  table_name varchar
+  record_id integer
+  old_data text
+  new_data text
+  ip_address varchar
+  user_agent varchar
+  created_at timestamp
+}
+
+Table provinces {
+  id integer [primary key]
+  name varchar [not null]
+  code varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table wards {
+  id integer [primary key]
+  province_id integer [not null]
+  name varchar [not null]
+  code varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table addresses {
+  id integer [primary key, increment]
+  address_line varchar
+  note text
+  ward_id integer
+  latitude decimal(10,7)
+  longitude decimal(10,7)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table schools {
+  id integer [primary key, increment]
+  name varchar [not null]
+  phone varchar
+  email varchar
+  address_id integer
+  note text
+  is_active boolean [default: true]
+  created_by integer
+  updated_by integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table teachers {
+  id integer [primary key, increment]
+  account_id integer [unique]
+  school_id integer
+  full_name varchar [not null]
+  phone varchar
+  email varchar
+  gender varchar
+  address_id integer
+  note text
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table volunteers {
+  id integer [primary key, increment]
+  account_id integer [unique]
+  full_name varchar [not null]
+  phone varchar
+  email varchar
+  gender varchar
+  address_id integer
+  note text
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table sponsors {
+  id integer [primary key, increment]
+  account_id integer [unique]
+  full_name varchar [not null]
+  phone varchar
+  email varchar
+  gender varchar
+  address_id integer
+  note text
+  is_active boolean [default: true]
+  created_by integer
+  updated_by integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table students {
+  id varchar(10) [primary key]
+  full_name varchar [not null]
+  date_of_birth date
+  gender varchar
+  phone varchar
+  address_id integer
+  school_id integer
+  grade varchar
+  family_condition text
+  status_id integer // INFO, CONTACTED, ACTIVE, PAUSED, DROPPED_OUT, GRADUATED
+  monthly_amount decimal(12,0) [default: 500000]
+  avatar_url varchar
+  is_active boolean [default: true]
+  created_by integer
+  updated_by integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table teacher_students {
+  id integer [primary key, increment]
+  student_id integer [not null]
+  teacher_id integer [not null]
+  start_date timestamp
+  end_date timestamp
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (student_id, teacher_id, start_date) [unique]
+  }
+}
+
+Table volunteer_students {
+  id integer [primary key, increment]
+  student_id integer [not null]
+  volunteer_id integer [not null]
+  start_date timestamp
+  end_date timestamp
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (student_id, volunteer_id, start_date) [unique]
+  }
+}
+
+Table sponsor_students {
+  id integer [primary key, increment]
+  student_id integer [not null]
+  sponsor_id integer [not null]
+  monthly_amount decimal(12,0)
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (student_id, sponsor_id) [unique]
+  }
+}
+
+Table bank_transactions {
+  id integer [primary key, increment]
+  sponsor_id integer
+  transaction_code varchar [unique]
+  bank_name varchar
+  account_number varchar
+  transfer_date timestamp
+  amount decimal(12,0) [not null]
+  transfer_content varchar
+  image_url varchar
+  status_id integer // PENDING, VERIFIED, REJECTED
+  verified_by integer
+  verified_at timestamp
+  note text
+  created_by integer
+  updated_by integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table support_disbursements {
+  id integer [primary key, increment]
+  bank_transaction_id integer
+  sponsor_student_id integer
+  student_id integer [not null]
+  event_id integer
+  teacher_id integer
+  support_month integer [not null]
+  support_year integer [not null]
+  amount decimal(12,0) [not null]
+  delivered_at timestamp
+  status_id integer // HOLDING, SENT_TO_TEACHER, DELIVERED_TO_STUDENT
+  note text
+  created_by integer
+  updated_by integer
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (student_id, support_month, support_year) [unique]
+  }
+}
+
+Table events {
+  id integer [primary key, increment]
+  title varchar [not null]
+  description varchar
+  start_date timestamp
+  end_date timestamp
+  address_id integer
+  is_public boolean [default: true]
+  created_by integer
+  updated_by integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table student_statuses {
+  id integer [primary key, increment]
+  code varchar [unique, not null] // INFO, CONTACTED, ACTIVE, PAUSED, DROPPED_OUT, GRADUATED
+  name varchar [not null]
+}
+
+Table bank_transaction_statuses {
+  id integer [primary key, increment]
+  code varchar [unique, not null] // PENDING, VERIFIED, REJECTED
+  name varchar [not null]
+}
+
+Table disbursement_statuses {
+  id integer [primary key, increment]
+  code varchar [unique, not null] // HOLDING, SENT_TO_TEACHER, DELIVERED_TO_STUDENT
+  name varchar [not null]
+}
+
+Table student_images {
+  id integer [primary key, increment]
+  student_id integer [not null]
+  image_url varchar [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table event_images {
+  id integer [primary key, increment]
+  event_id integer [not null]
+  image_url varchar [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref accounts_roles: accounts.role_id > roles.id
+
+Ref permissions_resources: permissions.resource_id > resources.id
+Ref permissions_actions: permissions.action_id > actions.id
+
+Ref role_permissions_roles: role_permissions.role_id > roles.id
+Ref role_permissions_permissions: role_permissions.permission_id > permissions.id
+
+Ref audit_logs_accounts: audit_logs.account_id > accounts.id
+
+Ref wards_provinces: wards.province_id > provinces.id
+
+Ref addresses_wards: addresses.ward_id > wards.id
+
+Ref schools_addresses: schools.address_id > addresses.id
+
+Ref teachers_accounts: teachers.account_id > accounts.id
+Ref teachers_schools: teachers.school_id > schools.id
+Ref teachers_addresses: teachers.address_id > addresses.id
+
+Ref volunteers_accounts: volunteers.account_id > accounts.id
+Ref volunteers_addresses: volunteers.address_id > addresses.id
+
+Ref sponsors_accounts: sponsors.account_id > accounts.id
+Ref sponsors_addresses: sponsors.address_id > addresses.id
+
+Ref students_addresses: students.address_id > addresses.id
+Ref students_schools: students.school_id > schools.id
+Ref students_statuses: students.status_id > student_statuses.id
+
+Ref teacher_students_students: teacher_students.student_id > students.id
+Ref teacher_students_teachers: teacher_students.teacher_id > teachers.id
+
+Ref volunteer_students_students: volunteer_students.student_id > students.id
+Ref volunteer_students_volunteers: volunteer_students.volunteer_id > volunteers.id
+
+Ref sponsor_students_sponsors: sponsor_students.sponsor_id > sponsors.id
+Ref sponsor_students_students: sponsor_students.student_id > students.id
+
+Ref bank_transactions_sponsors: bank_transactions.sponsor_id > sponsors.id
+Ref bank_transactions_verified_by: bank_transactions.verified_by > accounts.id
+Ref bank_transactions_statuses: bank_transactions.status_id > bank_transaction_statuses.id
+
+Ref disbursements_bank_transactions: support_disbursements.bank_transaction_id > bank_transactions.id
+Ref disbursements_teachers: support_disbursements.teacher_id > teachers.id
+Ref disbursements_sponsor_students: support_disbursements.sponsor_student_id > sponsor_students.id
+Ref disbursements_students: support_disbursements.student_id > students.id
+Ref disbursements_events: support_disbursements.event_id > events.id
+Ref disbursements_statuses: support_disbursements.status_id > disbursement_statuses.id
+
+Ref events_addresses: events.address_id > addresses.id
+
+Ref student_images_students: student_images.student_id > students.id
+Ref event_images_events: event_images.event_id > events.id
+
+Ref schools_created_by: schools.created_by > accounts.id
+Ref schools_updated_by: schools.updated_by > accounts.id
+
+Ref sponsors_created_by: sponsors.created_by > accounts.id
+Ref sponsors_updated_by: sponsors.updated_by > accounts.id
+
+Ref students_created_by: students.created_by > accounts.id
+Ref students_updated_by: students.updated_by > accounts.id
+
+Ref bank_transactions_created_by: bank_transactions.created_by > accounts.id
+Ref bank_transactions_updated_by: bank_transactions.updated_by > accounts.id
+
+Ref support_disbursements_created_by: support_disbursements.created_by > accounts.id
+Ref support_disbursements_updated_by: support_disbursements.updated_by > accounts.id
+
+Ref events_created_by: events.created_by > accounts.id
+Ref events_updated_by: events.updated_by > accounts.id

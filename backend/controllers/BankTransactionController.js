@@ -1,11 +1,11 @@
-const TransactionModel = require('../models/TransactionModel');
-const { validateTransaction } = require('../validations/transactionValidation');
+const BankTransactionModel = require('../models/BankTransactionModel');
+const { validateBankTransaction } = require('../validations/bankTransactionValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 
-class TransactionController {
+class BankTransactionController {
   async getAllTransactions(req, res) {
     try {
-      const transactions = await TransactionModel.findAll();
+      const transactions = await BankTransactionModel.findAll();
       return sendSuccess(res, transactions);
     } catch (error) {
       return sendError(res, 'Failed to fetch transactions', error.message);
@@ -14,7 +14,7 @@ class TransactionController {
 
   async getTransactionById(req, res) {
     try {
-      const transaction = await TransactionModel.findById(req.params.id);
+      const transaction = await BankTransactionModel.findById(parseInt(req.params.id));
       if (!transaction) return sendError(res, 'Transaction not found', [], 404);
       return sendSuccess(res, transaction);
     } catch (error) {
@@ -24,16 +24,17 @@ class TransactionController {
 
   async createTransaction(req, res) {
     try {
-      const validation = validateTransaction(req.body);
+      const validation = validateBankTransaction(req.body);
       if (!validation.isValid) {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const newId = await TransactionModel.generateNextId();
-      const newTransaction = await TransactionModel.create({
+      const newId = await BankTransactionModel.generateNextId();
+      const newTransaction = await BankTransactionModel.create({
         id: newId,
         ...req.body
       });
+
 
       return sendSuccess(res, newTransaction, 'Transaction created successfully', 201);
     } catch (error) {
@@ -43,12 +44,13 @@ class TransactionController {
 
   async updateTransaction(req, res) {
     try {
-      const validation = validateTransaction(req.body, true);
+      const validation = validateBankTransaction(req.body, true);
       if (!validation.isValid) {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const updatedTransaction = await TransactionModel.update(req.params.id, req.body);
+      const updatedTransaction = await BankTransactionModel.update(parseInt(req.params.id), req.body);
+
       if (!updatedTransaction) return sendError(res, 'Transaction not found', [], 404);
 
       return sendSuccess(res, updatedTransaction, 'Transaction updated successfully');
@@ -59,7 +61,7 @@ class TransactionController {
 
   async deleteTransaction(req, res) {
     try {
-      const success = await TransactionModel.delete(req.params.id);
+      const success = await BankTransactionModel.delete(parseInt(req.params.id));
       if (!success) return sendError(res, 'Transaction not found', [], 404);
       
       return sendSuccess(res, null, 'Transaction deleted successfully');
@@ -69,4 +71,4 @@ class TransactionController {
   }
 }
 
-module.exports = new TransactionController();
+module.exports = new BankTransactionController();

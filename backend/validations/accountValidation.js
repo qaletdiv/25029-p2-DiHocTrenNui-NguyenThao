@@ -1,12 +1,11 @@
-const validateUser = (data, isUpdate = false) => {
+const validateAccount = (data, isUpdate = false) => {
   const errors = [];
-  const { name, email, password_hash, phone, role_id } = data;
+  const { username, email, password, role_id } = data;
 
   if (!isUpdate) {
-    if (!name) errors.push('Name is required');
+    if (!username) errors.push('Username is required');
     if (!email) errors.push('Email is required');
-    if (!password_hash) errors.push('Password hash is required');
-    if (!phone) errors.push('Phone is required');
+    if (!password) errors.push('Password is required');
     if (!role_id) errors.push('Role ID is required');
   }
 
@@ -21,5 +20,5 @@ const validateUser = (data, isUpdate = false) => {
 };
 
 module.exports = {
-  validateUser
+  validateAccount
 };

@@ -1,49 +1,37 @@
 const STUDENT_STATUS = {
-  GETTING_INFO: 'gettingInfor',
-  GETTING_CONNECTION: 'gettingConnection',
-  IN_PROGRESS: 'inProgress',
-  DROPPED_OUT: 'droppedOut',
-  GRADUATED: 'graduated',
-  LEFT: 'left',
-  CANCELED: 'canceled',
+  INFO: 'INFO',
+  CONTACTED: 'CONTACTED',
+  ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED',
+  DROPPED_OUT: 'DROPPED_OUT',
+  GRADUATED: 'GRADUATED',
 };
 
-const SPONSOR_STATUS = {
-  GETTING_INFO: 'gettingInfor',
-  GETTING_CONNECTION: 'gettingConnection',
-  IN_PROGRESS: 'inProgress',
-  ENDED: 'ended',
-  CANCELED: 'canceled',
+const BANK_TRANSACTION_STATUS = {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
 };
 
-const TRANSACTION_STATUS = {
-  OPENED: 'opened',
-  APPROVED: 'approved',
-  CANCEL: 'cancel',
+const DISBURSEMENT_STATUS = {
+  HOLDING: 'HOLDING',
+  SENT_TO_TEACHER: 'SENT_TO_TEACHER',
+  DELIVERED_TO_STUDENT: 'DELIVERED_TO_STUDENT',
 };
 
 const STUDENT_STATUS_TRANSLATIONS = {
-  [STUDENT_STATUS.GETTING_INFO]: 'Đang lấy thông tin',
-  [STUDENT_STATUS.GETTING_CONNECTION]: 'Chờ kết nối NHT',
-  [STUDENT_STATUS.IN_PROGRESS]: 'Đang hỗ trợ',
+  [STUDENT_STATUS.INFO]: 'Đang lấy thông tin',
+  [STUDENT_STATUS.CONTACTED]: 'Đã liên hệ',
+  [STUDENT_STATUS.ACTIVE]: 'Đang hỗ trợ',
+  [STUDENT_STATUS.PAUSED]: 'Tạm dừng',
   [STUDENT_STATUS.DROPPED_OUT]: 'Đã nghỉ học',
-  [STUDENT_STATUS.GRADUATED]: 'Đã tốt nghiệp cấp 3',
-  [STUDENT_STATUS.LEFT]: 'Rời chương trình',
-  [STUDENT_STATUS.CANCELED]: 'Hủy',
-};
-
-const SPONSOR_STATUS_TRANSLATIONS = {
-  [SPONSOR_STATUS.GETTING_INFO]: 'Đang xác minh',
-  [SPONSOR_STATUS.GETTING_CONNECTION]: 'Chờ kết nối HS',
-  [SPONSOR_STATUS.IN_PROGRESS]: 'Đang hỗ trợ',
-  [SPONSOR_STATUS.ENDED]: 'Đã kết thúc',
-  [SPONSOR_STATUS.CANCELED]: 'Hủy',
+  [STUDENT_STATUS.GRADUATED]: 'Đã tốt nghiệp',
 };
 
 module.exports = {
   STUDENT_STATUS,
-  SPONSOR_STATUS,
-  TRANSACTION_STATUS,
+  BANK_TRANSACTION_STATUS,
+  DISBURSEMENT_STATUS,
   STUDENT_STATUS_TRANSLATIONS,
-  SPONSOR_STATUS_TRANSLATIONS,
 };
+

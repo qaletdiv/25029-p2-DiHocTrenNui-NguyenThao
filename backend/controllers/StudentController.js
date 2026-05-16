@@ -29,8 +29,8 @@ class StudentController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const { name, address, birthday } = req.body;
-      const existingStudent = await StudentModel.findByNameAndInfo(name, address, birthday);
+      const { full_name, address_id, date_of_birth } = req.body;
+      const existingStudent = await StudentModel.findByNameAndInfo(full_name, address_id, date_of_birth);
       if (existingStudent) {
         return sendError(res, 'Student already exists', [], 400);
       }
@@ -39,9 +39,9 @@ class StudentController {
       const newStudent = await StudentModel.create({
         id: newId,
         ...req.body,
-        total_funds: req.body.total_funds || 0,
-        current_balance: req.body.current_balance || 0,
+        monthly_amount: req.body.monthly_amount || 500000,
       });
+
 
       return sendSuccess(res, newStudent, 'Student created successfully', 201);
     } catch (error) {

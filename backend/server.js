@@ -15,11 +15,11 @@ const { sendError } = require('./utils/responseHandler');
 
 // Route Imports
 const loginRoute = require('./routes/login');
-const userRoutes = require('./routes/userRoutes');
+const accountRoutes = require('./routes/accountRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const sponsorRoutes = require('./routes/sponsorRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
+const bankTransactionRoutes = require('./routes/bankTransactionRoutes');
 const imageRoutes = require('./routes/imageRoutes');
 
 
@@ -27,11 +27,12 @@ const imageRoutes = require('./routes/imageRoutes');
 app.use('/login', loginRoute);
 
 // Protected Routes
-app.use('/users', authenticate, userRoutes);
+app.use('/accounts', authenticate, accountRoutes);
 app.use('/students', authenticate, studentRoutes);
 app.use('/sponsors', authenticate, sponsorRoutes);
 app.use('/schools', authenticate, schoolRoutes);
-app.use('/transactions', authenticate, transactionRoutes);
+app.use('/bank-transactions', authenticate, bankTransactionRoutes);
+
 app.use('/images', authenticate, imageRoutes);
 
 

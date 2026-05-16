@@ -1,11 +1,11 @@
-const validateTransaction = (data, isUpdate = false) => {
+const validateBankTransaction = (data, isUpdate = false) => {
   const errors = [];
-  const { date, amount, content, status_id } = data;
+  const { transfer_date, amount, transfer_content, status_id } = data;
 
   if (!isUpdate) {
-    if (!date) errors.push('Date is required');
+    if (!transfer_date) errors.push('Transfer date is required');
     if (!amount) errors.push('Amount is required');
-    if (!content) errors.push('Content is required');
+    if (!transfer_content) errors.push('Transfer content is required');
     if (!status_id) errors.push('Status ID is required');
   }
 
@@ -20,5 +20,5 @@ const validateTransaction = (data, isUpdate = false) => {
 };
 
 module.exports = {
-  validateTransaction
+  validateBankTransaction
 };

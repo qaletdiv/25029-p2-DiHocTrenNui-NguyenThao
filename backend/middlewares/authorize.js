@@ -8,13 +8,12 @@ const { sendError } = require('../utils/responseHandler');
  */
 const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return sendError(res, 'Authentication required', [], 401);
   }
 
-  // Use the SECRET_KEY set in app.set('SECRET_KEY', ...)
   const secretKey = req.app.get('SECRET_KEY');
 
   jwt.verify(token, secretKey, (err, user) => {
@@ -23,29 +22,39 @@ const authenticate = (req, res, next) => {
     }
 
     req.user = user;
-    // Attach permissions to request based on role from static data
-    req.permissions = ROLE_PERMISSIONS[user.role] || [];
+    // Attach permissions (ids) to request based on role
+    const permissions = require('../data/permissions');
+    const rolePermissions = require('../data/role_permission');
+    
+    const userPermissionIds = rolePermissions
+      .filter(rp => rp.role_id === user.role_id)
+      .map(rp => rp.permission_id);
+    
+    req.permissions = permissions.filter(p => userPermissionIds.includes(p.id));
     next();
   });
 };
 
 /**
  * Authorization Middleware
- * @param {string} action - The action to check (e.g., 'read') or full permission string (e.g., 'user:read')
- * @param {string} [resource] - The resource to check (e.g., 'user')
+ * @param {object} action - Action object from data/actions
+ * @param {object} resource - Resource object from data/resources
  */
 const authorize = (action, resource) => {
   return (req, res, next) => {
-    // Support both (action, resource) and (fullPermissionString)
-    const requiredPermission = resource ? `${resource}:${action}` : action;
     const userPermissions = req.permissions || [];
 
-    if (!userPermissions.includes(requiredPermission)) {
+    const hasPermission = userPermissions.some(p => 
+      p.action_id === action.id && p.resource_id === resource.id
+    );
+
+    if (!hasPermission) {
       return sendError(res, 'Forbidden: Insufficient permissions', [], 403);
     }
     next();
   };
 };
+
 
 module.exports = {
   authenticate,

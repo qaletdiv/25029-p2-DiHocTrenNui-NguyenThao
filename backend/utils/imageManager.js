@@ -24,7 +24,7 @@ class ImageManager {
     this.imagesByStudent.clear();
     this.imagesByEvent.clear();
 
-    this.imagesSortedByTime = [...this.data].sort((a, b) => 
+    this.imagesSortedByTime = [...this.data].sort((a, b) =>
       new Date(a.timestamp) - new Date(b.timestamp)
     );
 

@@ -14,7 +14,7 @@ class SponsorController {
 
   async getSponsorById(req, res) {
     try {
-      const sponsor = await SponsorModel.findById(req.params.id);
+      const sponsor = await SponsorModel.findById(parseInt(req.params.id));
       if (!sponsor) return sendError(res, 'Sponsor not found', [], 404);
       return sendSuccess(res, sponsor);
     } catch (error) {
@@ -29,8 +29,8 @@ class SponsorController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const { name } = req.body;
-      const existingSponsor = await SponsorModel.findByName(name);
+      const { full_name } = req.body;
+      const existingSponsor = await SponsorModel.findByFullName(full_name);
       if (existingSponsor) {
         return sendError(res, 'Sponsor name already exists', [], 400);
       }
@@ -38,12 +38,9 @@ class SponsorController {
       const newId = await SponsorModel.generateNextId();
       const newSponsor = await SponsorModel.create({
         id: newId,
-        student_count: 0,
-        student_ids: [],
-        total_deposit: 0,
-        current_balance: 0,
         ...req.body
       });
+
 
       return sendSuccess(res, newSponsor, 'Sponsor created successfully', 201);
     } catch (error) {
@@ -58,7 +55,7 @@ class SponsorController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const updatedSponsor = await SponsorModel.update(req.params.id, req.body);
+      const updatedSponsor = await SponsorModel.update(parseInt(req.params.id), req.body);
       if (!updatedSponsor) return sendError(res, 'Sponsor not found', [], 404);
 
       return sendSuccess(res, updatedSponsor, 'Sponsor updated successfully');
@@ -69,7 +66,7 @@ class SponsorController {
 
   async deleteSponsor(req, res) {
     try {
-      const success = await SponsorModel.delete(req.params.id);
+      const success = await SponsorModel.delete(parseInt(req.params.id));
       if (!success) return sendError(res, 'Sponsor not found', [], 404);
       
       return sendSuccess(res, null, 'Sponsor deleted successfully');
@@ -77,6 +74,7 @@ class SponsorController {
       return sendError(res, 'Failed to delete sponsor', error.message);
     }
   }
+
 }
 
 module.exports = new SponsorController();

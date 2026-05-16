@@ -27,7 +27,7 @@ class ImageModel extends BaseModel {
    */
   async generateNextId() {
     if (this.data.length === 0) return 1;
-    const latestImage = this.data.reduce((max, current) => 
+    const latestImage = this.data.reduce((max, current) =>
       current.id > max.id ? current : max
     );
     return latestImage.id + 1;
