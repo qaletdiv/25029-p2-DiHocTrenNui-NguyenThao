@@ -3,7 +3,7 @@ import React, { useActionState } from "react";
 import { Lock, User } from "lucide-react";
 import Image from "next/image";
 import heartBg from "@/assets/images/background/heart.jpg";
-import { loginAction } from "./actions";
+import { loginAction } from "@/services/login";
 
 
 interface LoginPageProps { }

@@ -19,6 +19,14 @@ interface DataTableProps<T extends object> {
   /** Unique field used as React key */
   rowKey: keyof T;
   emptyLabel?: string;
+  /**
+   * If provided, each row becomes clickable and calls this handler.
+   * Action buttons inside cells should call e.stopPropagation() to prevent
+   * bubbling up to this handler.
+   */
+  onRowClick?: (row: T) => void;
+  /** When true, the thead stays sticky within a scrollable parent */
+  stickyHeader?: boolean;
 }
 
 export default function DataTable<T extends object>({
@@ -26,6 +34,8 @@ export default function DataTable<T extends object>({
   rows,
   rowKey,
   emptyLabel = "Chưa có dữ liệu",
+  onRowClick,
+  stickyHeader = true,
 }: DataTableProps<T>) {
   const alignClass: Record<string, string> = {
     left: "text-left",
@@ -40,7 +50,7 @@ export default function DataTable<T extends object>({
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-gray-100 shadow-sm bg-white">
       <table className="w-full text-sm text-gray-700 border-collapse">
-        <thead>
+        <thead className={stickyHeader ? "sticky top-0 z-10" : ""}>
           <tr className="bg-gray-50 border-b border-gray-100">
             {columns.map((col) => (
               <th
@@ -70,9 +80,13 @@ export default function DataTable<T extends object>({
             rows.map((row, idx) => (
               <tr
                 key={String(cellValue(row, rowKey as string))}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={[
-                  "border-b border-gray-50 hover:bg-primary-900/5 transition-colors",
-                  idx % 2 === 0 ? "" : "bg-gray-50/50",
+                  "border-b border-gray-50 transition-colors",
+                  idx % 2 !== 0 ? "bg-gray-50/50" : "",
+                  onRowClick
+                    ? "cursor-pointer hover:bg-primary-900/5"
+                    : "hover:bg-gray-50",
                 ].join(" ")}
               >
                 {columns.map((col) => (

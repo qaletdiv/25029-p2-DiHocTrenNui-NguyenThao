@@ -14,7 +14,7 @@ export async function loginAction(preState: any, formData: FormData) {
         },
         body: JSON.stringify({ email, password })
     });
-    
+
     if (!res.ok) {
         console.log("Login failed: Email hoặc mật khẩu không đúng");
         return { ...preState, error: "Email hoặc mật khẩu không đúng" };
@@ -24,7 +24,7 @@ export async function loginAction(preState: any, formData: FormData) {
     const response = await res.json();
     const { accessToken } = response.data;
     const cookieStore = await cookies();
-    cookieStore.set("accessToken", accessToken, { 
+    cookieStore.set("accessToken", accessToken, {
         httpOnly: true,
         secure: false,
         maxAge: 60 * 60 * 24, // 1 ngay
