@@ -21,6 +21,8 @@ const sponsorRoutes = require('./routes/sponsorRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const bankTransactionRoutes = require('./routes/bankTransactionRoutes');
 const imageRoutes = require('./routes/imageRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
+const volunteerRoutes = require('./routes/volunteerRoutes');
 
 
 // Public Routes
@@ -32,8 +34,9 @@ app.use('/students', authenticate, studentRoutes);
 app.use('/sponsors', authenticate, sponsorRoutes);
 app.use('/schools', authenticate, schoolRoutes);
 app.use('/bank-transactions', authenticate, bankTransactionRoutes);
-
 app.use('/images', authenticate, imageRoutes);
+app.use('/teachers', authenticate, teacherRoutes);
+app.use('/volunteers', authenticate, volunteerRoutes);
 
 
 // Home Route

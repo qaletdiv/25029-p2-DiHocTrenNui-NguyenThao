@@ -1,12 +1,13 @@
 const SponsorModel = require('../models/SponsorModel');
 const { validateSponsor } = require('../validations/sponsorValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class SponsorController {
   async getAllSponsors(req, res) {
     try {
       const sponsors = await SponsorModel.findAll();
-      return sendSuccess(res, sponsors);
+      return sendSuccess(res, paginate(sponsors, req, 'sponsors'));
     } catch (error) {
       return sendError(res, 'Failed to fetch sponsors', error.message);
     }

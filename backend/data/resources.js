@@ -7,6 +7,8 @@ const RESOURCES = {
   IMAGE: { id: 6, code: 'IMAGE', name: 'Image' },
   REPORT: { id: 7, code: 'REPORT', name: 'Report' },
   DISBURSEMENT: { id: 8, code: 'DISBURSEMENT', name: 'Disbursement' },
+  TEACHER: { id: 9, code: 'TEACHER', name: 'Teacher' },
+  VOLUNTEER: { id: 10, code: 'VOLUNTEER', name: 'Volunteer' },
 };
 
 module.exports = RESOURCES;

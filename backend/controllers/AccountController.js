@@ -1,12 +1,13 @@
 const AccountModel = require('../models/AccountModel');
 const { validateAccount } = require('../validations/accountValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class AccountController {
   async getAllAccounts(req, res) {
     try {
       const accounts = await AccountModel.findAll();
-      return sendSuccess(res, accounts);
+      return sendSuccess(res, paginate(accounts, req, 'accounts'));
     } catch (error) {
       return sendError(res, 'Failed to fetch accounts', error.message);
     }

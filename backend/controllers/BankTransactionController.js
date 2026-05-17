@@ -1,12 +1,13 @@
 const BankTransactionModel = require('../models/BankTransactionModel');
 const { validateBankTransaction } = require('../validations/bankTransactionValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class BankTransactionController {
   async getAllTransactions(req, res) {
     try {
       const transactions = await BankTransactionModel.findAll();
-      return sendSuccess(res, transactions);
+      return sendSuccess(res, paginate(transactions, req, 'transactions'));
     } catch (error) {
       return sendError(res, 'Failed to fetch transactions', error.message);
     }

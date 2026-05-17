@@ -1,12 +1,13 @@
 const ImageModel = require('../models/ImageModel');
 const { validateImage } = require('../validations/imageValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class ImageController {
   async getAllImages(req, res) {
     try {
       const images = await ImageModel.findAll();
-      return sendSuccess(res, images);
+      return sendSuccess(res, paginate(images, req, 'images'));
     } catch (error) {
       return sendError(res, 'Failed to fetch images', error.message);
     }

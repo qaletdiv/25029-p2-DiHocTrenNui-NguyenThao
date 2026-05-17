@@ -1,12 +1,13 @@
 const StudentModel = require('../models/StudentModel');
 const { validateStudent } = require('../validations/studentValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class StudentController {
   async getAllStudents(req, res) {
     try {
       const students = await StudentModel.findAll();
-      return sendSuccess(res, students);
+      return sendSuccess(res, paginate(students, req, 'students'));
     } catch (error) {
       return sendError(res, 'Failed to fetch students', error.message);
     }
