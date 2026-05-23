@@ -2,12 +2,15 @@ const VolunteerModel = require('../models/VolunteerModel');
 const { validateVolunteer } = require('../validations/volunteerValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 const { paginate } = require('../utils/pagination');
+const { formatVolunteerResponse, parseVolunteerRequest } = require('../utils/formatVolunteer');
 
 class VolunteerController {
   async getAllVolunteers(req, res) {
     try {
       const volunteers = await VolunteerModel.findAll();
-      return sendSuccess(res, paginate(volunteers, req, 'volunteers'));
+      const formattedVolunteers = volunteers.map(formatVolunteerResponse);
+      console.log("getAllVolunteers: \n", formattedVolunteers);
+      return sendSuccess(res, paginate(formattedVolunteers, req, 'volunteers'));
     } catch (error) {
       return sendError(res, 'Failed to fetch volunteers', error.message);
     }
@@ -17,7 +20,8 @@ class VolunteerController {
     try {
       const volunteer = await VolunteerModel.findById(parseInt(req.params.id));
       if (!volunteer) return sendError(res, 'Volunteer not found', [], 404);
-      return sendSuccess(res, volunteer);
+      console.log("getVolunteerById: \n", "Id: \n", req.params.id, "\n Volunteer: \n", formatVolunteerResponse(volunteer));
+      return sendSuccess(res, formatVolunteerResponse(volunteer));
     } catch (error) {
       return sendError(res, 'Failed to fetch volunteer', error.message);
     }
@@ -25,7 +29,8 @@ class VolunteerController {
 
   async createVolunteer(req, res) {
     try {
-      const validation = validateVolunteer(req.body);
+      const parsedBody = parseVolunteerRequest(req.body);
+      const validation = validateVolunteer(parsedBody);
       if (!validation.isValid) {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
@@ -33,10 +38,10 @@ class VolunteerController {
       const newId = await VolunteerModel.generateNextId();
       const newVolunteer = await VolunteerModel.create({
         id: newId,
-        ...req.body
+        ...parsedBody
       });
 
-      return sendSuccess(res, newVolunteer, 'Volunteer created successfully', 201);
+      return sendSuccess(res, formatVolunteerResponse(newVolunteer), 'Volunteer created successfully', 201);
     } catch (error) {
       return sendError(res, 'Failed to create volunteer', error.message);
     }
@@ -44,15 +49,16 @@ class VolunteerController {
 
   async updateVolunteer(req, res) {
     try {
-      const validation = validateVolunteer(req.body, true);
+      const parsedBody = parseVolunteerRequest(req.body);
+      const validation = validateVolunteer(parsedBody, true);
       if (!validation.isValid) {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const updatedVolunteer = await VolunteerModel.update(parseInt(req.params.id), req.body);
+      const updatedVolunteer = await VolunteerModel.update(parseInt(req.params.id), parsedBody);
       if (!updatedVolunteer) return sendError(res, 'Volunteer not found', [], 404);
 
-      return sendSuccess(res, updatedVolunteer, 'Volunteer updated successfully');
+      return sendSuccess(res, formatVolunteerResponse(updatedVolunteer), 'Volunteer updated successfully');
     } catch (error) {
       return sendError(res, 'Failed to update volunteer', error.message);
     }

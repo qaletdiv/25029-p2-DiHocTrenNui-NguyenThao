@@ -82,8 +82,9 @@ export default function DashboardHeader({
         </button>
 
         {/* User info */}
-        <button
+        <Link
           id="user-profile-btn"
+          href="/profile"
           className="flex items-center gap-2 rounded-full pl-1 pr-2 py-1 hover:bg-gray-100 transition-colors group"
           aria-label="Hồ sơ người dùng"
         >
@@ -116,7 +117,7 @@ export default function DashboardHeader({
             size={14}
             className="hidden sm:block text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180"
           />
-        </button>
+        </Link>
       </div>
     </header>
   );

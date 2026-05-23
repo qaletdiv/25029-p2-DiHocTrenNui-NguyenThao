@@ -1,18 +1,52 @@
-interface TransactionDetailPageProps {
-  params: { id: string };
-}
+import React from "react";
+import { notFound } from "next/navigation";
+import { getTransactionById } from "@/services/transactions";
+import { getAllSponsors } from "@/services/sponsors";
+import TransactionDetailClient from "../_components/TransactionDetailClient";
 
-export default function TransactionDetailPage({
+// ─────────────────────────────────────────────
+// Server Component — fetches single transaction at request time
+// ─────────────────────────────────────────────
+export default async function TransactionDetailPage({
   params,
-}: TransactionDetailPageProps) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const numericId = parseInt(id, 10);
+
+  if (isNaN(numericId)) {
+    notFound();
+  }
+
+  let transaction;
+  try {
+    const response = await getTransactionById(numericId);
+    transaction = response.data;
+  } catch (error) {
+    notFound();
+  }
+
+  if (!transaction) {
+    notFound();
+  }
+
+  // Fetch sponsors for sponsor selection dropdown
+  let sponsors: any[] = [];
+  try {
+    const sponsorsResponse = await getAllSponsors();
+    const sponsorData = sponsorsResponse.data;
+    sponsors =
+      sponsorData && "sponsors" in sponsorData
+        ? (sponsorData as any).sponsors
+        : Array.isArray(sponsorData)
+        ? sponsorData
+        : [];
+  } catch (error) {
+    console.error("Failed to fetch sponsors in transaction detail:", error);
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold text-gray-800">
-        Chi tiết Giao dịch — {params.id}
-      </h1>
-      <p className="text-gray-500 mt-2 text-sm">
-        Trang chi tiết đang được xây dựng.
-      </p>
-    </div>
+    <TransactionDetailClient transaction={transaction} sponsors={sponsors} />
   );
 }

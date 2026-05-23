@@ -1,4 +1,5 @@
 import React from "react";
+import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
 
 type StatusVariant =
   // Generic
@@ -7,13 +8,14 @@ type StatusVariant =
   | "pending"
   | "verified"
   | "suspended"
+  | "rejected"
   // Student-specific lifecycle
-  | "INFO"
-  | "CONTACTED"
-  | "ACTIVE"
-  | "PAUSED"
-  | "DROPPED_OUT"
-  | "GRADUATED";
+  | typeof STUDENT_STATUS.INFO
+  | typeof STUDENT_STATUS.CONTACTED
+  | typeof STUDENT_STATUS.ACTIVE
+  | typeof STUDENT_STATUS.PAUSED
+  | typeof STUDENT_STATUS.DROPPED_OUT
+  | typeof STUDENT_STATUS.GRADUATED;
 
 interface StatusBadgeProps {
   status: StatusVariant | string;
@@ -26,13 +28,14 @@ const VARIANT_MAP: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
   verified: "bg-sky-100 text-sky-700",
   suspended: "bg-red-100 text-red-600",
+  rejected: "bg-red-100 text-red-700",
   // Student lifecycle
-  INFO: "bg-slate-100 text-slate-600",
-  CONTACTED: "bg-blue-100 text-blue-700",
-  ACTIVE: "bg-emerald-100 text-emerald-700",
-  PAUSED: "bg-amber-100 text-amber-700",
-  DROPPED_OUT: "bg-red-100 text-red-600",
-  GRADUATED: "bg-violet-100 text-violet-700",
+  [STUDENT_STATUS.INFO]: "bg-slate-100 text-slate-600",
+  [STUDENT_STATUS.CONTACTED]: "bg-blue-100 text-blue-700",
+  [STUDENT_STATUS.ACTIVE]: "bg-emerald-100 text-emerald-700",
+  [STUDENT_STATUS.PAUSED]: "bg-amber-100 text-amber-700",
+  [STUDENT_STATUS.DROPPED_OUT]: "bg-red-100 text-red-600",
+  [STUDENT_STATUS.GRADUATED]: "bg-violet-100 text-violet-700",
 };
 
 const LABEL_MAP: Record<string, string> = {
@@ -42,13 +45,14 @@ const LABEL_MAP: Record<string, string> = {
   pending: "Chờ duyệt",
   verified: "Đã xác thực",
   suspended: "Đã khoá",
+  rejected: "Đã từ chối",
   // Student lifecycle
-  INFO: "Thông tin",
-  CONTACTED: "Đã liên hệ",
-  ACTIVE: "Đang học",
-  PAUSED: "Tạm dừng",
-  DROPPED_OUT: "Nghỉ học",
-  GRADUATED: "Tốt nghiệp",
+  [STUDENT_STATUS.INFO]: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.INFO],
+  [STUDENT_STATUS.CONTACTED]: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.CONTACTED],
+  [STUDENT_STATUS.ACTIVE]: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.ACTIVE],
+  [STUDENT_STATUS.PAUSED]: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.PAUSED],
+  [STUDENT_STATUS.DROPPED_OUT]: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.DROPPED_OUT],
+  [STUDENT_STATUS.GRADUATED]: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.GRADUATED],
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {

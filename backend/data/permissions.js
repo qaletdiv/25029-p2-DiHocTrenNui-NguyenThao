@@ -4,7 +4,7 @@ const PERMISSIONS = [
   { id: 2, resource_id: 1, action_id: 2, code: 'STUDENT_READ' },
   { id: 3, resource_id: 1, action_id: 3, code: 'STUDENT_UPDATE' },
   { id: 4, resource_id: 1, action_id: 4, code: 'STUDENT_DELETE' },
-  
+
   // Sponsors
   { id: 5, resource_id: 2, action_id: 1, code: 'SPONSOR_CREATE' },
   { id: 6, resource_id: 2, action_id: 2, code: 'SPONSOR_READ' },
@@ -42,6 +42,18 @@ const PERMISSIONS = [
   { id: 26, resource_id: 8, action_id: 1, code: 'DISBURSEMENT_CREATE' },
   { id: 27, resource_id: 8, action_id: 2, code: 'DISBURSEMENT_READ' },
   { id: 28, resource_id: 8, action_id: 3, code: 'DISBURSEMENT_UPDATE' },
+
+  // Teachers
+  { id: 29, resource_id: 9, action_id: 1, code: 'TEACHER_CREATE' },
+  { id: 30, resource_id: 9, action_id: 2, code: 'TEACHER_READ' },
+  { id: 31, resource_id: 9, action_id: 3, code: 'TEACHER_UPDATE' },
+  { id: 32, resource_id: 9, action_id: 4, code: 'TEACHER_DELETE' },
+
+  // Volunteers
+  { id: 33, resource_id: 10, action_id: 1, code: 'VOLUNTEER_CREATE' },
+  { id: 34, resource_id: 10, action_id: 2, code: 'VOLUNTEER_READ' },
+  { id: 35, resource_id: 10, action_id: 3, code: 'VOLUNTEER_UPDATE' },
+  { id: 36, resource_id: 10, action_id: 4, code: 'VOLUNTEER_DELETE' },
 ];
 
 module.exports = PERMISSIONS;

@@ -4,15 +4,6 @@ import PageShell from "@/components/member/common/PageShell";
 import { getAllStudents } from "@/services/students";
 import StudentListClient from "./_components/StudentListClient";
 
-const STUDENT_STATUS = {
-  INFO: "INFO",
-  CONTACTED: "CONTACTED",
-  ACTIVE: "ACTIVE",
-  PAUSED: "PAUSED",
-  DROPPED_OUT: "DROPPED_OUT",
-  GRADUATED: "GRADUATED",
-};
-
 // ─────────────────────────────────────────────
 // Server Component — fetches data at request time
 // ─────────────────────────────────────────────
@@ -22,25 +13,21 @@ export default async function StudentsPage(props: {
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;
-  
+
   const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === 'string' ? parseInt(pageSizeParam, 10) : 10;
 
   const response = await getAllStudents(page, pageSize);
-  
+
   // Handle both paginated and non-paginated responses gracefully
   const isPaginated = 'students' in response.data;
   const students = isPaginated ? (response.data as any).students : response.data;
   const total = isPaginated ? (response.data as any).total : students.length;
 
-  const activeCount = students.filter(
-    (s: any) => s.status === STUDENT_STATUS.ACTIVE
-  ).length;
-
   return (
     <PageShell
       title="Danh sách Học sinh"
-      subtitle={`${total} học sinh · ${activeCount} đang học (trang này)`}
+      subtitle={`${total} học sinh`}
       icon={GraduationCap}
       iconColor="bg-primary-900/10 text-primary-900"
     >

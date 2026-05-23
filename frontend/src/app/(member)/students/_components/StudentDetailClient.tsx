@@ -19,49 +19,13 @@ import {
 } from "lucide-react";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import { Student, updateStudent, UpdateStudentPayload } from "@/services/students";
+import { fmtAmount, fmtDate, fmtDateTime, calcAge } from "@/hooks/convertData";
+import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
+import { School } from "@/services/schools";
+import { Sponsor } from "@/services/sponsors";
+import { Teacher } from "@/services/teachers";
+import { Volunteer } from "@/services/volunteers";
 
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
-function calcAge(dob: string) {
-  const b = new Date(dob);
-  const now = new Date();
-  let age = now.getFullYear() - b.getFullYear();
-  if (
-    now.getMonth() < b.getMonth() ||
-    (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())
-  )
-    age--;
-  return age;
-}
-
-function fmtDate(iso: string) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
-
-function fmtDateTime(iso: string) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function fmtAmount(n: number) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
 
 function getInitials(name: string) {
   return (name || "")
@@ -164,7 +128,7 @@ function toForm(student: Student): FormState {
   return {
     full_name: student.full_name || "",
     date_of_birth: student.date_of_birth ? student.date_of_birth.substring(0, 10) : "",
-    gender: student.gender || "Male",
+    gender: student.gender || "Nam",
     phone: student.phone || "",
     grade: student.grade || "",
     family_condition: student.family_condition || "",
@@ -181,9 +145,19 @@ function toForm(student: Student): FormState {
 // ─────────────────────────────────────────────
 interface Props {
   student: Student;
+  schoolDetail?: School | null;
+  sponsorDetail?: Sponsor | null;
+  teacherDetail?: Teacher | null;
+  volunteerDetail?: Volunteer | null;
 }
 
-export default function StudentDetailClient({ student }: Props) {
+export default function StudentDetailClient({
+  student,
+  schoolDetail,
+  sponsorDetail,
+  teacherDetail,
+  volunteerDetail,
+}: Props) {
   const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -281,9 +255,17 @@ export default function StudentDetailClient({ student }: Props) {
         <div className="px-6 pb-6">
           {/* Avatar */}
           <div className="-mt-10 mb-4 flex items-end gap-4">
-            <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-md bg-primary-900/10 text-primary-900 flex items-center justify-center flex-shrink-0 text-2xl font-bold">
-              {getInitials(form.full_name)}
-            </div>
+            {student.avatar_url ? (
+              <img
+                src={student.avatar_url}
+                alt={form.full_name}
+                className="w-20 h-20 rounded-2xl border-4 border-white shadow-md object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-md bg-primary-900/10 text-primary-900 flex items-center justify-center flex-shrink-0 text-2xl font-bold">
+                {getInitials(form.full_name)}
+              </div>
+            )}
             <div className="pb-1">
               <StatusBadge status={form.status} />
             </div>
@@ -316,9 +298,8 @@ export default function StudentDetailClient({ student }: Props) {
                 <Calendar size={12} /> {age} tuổi
               </span>
               <span
-                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-semibold ${
-                  form.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
-                }`}
+                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-semibold ${form.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
+                  }`}
               >
                 {form.is_active ? "● Đang hoạt động" : "● Đã dừng"}
               </span>
@@ -363,16 +344,16 @@ export default function StudentDetailClient({ student }: Props) {
           <InfoRow
             label="Giới tính"
             isEditing={isEditing}
-            value={form.gender === "Male" ? "Nam" : form.gender === "Female" ? "Nữ" : "Khác"}
+            value={form.gender === "Nam" ? "Nam" : form.gender === "Nữ" ? "Nữ" : "Khác"}
             editNode={
               <select
                 value={form.gender}
                 onChange={(e) => set("gender", e.target.value)}
                 className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               >
-                <option value="Male">Nam</option>
-                <option value="Female">Nữ</option>
-                <option value="Other">Khác</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
               </select>
             }
           />
@@ -450,12 +431,12 @@ export default function StudentDetailClient({ student }: Props) {
                   onChange={(e) => set("status", e.target.value)}
                   className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
                 >
-                  <option value="INFO">Thông tin</option>
-                  <option value="CONTACTED">Đã liên hệ</option>
-                  <option value="ACTIVE">Đang học</option>
-                  <option value="PAUSED">Tạm dừng</option>
-                  <option value="DROPPED_OUT">Nghỉ học</option>
-                  <option value="GRADUATED">Tốt nghiệp</option>
+                  <option value="INFO">{STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.INFO]}</option>
+                  <option value="CONTACTED">{STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.CONTACTED]}</option>
+                  <option value="ACTIVE">{STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.ACTIVE]}</option>
+                  <option value="PAUSED">{STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.PAUSED]}</option>
+                  <option value="DROPPED_OUT">{STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.DROPPED_OUT]}</option>
+                  <option value="GRADUATED">{STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.GRADUATED]}</option>
                 </select>
               }
             />
@@ -467,10 +448,10 @@ export default function StudentDetailClient({ student }: Props) {
                 <EditInput value={form.school} onChange={(v) => set("school", v)} />
               }
             />
-            <InfoRow 
-              label="Lớp" 
-              isEditing={isEditing} 
-              value={form.grade || "—"} 
+            <InfoRow
+              label="Lớp"
+              isEditing={isEditing}
+              value={form.grade || "—"}
               editNode={
                 <EditInput value={form.grade} onChange={(v) => set("grade", v)} />
               }
@@ -527,9 +508,169 @@ export default function StudentDetailClient({ student }: Props) {
               isEditing={false}
               value={fmtDateTime(student.created_at)}
             />
+            <InfoRow
+              label="Cập nhật bởi"
+              isEditing={false}
+              value={
+                <span className="inline-flex items-center gap-1 text-gray-600">
+                  <Clock size={13} className="text-gray-400" /> {student.updater || "—"}
+                </span>
+              }
+            />
+            <InfoRow
+              label="Ngày cập nhật"
+              isEditing={false}
+              value={fmtDateTime(student.updated_at)}
+            />
           </SectionCard>
         </div>
       </div>
+
+      {(schoolDetail || sponsorDetail || teacherDetail || volunteerDetail) && (
+        <div className="mt-8 space-y-4">
+          <h3 className="text-base font-bold text-gray-800">Thông tin liên quan</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* School Info */}
+            {schoolDetail && (
+              <SectionCard icon={GraduationCap} title="Thông tin trường học">
+                <InfoRow label="Tên trường" isEditing={false} value={schoolDetail.name} />
+                <InfoRow
+                  label="Số điện thoại"
+                  isEditing={false}
+                  value={
+                    schoolDetail.phone ? (
+                      <a href={`tel:${schoolDetail.phone}`} className="text-primary-900 hover:underline">
+                        {schoolDetail.phone}
+                      </a>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+                <InfoRow
+                  label="Email"
+                  isEditing={false}
+                  value={
+                    schoolDetail.email ? (
+                      <a href={`mailto:${schoolDetail.email}`} className="text-primary-900 hover:underline">
+                        {schoolDetail.email}
+                      </a>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+                <InfoRow label="Địa chỉ" isEditing={false} value={schoolDetail.address || "—"} />
+              </SectionCard>
+            )}
+
+            {/* Sponsor Info */}
+            {sponsorDetail && (
+              <SectionCard icon={Heart} title="Thông tin nhà tài trợ">
+                <InfoRow label="Họ và tên" isEditing={false} value={sponsorDetail.full_name} />
+                <InfoRow
+                  label="Số điện thoại"
+                  isEditing={false}
+                  value={
+                    sponsorDetail.phone ? (
+                      <a href={`tel:${sponsorDetail.phone}`} className="text-primary-900 hover:underline">
+                        {sponsorDetail.phone}
+                      </a>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+                <InfoRow label="Giới tính" isEditing={false} value={sponsorDetail.gender || "—"} />
+                <InfoRow label="Địa chỉ" isEditing={false} value={sponsorDetail.address || "—"} />
+                <InfoRow
+                  label="Tài khoản"
+                  isEditing={false}
+                  value={
+                    sponsorDetail.username ? (
+                      <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+                        {sponsorDetail.username}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Chưa liên kết</span>
+                    )
+                  }
+                />
+              </SectionCard>
+            )}
+
+            {/* Teacher Info */}
+            {teacherDetail && (
+              <SectionCard icon={User} title="Giáo viên phụ trách">
+                <InfoRow label="Họ và tên" isEditing={false} value={teacherDetail.full_name} />
+                <InfoRow
+                  label="Số điện thoại"
+                  isEditing={false}
+                  value={
+                    teacherDetail.phone ? (
+                      <a href={`tel:${teacherDetail.phone}`} className="text-primary-900 hover:underline">
+                        {teacherDetail.phone}
+                      </a>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+                <InfoRow label="Giới tính" isEditing={false} value={teacherDetail.gender || "—"} />
+                <InfoRow label="Địa chỉ" isEditing={false} value={teacherDetail.address || "—"} />
+                <InfoRow
+                  label="Tài khoản"
+                  isEditing={false}
+                  value={
+                    teacherDetail.username ? (
+                      <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+                        {teacherDetail.username}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Chưa liên kết</span>
+                    )
+                  }
+                />
+              </SectionCard>
+            )}
+
+            {/* Volunteer Info */}
+            {volunteerDetail && (
+              <SectionCard icon={User} title="Thông tin tình nguyện viên">
+                <InfoRow label="Họ và tên" isEditing={false} value={volunteerDetail.full_name} />
+                <InfoRow
+                  label="Số điện thoại"
+                  isEditing={false}
+                  value={
+                    volunteerDetail.phone ? (
+                      <a href={`tel:${volunteerDetail.phone}`} className="text-primary-900 hover:underline">
+                        {volunteerDetail.phone}
+                      </a>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+                <InfoRow label="Giới tính" isEditing={false} value={volunteerDetail.gender || "—"} />
+                <InfoRow label="Địa chỉ" isEditing={false} value={volunteerDetail.address || "—"} />
+                <InfoRow
+                  label="Tài khoản"
+                  isEditing={false}
+                  value={
+                    volunteerDetail.username ? (
+                      <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+                        {volunteerDetail.username}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Chưa liên kết</span>
+                    )
+                  }
+                />
+              </SectionCard>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

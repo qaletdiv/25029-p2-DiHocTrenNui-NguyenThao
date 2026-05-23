@@ -7,6 +7,8 @@ import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
 import { Student } from "@/services/students";
+import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
+
 
 // ─────────────────────────────────────────────
 // Constants
@@ -15,33 +17,13 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 const ALL_STATUSES: { value: string; label: string }[] = [
   { value: "", label: "Tất cả trạng thái" },
-  { value: "INFO", label: "Thông tin" },
-  { value: "CONTACTED", label: "Đã liên hệ" },
-  { value: "ACTIVE", label: "Đang học" },
-  { value: "PAUSED", label: "Tạm dừng" },
-  { value: "DROPPED_OUT", label: "Nghỉ học" },
-  { value: "GRADUATED", label: "Tốt nghiệp" },
+  { value: STUDENT_STATUS.INFO, label: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.INFO] },
+  { value: STUDENT_STATUS.CONTACTED, label: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.CONTACTED] },
+  { value: STUDENT_STATUS.ACTIVE, label: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.ACTIVE] },
+  { value: STUDENT_STATUS.PAUSED, label: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.PAUSED] },
+  { value: STUDENT_STATUS.DROPPED_OUT, label: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.DROPPED_OUT] },
+  { value: STUDENT_STATUS.GRADUATED, label: STUDENT_STATUS_TRANSLATIONS[STUDENT_STATUS.GRADUATED] },
 ];
-
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
-function calcAge(dob: string): number {
-  const birth = new Date(dob);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return age;
-}
-
-function formatAmount(amount: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 // ─────────────────────────────────────────────
 // Sub-components

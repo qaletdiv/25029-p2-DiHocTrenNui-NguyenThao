@@ -12,11 +12,12 @@ const accountMap = new Map(accounts.map(a => [a.id, a.username]));
  */
 const formatStudentResponse = (rawStudent) => {
   if (!rawStudent) return rawStudent;
-  
+
   const {
     school_id,
     status_id,
     created_by,
+    updated_by,
     ...restOfStudentData
   } = rawStudent;
 
@@ -25,6 +26,7 @@ const formatStudentResponse = (rawStudent) => {
     school: schoolMap.get(school_id) || null,
     status: statusMap.get(status_id) || null,
     creator: accountMap.get(created_by) || null,
+    updater: accountMap.get(updated_by) || null,
   };
 };
 

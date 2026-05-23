@@ -171,3 +171,34 @@ export async function deleteAccount(
         throw error;
     }
 }
+
+/**
+ * Decode access token cookie and fetch current signed-in account details.
+ */
+export async function getCurrentAccount(): Promise<Account | null> {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("accessToken")?.value;
+        if (!token) return null;
+
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            return null;
+        }
+        
+        // Decode base64 payload of JWT
+        const payloadStr = parts[1];
+        const payload = JSON.parse(Buffer.from(payloadStr, 'base64').toString('utf-8'));
+        
+        if (!payload || !payload.id) {
+            return null;
+        }
+
+        const res = await getAccountById(payload.id);
+        return res.data;
+    } catch (error) {
+        console.error("[getCurrentAccount] Error", error);
+        return null;
+    }
+}
+

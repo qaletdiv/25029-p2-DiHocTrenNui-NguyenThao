@@ -12,6 +12,7 @@ export interface Image {
     url: string;
     timestamp: string;
     metadata: Record<string, unknown>;
+    event_id?: string;
     [key: string]: unknown;
 }
 
@@ -20,6 +21,7 @@ export interface CreateImagePayload {
     url: string;
     timestamp: string;
     metadata?: Record<string, unknown>;
+    event_id?: string;
 }
 
 export interface UpdateImagePayload {
@@ -27,11 +29,19 @@ export interface UpdateImagePayload {
     url?: string;
     timestamp?: string;
     metadata?: Record<string, unknown>;
+    event_id?: string;
 }
 
 export interface ImageRangeParams {
     start: string; // YYYY-MM-DD
     end: string;   // YYYY-MM-DD
+}
+
+export interface PaginatedImages {
+    images: Image[];
+    total: number;
+    page: number;
+    pageSize: number;
 }
 
 export interface ApiResponse<T> {
@@ -52,10 +62,15 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 
 // ─── Service Functions ────────────────────────────────────────────────────────
 
-/** GET /images — Fetch all images. */
-export async function getAllImages(): Promise<ApiResponse<Image[]>> {
+/** GET /images — Fetch all images. Supports pagination. */
+export async function getAllImages(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedImages | Image[]>> {
     try {
-        const res = await fetch(`${BASE_URL}/images`, { method: "GET", headers: await getAuthHeaders() });
+        const headers = await getAuthHeaders();
+        let url = `${BASE_URL}/images`;
+        if (page !== undefined && pageSize !== undefined) {
+            url += `?page=${page}&pageSize=${pageSize}`;
+        }
+        const res = await fetch(url, { method: "GET", headers });
         if (!res.ok) throw new Error(`Failed to fetch images: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {

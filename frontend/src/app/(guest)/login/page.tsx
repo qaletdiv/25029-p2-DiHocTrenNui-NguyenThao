@@ -9,7 +9,7 @@ import { loginAction } from "@/services/login";
 interface LoginPageProps { }
 
 export default function LoginPage({ }: LoginPageProps) {
-    const [preState, formAction, isPending] = useActionState(loginAction, { email: null, password: null, error: null });
+    const [preState, formAction, isPending] = useActionState(loginAction, { username: null, password: null, error: null });
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-yellow-400 selection:text-primary-900">
@@ -42,9 +42,9 @@ export default function LoginPage({ }: LoginPageProps) {
                                     </div>
                                     <input
                                         className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors bg-gray-50/50"
-                                        id="email"
-                                        type="email"
-                                        name="email"
+                                        id="username"
+                                        type="text"
+                                        name="username"
                                         placeholder="@username"
                                         required
                                     />

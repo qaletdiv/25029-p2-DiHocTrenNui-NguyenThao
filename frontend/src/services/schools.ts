@@ -9,21 +9,45 @@ const BASE_URL = "http://localhost:5001";
 export interface School {
     id: number;
     name: string;
+    phone?: string;
+    email?: string;
     address: string;
+    note?: string;
+    is_active: boolean;
     teacher_id: number;
+    created_at?: string;
+    updated_at?: string;
+    username?: string;
+    creator?: string;
+    updater?: string;
     [key: string]: unknown;
 }
 
 export interface CreateSchoolPayload {
     name: string;
+    phone?: string;
+    email?: string;
     address: string;
+    note?: string;
+    is_active: boolean;
     teacher_id: number;
 }
 
 export interface UpdateSchoolPayload {
     name?: string;
+    phone?: string;
+    email?: string;
     address?: string;
+    note?: string;
+    is_active?: boolean;
     teacher_id?: number;
+}
+
+export interface PaginatedSchools {
+    schools: School[];
+    total: number;
+    page: number;
+    pageSize: number;
 }
 
 export interface ApiResponse<T> {
@@ -46,12 +70,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 
 /**
  * GET /schools
- * Fetch all schools.
+ * Fetch schools. Supports pagination.
  */
-export async function getAllSchools(): Promise<ApiResponse<School[]>> {
+export async function getAllSchools(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedSchools>> {
     try {
         const headers = await getAuthHeaders();
-        const res = await fetch(`${BASE_URL}/schools`, {
+        let url = `${BASE_URL}/schools`;
+        if (page !== undefined && pageSize !== undefined) {
+            url += `?page=${page}&pageSize=${pageSize}`;
+        }
+        const res = await fetch(url, {
             method: "GET",
             headers,
         });
@@ -106,7 +134,8 @@ export async function createSchool(
         });
 
         if (!res.ok) {
-            throw new Error(`Failed to create school: ${res.status} ${res.statusText}`);
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.message || `Failed to create school: ${res.status} ${res.statusText}`);
         }
 
         return res.json();
@@ -133,7 +162,8 @@ export async function updateSchool(
         });
 
         if (!res.ok) {
-            throw new Error(`Failed to update school ${id}: ${res.status} ${res.statusText}`);
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.message || `Failed to update school ${id}: ${res.status} ${res.statusText}`);
         }
 
         return res.json();
@@ -167,3 +197,59 @@ export async function deleteSchool(
         throw error;
     }
 }
+
+// ─── Server Actions ──────────────────────────────────────────────────────────
+
+export interface FormState {
+    success: boolean;
+    message: string;
+    errors?: Record<string, string[]>;
+}
+
+export async function createSchoolAction(
+    prevState: FormState,
+    formData: FormData
+): Promise<FormState> {
+    try {
+        const payload: CreateSchoolPayload = {
+            name: formData.get("name") as string,
+            phone: formData.get("phone") as string || undefined,
+            email: formData.get("email") as string || undefined,
+            address: formData.get("address") as string,
+            note: formData.get("note") as string || undefined,
+            is_active: formData.get("is_active") === "on",
+            teacher_id: Number(formData.get("teacher_id")),
+        };
+
+        await createSchool(payload);
+        return { success: true, message: "Trường học đã được tạo thành công" };
+    } catch (error: any) {
+        console.error("[createSchoolAction]", error);
+        return { success: false, message: error.message || "Đã xảy ra lỗi khi tạo trường học." };
+    }
+}
+
+export async function updateSchoolAction(
+    id: number,
+    prevState: FormState,
+    formData: FormData
+): Promise<FormState> {
+    try {
+        const payload: UpdateSchoolPayload = {
+            name: formData.get("name") as string || undefined,
+            phone: formData.get("phone") as string || undefined,
+            email: formData.get("email") as string || undefined,
+            address: formData.get("address") as string || undefined,
+            note: formData.get("note") as string || undefined,
+            is_active: formData.get("is_active") === "on",
+            teacher_id: Number(formData.get("teacher_id")) || undefined,
+        };
+
+        await updateSchool(id, payload);
+        return { success: true, message: "Trường học đã được cập nhật thành công" };
+    } catch (error: any) {
+        console.error("[updateSchoolAction]", error);
+        return { success: false, message: error.message || "Đã xảy ra lỗi khi cập nhật trường học." };
+    }
+}
+

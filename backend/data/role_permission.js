@@ -1,6 +1,6 @@
 const ROLE_PERMISSIONS = [
-  // Admin (Role ID 1) - All permissions 1-28
-  ...Array.from({ length: 28 }, (_, i) => ({ id: i + 1, role_id: 1, permission_id: i + 1 })),
+  // Admin (Role ID 1) - All permissions 1-36
+  ...Array.from({ length: 36 }, (_, i) => ({ id: i + 1, role_id: 1, permission_id: i + 1 })),
 
   // Volunteer (Role ID 2)
   { id: 29, role_id: 2, permission_id: 1 }, // STUDENT_CREATE
@@ -13,6 +13,8 @@ const ROLE_PERMISSIONS = [
   { id: 36, role_id: 2, permission_id: 15 }, // BANK_TRANSACTION_UPDATE
   { id: 37, role_id: 2, permission_id: 23 }, // IMAGE_READ
   { id: 38, role_id: 2, permission_id: 25 }, // REPORT_READ
+  { id: 49, role_id: 2, permission_id: 30 }, // TEACHER_READ
+  { id: 50, role_id: 2, permission_id: 34 }, // VOLUNTEER_READ
 
   // Teacher (Role ID 3)
   { id: 39, role_id: 3, permission_id: 1 }, // STUDENT_CREATE
@@ -21,6 +23,7 @@ const ROLE_PERMISSIONS = [
   { id: 42, role_id: 3, permission_id: 10 }, // SCHOOL_READ
   { id: 43, role_id: 3, permission_id: 23 }, // IMAGE_READ
   { id: 44, role_id: 3, permission_id: 27 }, // DISBURSEMENT_READ
+  { id: 51, role_id: 3, permission_id: 30 }, // TEACHER_READ
 
   // Sponsor (Role ID 4)
   { id: 45, role_id: 4, permission_id: 2 }, // STUDENT_READ

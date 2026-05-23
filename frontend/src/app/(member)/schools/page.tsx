@@ -1,88 +1,53 @@
-"use client";
-
-import React, { useState } from "react";
-import { School, Eye, Pencil, Trash2 } from "lucide-react";
+import React from "react";
+import { School as SchoolIcon } from "lucide-react";
 import PageShell from "@/components/member/common/PageShell";
-import ListToolbar from "@/components/member/common/ListToolbar";
-import DataTable, { Column } from "@/components/member/common/DataTable";
-import StatusBadge from "@/components/member/common/StatusBadge";
+import { getAllSchools } from "@/services/schools";
+import { getAllTeachers } from "@/services/teachers";
+import SchoolListClient from "./_components/SchoolListClient";
 
-interface School {
-  id: string;
-  name: string;
-  level: string;
-  district: string;
-  province: string;
-  students: number;
-  teachers: number;
-  status: string;
-}
+// ─────────────────────────────────────────────
+// Server Component — fetches data at request time
+// ─────────────────────────────────────────────
+export default async function SchoolsPage(props: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const searchParams = await props.searchParams;
+  const pageParam = searchParams?.page;
+  const pageSizeParam = searchParams?.pageSize;
 
-const SEED_DATA: School[] = [
-  { id: "TR001", name: "TH Pú Nhung", level: "Tiểu học", district: "Tuần Giáo", province: "Điện Biên", students: 12, teachers: 3, status: "active" },
-  { id: "TR002", name: "TH Nậm Pồ", level: "Tiểu học", district: "Nậm Pồ", province: "Điện Biên", students: 8, teachers: 2, status: "active" },
-  { id: "TR003", name: "THCS Trạm Tấu", level: "THCS", district: "Trạm Tấu", province: "Yên Bái", students: 20, teachers: 5, status: "active" },
-  { id: "TR004", name: "TH Pha Long", level: "Tiểu học", district: "Mường Khương", province: "Lào Cai", students: 15, teachers: 4, status: "active" },
-  { id: "TR005", name: "TH Mường Mươn", level: "Tiểu học", district: "Mường Chà", province: "Điện Biên", students: 7, teachers: 2, status: "pending" },
-];
+  const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 1;
+  const pageSize = typeof pageSizeParam === 'string' ? parseInt(pageSizeParam, 10) : 10;
 
-const COLUMNS: Column<School>[] = [
-  { key: "id", header: "Mã trường", width: "w-24" },
-  { key: "name", header: "Tên trường" },
-  { key: "level", header: "Cấp học" },
-  { key: "district", header: "Huyện" },
-  { key: "province", header: "Tỉnh" },
-  { key: "students", header: "HS", align: "center", width: "w-16" },
-  { key: "teachers", header: "GV", align: "center", width: "w-16" },
-  {
-    key: "status",
-    header: "Trạng thái",
-    align: "center",
-    render: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    key: "actions",
-    header: "",
-    align: "right",
-    width: "w-24",
-    render: () => (
-      <div className="flex items-center justify-end gap-2">
-        <button className="p-1.5 rounded-lg text-gray-400 hover:text-sky-600 hover:bg-sky-50 transition-colors" aria-label="Xem"><Eye size={15} /></button>
-        <button className="p-1.5 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors" aria-label="Sửa"><Pencil size={15} /></button>
-        <button className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors" aria-label="Xoá"><Trash2 size={15} /></button>
-      </div>
-    ),
-  },
-];
+  const response = await getAllSchools(page, pageSize);
 
-export default function SchoolsPage() {
-  const [search, setSearch] = useState("");
-  const filtered = SEED_DATA.filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.province.toLowerCase().includes(search.toLowerCase()) ||
-      s.district.toLowerCase().includes(search.toLowerCase())
-  );
+  // Handle both paginated and non-paginated responses gracefully
+  const isPaginated = response.data && 'schools' in response.data;
+  const schools = isPaginated ? (response.data as any).schools : (response.data || []);
+  const total = isPaginated ? (response.data as any).total : schools.length;
+
+  // Fetch teachers to map teacher_id to teacher names
+  const teachersResponse = await getAllTeachers();
+  const teachersData = teachersResponse.data;
+  const teachersList =
+    teachersData && "teachers" in teachersData
+      ? (teachersData as any).teachers
+      : Array.isArray(teachersData)
+      ? teachersData
+      : [];
 
   return (
     <PageShell
       title="Danh sách Trường học"
-      subtitle={`${SEED_DATA.length} trường đang được hỗ trợ`}
-      icon={School}
-      iconColor="bg-emerald-100 text-emerald-700"
+      subtitle={`${total} trường học`}
+      icon={SchoolIcon}
+      iconColor="bg-emerald-900/10 text-emerald-900"
     >
-      <ListToolbar
-        searchPlaceholder="Tìm theo tên trường, huyện, tỉnh..."
-        searchValue={search}
-        onSearchChange={setSearch}
-        addLabel="Thêm trường học"
-        onAdd={() => {}}
-      />
-      <DataTable<School>
-        columns={COLUMNS}
-        rows={filtered}
-        rowKey="id"
-        emptyLabel="Không tìm thấy trường học phù hợp"
+      <SchoolListClient
+        schools={schools}
+        total={total}
+        initialPage={page}
+        initialPageSize={pageSize}
+        teachers={teachersList}
       />
     </PageShell>
   );

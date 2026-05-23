@@ -1,81 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, X } from "lucide-react";
-import { createStudent, CreateStudentPayload } from "@/services/students";
+import { createStudentAction } from "@/services/students";
+import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
+
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-900 text-white text-sm font-semibold hover:bg-primary-800 shadow-sm transition-colors disabled:opacity-50"
+    >
+      <Save size={15} /> {pending ? "Đang lưu..." : "Lưu học sinh"}
+    </button>
+  );
+}
 
 export default function StudentCreateClient() {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, formAction] = useActionState(createStudentAction, { success: false, message: "" });
 
-  const [form, setForm] = useState({
-    full_name: "",
-    date_of_birth: "",
-    gender: "Male",
-    phone: "",
-    grade: "",
-    family_condition: "",
-    monthly_amount: "500000",
-    is_active: true,
-    address: "",
-    school: "",
-    status: "INFO",
-  });
-
-  const set = (field: string, val: string | boolean) => {
-    setForm((prev) => ({ ...prev, [field]: val }));
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      const payload: CreateStudentPayload = {
-        ...form,
-        monthly_amount: Number(form.monthly_amount) || 0,
-      };
-      await createStudent(payload);
+  useEffect(() => {
+    if (state.success) {
       router.push("/students");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Đã xảy ra lỗi khi tạo học sinh.");
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [state.success, router]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <button
+          type="button"
           onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-900 transition-colors group"
         >
-          <ArrowLeft size={16} /> Quay lại
+          <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" /> Quay lại
         </button>
         <h1 className="text-xl font-bold text-gray-800">Thêm học sinh mới</h1>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <form onSubmit={handleSave} className="space-y-5">
-          {error && (
+        <form action={formAction} className="space-y-5">
+          {!state.success && state.message && (
             <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-100">
-              {error}
+              {state.message}
             </div>
           )}
+
+          {/* Section: Expected Generated ID */}
+          <div className="p-4 bg-primary-50/50 rounded-xl border border-primary-100/50">
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">Mã học sinh dự kiến</label>
+              <input
+                type="text"
+                disabled
+                value="HS****"
+                className="w-full px-3 py-2 text-sm font-mono text-primary-700 bg-primary-900/5 border border-primary-100 rounded-lg cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Mã sẽ được hệ thống tự động tạo theo thứ tự tăng dần (ví dụ: HS0031) khi lưu thành công.
+              </p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">Họ và tên *</label>
               <input
                 type="text"
+                name="full_name"
                 required
-                value={form.full_name}
-                onChange={(e) => set("full_name", e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               />
             </div>
@@ -83,9 +83,8 @@ export default function StudentCreateClient() {
               <label className="text-sm font-semibold text-gray-700">Ngày sinh *</label>
               <input
                 type="date"
+                name="date_of_birth"
                 required
-                value={form.date_of_birth}
-                onChange={(e) => set("date_of_birth", e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               />
             </div>
@@ -95,21 +94,20 @@ export default function StudentCreateClient() {
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">Giới tính</label>
               <select
-                value={form.gender}
-                onChange={(e) => set("gender", e.target.value)}
+                name="gender"
+                defaultValue="Nam"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30 bg-white"
               >
-                <option value="Male">Nam</option>
-                <option value="Female">Nữ</option>
-                <option value="Other">Khác</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
               </select>
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">Số điện thoại</label>
               <input
                 type="tel"
-                value={form.phone}
-                onChange={(e) => set("phone", e.target.value)}
+                name="phone"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               />
             </div>
@@ -120,8 +118,7 @@ export default function StudentCreateClient() {
               <label className="text-sm font-semibold text-gray-700">Trường học</label>
               <input
                 type="text"
-                value={form.school}
-                onChange={(e) => set("school", e.target.value)}
+                name="school"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               />
             </div>
@@ -129,19 +126,18 @@ export default function StudentCreateClient() {
               <label className="text-sm font-semibold text-gray-700">Lớp</label>
               <input
                 type="text"
-                value={form.grade}
-                onChange={(e) => set("grade", e.target.value)}
+                name="grade"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700">Địa chỉ</label>
+            <label className="text-sm font-semibold text-gray-700">Địa chỉ cụ thể</label>
             <input
               type="text"
-              value={form.address}
-              onChange={(e) => set("address", e.target.value)}
+              name="address"
+              placeholder="Ví dụ: Bản Nà Lốc"
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
             />
           </div>
@@ -149,9 +145,8 @@ export default function StudentCreateClient() {
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-gray-700">Hoàn cảnh gia đình</label>
             <textarea
+              name="family_condition"
               rows={3}
-              value={form.family_condition}
-              onChange={(e) => set("family_condition", e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30 resize-none"
             />
           </div>
@@ -161,24 +156,21 @@ export default function StudentCreateClient() {
               <label className="text-sm font-semibold text-gray-700">Mức hỗ trợ / tháng (VNĐ)</label>
               <input
                 type="number"
-                value={form.monthly_amount}
-                onChange={(e) => set("monthly_amount", e.target.value)}
+                name="monthly_amount"
+                defaultValue="500000"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">Trạng thái</label>
               <select
-                value={form.status}
-                onChange={(e) => set("status", e.target.value)}
+                name="status"
+                defaultValue="INFO"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30 bg-white"
               >
-                <option value="INFO">Thông tin</option>
-                <option value="CONTACTED">Đã liên hệ</option>
-                <option value="ACTIVE">Đang học</option>
-                <option value="PAUSED">Tạm dừng</option>
-                <option value="DROPPED_OUT">Nghỉ học</option>
-                <option value="GRADUATED">Tốt nghiệp</option>
+                {Object.entries(STUDENT_STATUS_TRANSLATIONS).map(([key, value]) => (
+                  <option key={key} value={key}>{value}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -187,8 +179,8 @@ export default function StudentCreateClient() {
             <input
               type="checkbox"
               id="is_active"
-              checked={form.is_active}
-              onChange={(e) => set("is_active", e.target.checked)}
+              name="is_active"
+              defaultChecked={true}
               className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
             />
             <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
@@ -200,21 +192,15 @@ export default function StudentCreateClient() {
             <button
               type="button"
               onClick={() => router.back()}
-              disabled={isSaving}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
             >
               <X size={15} /> Huỷ
             </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-900 text-white text-sm font-semibold hover:bg-primary-800 shadow-sm transition-colors disabled:opacity-50"
-            >
-              <Save size={15} /> {isSaving ? "Đang lưu..." : "Lưu học sinh"}
-            </button>
+            <SubmitButton />
           </div>
         </form>
       </div>
     </div>
   );
 }
+

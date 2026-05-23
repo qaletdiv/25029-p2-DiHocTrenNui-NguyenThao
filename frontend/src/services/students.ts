@@ -15,12 +15,15 @@ export interface Student {
     grade: string;
     family_condition: string;
     monthly_amount: number;
+    avatar_url: string;
     is_active: boolean;
     created_at: string;
+    updated_at: string;
     address: string;
     school: string;
     status: string;
     creator: string;
+    updater: string;
     [key: string]: unknown;
 }
 
@@ -135,6 +138,8 @@ export async function createStudent(
     payload: CreateStudentPayload
 ): Promise<ApiResponse<Student>> {
     try {
+        console.log("payload create student:", payload);
+
         const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/students`, {
             method: "POST",
@@ -153,6 +158,39 @@ export async function createStudent(
     }
 }
 
+export interface FormState {
+    success: boolean;
+    message: string;
+    errors?: Record<string, string[]>;
+}
+
+export async function createStudentAction(
+    prevState: FormState,
+    formData: FormData
+): Promise<FormState> {
+    try {
+        const payload: CreateStudentPayload = {
+            full_name: formData.get("full_name") as string,
+            date_of_birth: formData.get("date_of_birth") as string,
+            gender: formData.get("gender") as string,
+            phone: formData.get("phone") as string,
+            grade: formData.get("grade") as string,
+            family_condition: formData.get("family_condition") as string,
+            monthly_amount: Number(formData.get("monthly_amount")) || 0,
+            is_active: formData.get("is_active") === "on",
+            address: formData.get("address") as string,
+            school: formData.get("school") as string,
+            status: formData.get("status") as string,
+        };
+
+        await createStudent(payload);
+        return { success: true, message: "Học sinh đã được tạo thành công" };
+    } catch (error: any) {
+        console.error("[createStudentAction]", error);
+        return { success: false, message: error.message || "Đã xảy ra lỗi khi tạo học sinh." };
+    }
+}
+
 /**
  * PATCH /students/:id
  * Partially update a student.
@@ -162,6 +200,7 @@ export async function updateStudent(
     payload: UpdateStudentPayload
 ): Promise<ApiResponse<Student>> {
     try {
+        console.log("payload update student: ", payload);
         const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/students/${id}`, {
             method: "PATCH",

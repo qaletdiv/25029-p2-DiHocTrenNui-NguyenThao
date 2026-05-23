@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/member/dashboard/DashboardHeader";
 import DashboardSidebar from "@/components/member/dashboard/DashboardSidebar";
 import DashboardFooter from "@/components/member/dashboard/DashboardFooter";
+import { getCurrentAccount, type Account } from "@/services/accounts";
 
 interface MemberLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,32 @@ interface MemberLayoutProps {
 
 export default function MemberLayout({ children }: MemberLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [account, setAccount] = useState<Account | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const data = await getCurrentAccount();
+        if (data) {
+          setAccount(data);
+        }
+      } catch (err) {
+        console.error("Failed to load layout user info", err);
+      }
+    }
+    loadUser();
+  }, []);
+
+  const ROLE_MAP: Record<number, string> = {
+    1: "Quản trị viên",
+    2: "Tình nguyện viên",
+    3: "Giáo viên",
+    4: "Nhà tài trợ",
+  };
+
+  const userProp = account
+    ? { name: account.username, role: ROLE_MAP[account.role_id] || "Người dùng" }
+    : { name: "Admin", role: "Quản trị viên" };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -19,7 +46,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
         pageTitle="Dashboard Overview"
         mobileMenuOpen={mobileMenuOpen}
         onMobileMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
-        user={{ name: "Admin", role: "Quản trị viên" }}
+        user={userProp}
       />
 
       {/* Sidebar — fixed, starts below header */}
