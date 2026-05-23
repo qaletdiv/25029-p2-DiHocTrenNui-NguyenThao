@@ -1,12 +1,12 @@
 const validateSponsor = (data, isUpdate = false) => {
   const errors = [];
-  const { name, contact_info, status_id, volunteer_id } = data;
+  const { account_id, full_name, phone, gender } = data;
 
   if (!isUpdate) {
-    if (!name) errors.push('Name is required');
-    if (!contact_info) errors.push('Contact info is required');
-    if (!status_id) errors.push('Status ID is required');
-    if (!volunteer_id) errors.push('Volunteer ID is required');
+    if (!account_id) errors.push('Account ID is required');
+    if (!full_name) errors.push('Full name is required');
+    if (!phone) errors.push('Phone is required');
+    if (!gender) errors.push('Gender is required');
   }
 
   return {

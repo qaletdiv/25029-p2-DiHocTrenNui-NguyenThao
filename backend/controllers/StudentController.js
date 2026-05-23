@@ -33,13 +33,13 @@ class StudentController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const { full_name, address_id, date_of_birth } = parsedBody;
-      const existingStudent = await StudentModel.findByNameAndInfo(full_name, address_id, date_of_birth);
+      const { full_name, address, date_of_birth } = parsedBody;
+      const existingStudent = await StudentModel.findByNameAndInfo(full_name, address, date_of_birth);
       if (existingStudent) {
         return sendError(res, 'Student already exists', [], 400);
       }
 
-      const newId = await StudentModel.generateNextId(address_id);
+      const newId = await StudentModel.generateNextId();
       const newStudent = await StudentModel.create({
         id: newId,
         ...parsedBody,

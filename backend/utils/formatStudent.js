@@ -1,27 +1,8 @@
-const addresses = require('../data/addresses');
-const wards = require('../data/wards');
-const provinces = require('../data/provinces');
 const schools = require('../data/schools');
 const studentStatuses = require('../data/student_statuses');
 const accounts = require('../data/accounts');
 
 // Pre-compute lookup maps for O(1) access time
-const provinceMap = new Map(provinces.map(p => [p.id, p.name]));
-const wardMap = new Map(wards.map(w => [w.id, { name: w.name, province_id: w.province_id }]));
-
-const addressMap = new Map(addresses.map(a => {
-  const ward = wardMap.get(a.ward_id) || {};
-  const provinceName = provinceMap.get(ward.province_id) || '';
-  const wardName = ward.name || '';
-  
-  // Construct full string: [address_line], [ward name], [province name]
-  const fullAddress = [a.address_line, wardName, provinceName]
-    .filter(Boolean)
-    .join(', ');
-    
-  return [a.id, fullAddress];
-}));
-
 const schoolMap = new Map(schools.map(s => [s.id, s.name]));
 const statusMap = new Map(studentStatuses.map(s => [s.id, s.code]));
 const accountMap = new Map(accounts.map(a => [a.id, a.username]));
@@ -33,7 +14,6 @@ const formatStudentResponse = (rawStudent) => {
   if (!rawStudent) return rawStudent;
   
   const {
-    address_id,
     school_id,
     status_id,
     created_by,
@@ -42,7 +22,6 @@ const formatStudentResponse = (rawStudent) => {
 
   return {
     ...restOfStudentData,
-    address: addressMap.get(address_id) || null,
     school: schoolMap.get(school_id) || null,
     status: statusMap.get(status_id) || null,
     creator: accountMap.get(created_by) || null,
@@ -58,7 +37,6 @@ const parseStudentRequest = (receivedStudent) => {
   if (!receivedStudent) return receivedStudent;
 
   const {
-    address,
     school,
     status,
     creator,
@@ -70,24 +48,6 @@ const parseStudentRequest = (receivedStudent) => {
   const originalStudent = {
     ...restOfStudentData,
   };
-
-  // 1. Resolve address_id from address text if not present or if text is provided
-  if (address !== undefined) {
-    if (address === null || address === '') {
-      originalStudent.address_id = null;
-    } else {
-      let foundAddressId = null;
-      for (const [id, fullAddr] of addressMap.entries()) {
-        if (fullAddr === address) {
-          foundAddressId = id;
-          break;
-        }
-      }
-      if (foundAddressId !== null) {
-        originalStudent.address_id = foundAddressId;
-      }
-    }
-  }
 
   // 2. Resolve school_id from school name
   if (school !== undefined) {
@@ -154,4 +114,3 @@ const parseStudentRequest = (receivedStudent) => {
 };
 
 module.exports = { formatStudentResponse, parseStudentRequest };
-

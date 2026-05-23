@@ -1,11 +1,11 @@
 const students = [
   {
-    "id": "DH92.001",
+    "id": "HS0001",
     "full_name": "Huỳnh Hữu Khoa",
     "date_of_birth": "2011-11-25",
     "gender": "Nữ",
     "phone": "0428220623",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 1,
     "grade": "9",
     "family_condition": "Khó khăn",
@@ -19,12 +19,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH74.001",
+    "id": "HS0002",
     "full_name": "Phạm Hải Bình",
     "date_of_birth": "2013-01-22",
     "gender": "Nam",
     "phone": "0249493060",
-    "address_id": 3,
+    "address": "Xóm 1, Xã Ia Băng, Huyện Chư Prông, Quảng Trị",
     "school_id": 1,
     "grade": "10",
     "family_condition": "Khó khăn",
@@ -38,12 +38,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH43.001",
+    "id": "HS0003",
     "full_name": "Dương Minh Sơn",
     "date_of_birth": "2005-04-17",
     "gender": "Nam",
     "phone": "0181687814",
-    "address_id": 5,
+    "address": "Thôn Lùng Cát, Xã Cán Chu Phìn, Huyện Mèo Vạc, Đà Nẵng",
     "school_id": 1,
     "grade": "8",
     "family_condition": "Khó khăn",
@@ -57,12 +57,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.002",
+    "id": "HS0004",
     "full_name": "Đỗ Hữu Phong",
     "date_of_birth": "2014-10-15",
     "gender": "Nam",
     "phone": "0306914728",
-    "address_id": 6,
+    "address": "Bản Na Tông, Xã Nùng Nàng, Huyện Điện Biên, Quảng Nam",
     "school_id": 1,
     "grade": "3",
     "family_condition": "Khó khăn",
@@ -76,12 +76,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.003",
+    "id": "HS0005",
     "full_name": "Đỗ Đức Lan",
     "date_of_birth": "2014-11-29",
     "gender": "Nữ",
     "phone": "0446782558",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 1,
     "grade": "1",
     "family_condition": "Khó khăn",
@@ -95,12 +95,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH76.001",
+    "id": "HS0006",
     "full_name": "Nguyễn Xuân Dũng",
     "date_of_birth": "2013-03-26",
     "gender": "Nam",
     "phone": "0484371295",
-    "address_id": 2,
+    "address": "Thôn 3, Xã Trà Mai, Huyện Nam Trà My, Quảng Ngãi",
     "school_id": 1,
     "grade": "12",
     "family_condition": "Khó khăn",
@@ -114,12 +114,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.004",
+    "id": "HS0007",
     "full_name": "Huỳnh Đức Dũng",
     "date_of_birth": "2008-02-18",
     "gender": "Nữ",
     "phone": "0175160013",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 2,
     "grade": "12",
     "family_condition": "Khó khăn",
@@ -133,12 +133,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.005",
+    "id": "HS0008",
     "full_name": "Phan Đức Tuấn",
     "date_of_birth": "2011-03-14",
     "gender": "Nữ",
     "phone": "0821582074",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 2,
     "grade": "5",
     "family_condition": "Khó khăn",
@@ -152,12 +152,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.006",
+    "id": "HS0009",
     "full_name": "Bùi Xuân Dũng",
     "date_of_birth": "2014-03-03",
     "gender": "Nữ",
     "phone": "0405582129",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 2,
     "grade": "9",
     "family_condition": "Khó khăn",
@@ -171,12 +171,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.007",
+    "id": "HS0010",
     "full_name": "Lê Đức Vinh",
     "date_of_birth": "2005-02-18",
     "gender": "Nam",
     "phone": "0444697929",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 2,
     "grade": "8",
     "family_condition": "Khó khăn",
@@ -190,12 +190,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.008",
+    "id": "HS0011",
     "full_name": "Phạm Đức Quang",
     "date_of_birth": "2011-11-03",
     "gender": "Nữ",
     "phone": "0290767928",
-    "address_id": 4,
+    "address": "Bản Pa Vệ Sủ, Xã Pa Vệ Sủ, Huyện Mường Tè, Quảng Nam",
     "school_id": 2,
     "grade": "7",
     "family_condition": "Khó khăn",
@@ -209,12 +209,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.009",
+    "id": "HS0012",
     "full_name": "Lý Thu Bình",
     "date_of_birth": "2005-12-30",
     "gender": "Nữ",
     "phone": "0260930727",
-    "address_id": 4,
+    "address": "Bản Pa Vệ Sủ, Xã Pa Vệ Sủ, Huyện Mường Tè, Quảng Nam",
     "school_id": 2,
     "grade": "12",
     "family_condition": "Khó khăn",
@@ -228,12 +228,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.010",
+    "id": "HS0013",
     "full_name": "Đỗ Đức Phong",
     "date_of_birth": "2009-06-20",
     "gender": "Nữ",
     "phone": "0995815807",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 3,
     "grade": "4",
     "family_condition": "Khó khăn",
@@ -247,12 +247,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH76.002",
+    "id": "HS0014",
     "full_name": "Bùi Đình Quang",
     "date_of_birth": "2014-08-20",
     "gender": "Nam",
     "phone": "0568541951",
-    "address_id": 2,
+    "address": "Thôn 3, Xã Trà Mai, Huyện Nam Trà My, Quảng Ngãi",
     "school_id": 3,
     "grade": "11",
     "family_condition": "Khó khăn",
@@ -266,12 +266,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH76.003",
+    "id": "HS0015",
     "full_name": "Bùi Minh Tuấn",
     "date_of_birth": "2013-01-26",
     "gender": "Nam",
     "phone": "0553999375",
-    "address_id": 2,
+    "address": "Thôn 3, Xã Trà Mai, Huyện Nam Trà My, Quảng Ngãi",
     "school_id": 3,
     "grade": "1",
     "family_condition": "Khó khăn",
@@ -285,12 +285,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.011",
+    "id": "HS0016",
     "full_name": "Hồ Hữu An",
     "date_of_birth": "2009-01-26",
     "gender": "Nam",
     "phone": "0459075861",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 3,
     "grade": "12",
     "family_condition": "Khó khăn",
@@ -304,12 +304,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.012",
+    "id": "HS0017",
     "full_name": "Lê Hữu Tuấn",
     "date_of_birth": "2014-12-04",
     "gender": "Nam",
     "phone": "0257633643",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 3,
     "grade": "4",
     "family_condition": "Khó khăn",
@@ -323,12 +323,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.013",
+    "id": "HS0018",
     "full_name": "Lê Minh Dũng",
     "date_of_birth": "2006-08-10",
     "gender": "Nữ",
     "phone": "0727982549",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 3,
     "grade": "7",
     "family_condition": "Khó khăn",
@@ -342,12 +342,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.014",
+    "id": "HS0019",
     "full_name": "Lý Hữu Giang",
     "date_of_birth": "2009-09-28",
     "gender": "Nam",
     "phone": "0399035786",
-    "address_id": 6,
+    "address": "Bản Na Tông, Xã Nùng Nàng, Huyện Điện Biên, Quảng Nam",
     "school_id": 4,
     "grade": "6",
     "family_condition": "Khó khăn",
@@ -361,12 +361,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH76.004",
+    "id": "HS0020",
     "full_name": "Trần Xuân Vinh",
     "date_of_birth": "2014-05-13",
     "gender": "Nam",
     "phone": "0996098008",
-    "address_id": 2,
+    "address": "Thôn 3, Xã Trà Mai, Huyện Nam Trà My, Quảng Ngãi",
     "school_id": 4,
     "grade": "9",
     "family_condition": "Khó khăn",
@@ -380,12 +380,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH43.002",
+    "id": "HS0021",
     "full_name": "Hoàng Thu Hải",
     "date_of_birth": "2008-06-10",
     "gender": "Nữ",
     "phone": "0442387446",
-    "address_id": 5,
+    "address": "Thôn Lùng Cát, Xã Cán Chu Phìn, Huyện Mèo Vạc, Đà Nẵng",
     "school_id": 4,
     "grade": "11",
     "family_condition": "Khó khăn",
@@ -399,12 +399,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.015",
+    "id": "HS0022",
     "full_name": "Lê Thị Hà",
     "date_of_birth": "2014-12-24",
     "gender": "Nữ",
     "phone": "0446183350",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 4,
     "grade": "10",
     "family_condition": "Khó khăn",
@@ -418,12 +418,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH74.002",
+    "id": "HS0023",
     "full_name": "Đặng Đình Oanh",
     "date_of_birth": "2011-02-01",
     "gender": "Nữ",
     "phone": "0986357801",
-    "address_id": 3,
+    "address": "Xóm 1, Xã Ia Băng, Huyện Chư Prông, Quảng Trị",
     "school_id": 4,
     "grade": "5",
     "family_condition": "Khó khăn",
@@ -437,12 +437,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.016",
+    "id": "HS0024",
     "full_name": "Hoàng Văn Giang",
     "date_of_birth": "2010-02-19",
     "gender": "Nữ",
     "phone": "0559415550",
-    "address_id": 6,
+    "address": "Bản Na Tông, Xã Nùng Nàng, Huyện Điện Biên, Quảng Nam",
     "school_id": 4,
     "grade": "10",
     "family_condition": "Khó khăn",
@@ -456,12 +456,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH43.003",
+    "id": "HS0025",
     "full_name": "Lê Thu Phong",
     "date_of_birth": "2011-05-27",
     "gender": "Nam",
     "phone": "0758686047",
-    "address_id": 5,
+    "address": "Thôn Lùng Cát, Xã Cán Chu Phìn, Huyện Mèo Vạc, Đà Nẵng",
     "school_id": 5,
     "grade": "1",
     "family_condition": "Khó khăn",
@@ -475,12 +475,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.017",
+    "id": "HS0026",
     "full_name": "Hồ Văn Bình",
     "date_of_birth": "2006-09-26",
     "gender": "Nam",
     "phone": "0427712259",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 5,
     "grade": "7",
     "family_condition": "Khó khăn",
@@ -494,12 +494,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.018",
+    "id": "HS0027",
     "full_name": "Ngô Hải Yến",
     "date_of_birth": "2007-06-11",
     "gender": "Nam",
     "phone": "0782871962",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 5,
     "grade": "12",
     "family_condition": "Khó khăn",
@@ -513,12 +513,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.019",
+    "id": "HS0028",
     "full_name": "Phan Thị Trang",
     "date_of_birth": "2009-08-18",
     "gender": "Nam",
     "phone": "0514432035",
-    "address_id": 6,
+    "address": "Bản Na Tông, Xã Nùng Nàng, Huyện Điện Biên, Quảng Nam",
     "school_id": 5,
     "grade": "11",
     "family_condition": "Khó khăn",
@@ -532,12 +532,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH43.004",
+    "id": "HS0029",
     "full_name": "Đỗ Xuân Mai",
     "date_of_birth": "2005-08-31",
     "gender": "Nữ",
     "phone": "0530344026",
-    "address_id": 5,
+    "address": "Thôn Lùng Cát, Xã Cán Chu Phìn, Huyện Mèo Vạc, Đà Nẵng",
     "school_id": 5,
     "grade": "11",
     "family_condition": "Khó khăn",
@@ -551,12 +551,12 @@ const students = [
     "updated_at": "2026-05-17T15:52:31.706Z"
   },
   {
-    "id": "DH92.020",
+    "id": "HS0030",
     "full_name": "Trần Thị Dũng",
     "date_of_birth": "2010-08-14",
     "gender": "Nam",
     "phone": "0717285829",
-    "address_id": 1,
+    "address": "Bản Nà Lốc, Xã Nùng Nàng, Huyện Tam Đường, Quảng Nam",
     "school_id": 5,
     "grade": "9",
     "family_condition": "Khó khăn",
