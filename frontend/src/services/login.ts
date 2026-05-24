@@ -33,3 +33,9 @@ export async function loginAction(preState: any, formData: FormData) {
     console.log("Login successful: Token saved to cookie");
     redirect("/dashboard");
 }
+
+export async function logoutAction() {
+    const cookieStore = await cookies();
+    cookieStore.delete("accessToken");
+    redirect("/login");
+}

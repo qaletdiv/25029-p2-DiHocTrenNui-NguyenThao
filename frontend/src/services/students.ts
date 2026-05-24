@@ -53,6 +53,9 @@ export interface UpdateStudentPayload {
     address?: string;
     school?: string;
     status?: string;
+    sponsor_id?: number | null;
+    teacher_id?: number | null;
+    volunteer_id?: number | null;
 }
 
 export interface ApiResponse<T> {

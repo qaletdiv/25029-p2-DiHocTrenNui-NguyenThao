@@ -3,7 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, Bell, ChevronDown } from "lucide-react";
+import { Menu, X, Bell, ChevronDown, LogOut } from "lucide-react";
+import { logoutAction } from "@/services/login";
 
 interface DashboardHeaderProps {
   pageTitle: string;
@@ -118,6 +119,17 @@ export default function DashboardHeader({
             className="hidden sm:block text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180"
           />
         </Link>
+
+        {/* Logout button */}
+        <button
+          id="logout-btn"
+          onClick={() => logoutAction()}
+          className="flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+          title="Đăng xuất"
+          aria-label="Đăng xuất"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     </header>
   );

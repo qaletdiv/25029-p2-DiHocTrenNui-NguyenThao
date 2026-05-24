@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -22,9 +22,9 @@ import { Student, updateStudent, UpdateStudentPayload } from "@/services/student
 import { fmtAmount, fmtDate, fmtDateTime, calcAge } from "@/hooks/convertData";
 import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
 import { School } from "@/services/schools";
-import { Sponsor } from "@/services/sponsors";
-import { Teacher } from "@/services/teachers";
-import { Volunteer } from "@/services/volunteers";
+import { Sponsor, getAllSponsors, PaginatedSponsors } from "@/services/sponsors";
+import { Teacher, getAllTeachers, PaginatedTeachers } from "@/services/teachers";
+import { Volunteer, getAllVolunteers, PaginatedVolunteers } from "@/services/volunteers";
 
 
 function getInitials(name: string) {
@@ -122,9 +122,17 @@ interface FormState {
   address: string;
   school: string;
   status: string;
+  sponsor_id: string;
+  teacher_id: string;
+  volunteer_id: string;
 }
 
-function toForm(student: Student): FormState {
+function toForm(
+  student: Student,
+  sponsorDetail?: Sponsor | null,
+  teacherDetail?: Teacher | null,
+  volunteerDetail?: Volunteer | null
+): FormState {
   return {
     full_name: student.full_name || "",
     date_of_birth: student.date_of_birth ? student.date_of_birth.substring(0, 10) : "",
@@ -137,6 +145,9 @@ function toForm(student: Student): FormState {
     address: student.address || "",
     school: student.school || "",
     status: student.status || "INFO",
+    sponsor_id: sponsorDetail ? String(sponsorDetail.id) : "",
+    teacher_id: teacherDetail ? String(teacherDetail.id) : "",
+    volunteer_id: volunteerDetail ? String(volunteerDetail.id) : "",
   };
 }
 
@@ -164,8 +175,52 @@ export default function StudentDetailClient({
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [form, setForm] = useState<FormState>(toForm(student));
+  const [form, setForm] = useState<FormState>(toForm(student, sponsorDetail, teacherDetail, volunteerDetail));
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Dropdown options states
+  const [sponsorsOptions, setSponsorsOptions] = useState<Sponsor[]>([]);
+  const [teachersOptions, setTeachersOptions] = useState<Teacher[]>([]);
+  const [volunteersOptions, setVolunteersOptions] = useState<Volunteer[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [optionsError, setOptionsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadOptions() {
+      setOptionsLoading(true);
+      setOptionsError(null);
+      try {
+        const [sponsorsRes, teachersRes, volunteersRes] = await Promise.all([
+          getAllSponsors(),
+          getAllTeachers(),
+          getAllVolunteers(),
+        ]);
+
+        const sponsorsList = Array.isArray(sponsorsRes.data)
+          ? sponsorsRes.data
+          : (sponsorsRes.data as PaginatedSponsors).sponsors || [];
+
+        const teachersList = Array.isArray(teachersRes.data)
+          ? teachersRes.data
+          : (teachersRes.data as PaginatedTeachers).teachers || [];
+
+        const volunteersList = Array.isArray(volunteersRes.data)
+          ? volunteersRes.data
+          : (volunteersRes.data as PaginatedVolunteers).volunteers || [];
+
+        setSponsorsOptions(sponsorsList);
+        setTeachersOptions(teachersList);
+        setVolunteersOptions(volunteersList);
+      } catch (err: any) {
+        console.error("Failed to load select options", err);
+        setOptionsError("Không thể tải danh sách lựa chọn liên quan.");
+      } finally {
+        setOptionsLoading(false);
+      }
+    }
+
+    loadOptions();
+  }, []);
 
   const set = (field: keyof FormState, val: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: val }));
@@ -186,6 +241,9 @@ export default function StudentDetailClient({
         address: form.address,
         school: form.school,
         status: form.status,
+        sponsor_id: form.sponsor_id ? Number(form.sponsor_id) : null,
+        teacher_id: form.teacher_id ? Number(form.teacher_id) : null,
+        volunteer_id: form.volunteer_id ? Number(form.volunteer_id) : null,
       };
       await updateStudent(student.id, payload);
       setIsEditing(false);
@@ -199,7 +257,7 @@ export default function StudentDetailClient({
   }
 
   function handleCancel() {
-    setForm(toForm(student));
+    setForm(toForm(student, sponsorDetail, teacherDetail, volunteerDetail));
     setSaveError(null);
     setIsEditing(false);
   }
@@ -487,6 +545,87 @@ export default function StudentDetailClient({
                   onChange={(v) => set("monthly_amount", v)}
                   placeholder="500000"
                 />
+              }
+            />
+            <InfoRow
+              label="Nhà tài trợ"
+              isEditing={isEditing}
+              value={sponsorsOptions.find(s => String(s.id) === form.sponsor_id)?.full_name || sponsorDetail?.full_name || "—"}
+              editNode={
+                optionsLoading ? (
+                  <span className="text-xs text-gray-500">Đang tải...</span>
+                ) : optionsError ? (
+                  <span className="text-xs text-red-500">{optionsError}</span>
+                ) : (
+                  <select
+                    value={form.sponsor_id}
+                    onChange={(e) => set("sponsor_id", e.target.value)}
+                    className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
+                  >
+                    <option value="">Không có / Chọn...</option>
+                    {sponsorsOptions
+                      .filter((s) => s.is_active || String(s.id) === form.sponsor_id)
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.full_name}
+                        </option>
+                      ))}
+                  </select>
+                )
+              }
+            />
+            <InfoRow
+              label="Giáo viên"
+              isEditing={isEditing}
+              value={teachersOptions.find(t => String(t.id) === form.teacher_id)?.full_name || teacherDetail?.full_name || "—"}
+              editNode={
+                optionsLoading ? (
+                  <span className="text-xs text-gray-500">Đang tải...</span>
+                ) : optionsError ? (
+                  <span className="text-xs text-red-500">{optionsError}</span>
+                ) : (
+                  <select
+                    value={form.teacher_id}
+                    onChange={(e) => set("teacher_id", e.target.value)}
+                    className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
+                  >
+                    <option value="">Không có / Chọn...</option>
+                    {teachersOptions
+                      .filter((t) => t.is_active || String(t.id) === form.teacher_id)
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.full_name}
+                        </option>
+                      ))}
+                  </select>
+                )
+              }
+            />
+            <InfoRow
+              label="Tình nguyện viên"
+              isEditing={isEditing}
+              value={volunteersOptions.find(v => String(v.id) === form.volunteer_id)?.full_name || volunteerDetail?.full_name || "—"}
+              editNode={
+                optionsLoading ? (
+                  <span className="text-xs text-gray-500">Đang tải...</span>
+                ) : optionsError ? (
+                  <span className="text-xs text-red-500">{optionsError}</span>
+                ) : (
+                  <select
+                    value={form.volunteer_id}
+                    onChange={(e) => set("volunteer_id", e.target.value)}
+                    className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
+                  >
+                    <option value="">Không có / Chọn...</option>
+                    {volunteersOptions
+                      .filter((v) => v.is_active || String(v.id) === form.volunteer_id)
+                      .map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.full_name}
+                        </option>
+                      ))}
+                  </select>
+                )
               }
             />
             <InfoRow
