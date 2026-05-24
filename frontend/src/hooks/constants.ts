@@ -28,4 +28,8 @@ export const STUDENT_STATUS_TRANSLATIONS = {
     [STUDENT_STATUS.GRADUATED]: 'Đã tốt nghiệp',
 };
 
-
+export const DISBURSEMENT_STATUS_TRANSLATIONS: Record<string, string> = {
+    [DISBURSEMENT_STATUS.HOLDING]: 'Đang giữ',
+    [DISBURSEMENT_STATUS.SENT_TO_TEACHER]: 'Đã gửi giáo viên',
+    [DISBURSEMENT_STATUS.DELIVERED_TO_STUDENT]: 'Đã giao học sinh',
+};

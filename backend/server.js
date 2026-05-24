@@ -23,6 +23,7 @@ const bankTransactionRoutes = require('./routes/bankTransactionRoutes');
 const imageRoutes = require('./routes/imageRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
+const disbursementRoutes = require('./routes/disbursementRoutes');
 
 
 // Public Routes
@@ -37,6 +38,7 @@ app.use('/bank-transactions', authenticate, bankTransactionRoutes);
 app.use('/images', authenticate, imageRoutes);
 app.use('/teachers', authenticate, teacherRoutes);
 app.use('/volunteers', authenticate, volunteerRoutes);
+app.use('/disbursements', authenticate, disbursementRoutes);
 
 
 // Home Route
