@@ -22,6 +22,7 @@ export interface CreateImagePayload {
     timestamp: string;
     metadata?: Record<string, unknown>;
     event_id?: string;
+    fileData?: string;
 }
 
 export interface UpdateImagePayload {
@@ -30,6 +31,7 @@ export interface UpdateImagePayload {
     timestamp?: string;
     metadata?: Record<string, unknown>;
     event_id?: string;
+    fileData?: string;
 }
 
 export interface ImageRangeParams {

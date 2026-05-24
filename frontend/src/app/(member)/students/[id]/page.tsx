@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { getStudentById } from "@/services/students";
+import { getAllSchools } from "@/services/schools";
 import StudentDetailClient from "../_components/StudentDetailClient";
 
 // ─────────────────────────────────────────────
@@ -14,12 +15,19 @@ export default async function StudentDetailPage({
   const { id } = await params;
 
   let student;
+  let schools: any[] = [];
   try {
-    const response = await getStudentById(id);
-    student = response.data;
+    const [studentResponse, schoolsResponse] = await Promise.all([
+      getStudentById(id),
+      getAllSchools(),
+    ]);
+    student = studentResponse.data;
+    schools = schoolsResponse.data?.schools || [];
   } catch {
-    // getStudentById throws on non-2xx (e.g. 404 from the backend)
-    notFound();
+    // If getting student fails, navigate to 404
+    if (!student) {
+      notFound();
+    }
   }
 
   if (!student) {
@@ -45,6 +53,7 @@ export default async function StudentDetailPage({
       sponsorDetail={sponsor as any}
       teacherDetail={teacher as any}
       volunteerDetail={volunteer as any}
+      schools={schools}
     />
   );
 }

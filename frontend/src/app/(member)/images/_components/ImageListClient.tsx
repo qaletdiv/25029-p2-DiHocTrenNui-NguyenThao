@@ -15,7 +15,8 @@ import {
   X, 
   Image as ImageIcon,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Upload
 } from "lucide-react";
 import Image from "next/image";
 import ListToolbar from "@/components/member/common/ListToolbar";
@@ -35,14 +36,29 @@ import { Student } from "@/services/students";
 // ─────────────────────────────────────────────
 const PAGE_SIZE_OPTIONS = [8, 16, 24];
 
-const PRESET_URLS = [
-  { label: "Món quà hỗ trợ 1", value: "/static/image/ho-tro/gifts-1.jpg" },
-  { label: "Món quà hỗ trợ 2", value: "/static/image/ho-tro/gifts-2.jpg" },
-  { label: "Món quà hỗ trợ 3", value: "/static/image/ho-tro/gifts-3.jpg" },
-  { label: "Món quà hỗ trợ 4", value: "/static/image/ho-tro/gifts-4.jpg" },
-  { label: "Món quà hỗ trợ 5", value: "/static/image/ho-tro/gifts-5.jpg" },
-  { label: "Món quà hỗ trợ 6", value: "/static/image/ho-tro/gifts-6.jpg" },
-];
+
+
+// ─────────────────────────────────────────────────────────────
+// Safe Image Component (with local placeholder error fallback)
+// ─────────────────────────────────────────────────────────────
+function SafeImage({ src, alt, fallbackSrc = "/images/default-avatar.jpg", ...props }: any) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
+
+  return (
+    <Image
+      {...props}
+      src={imgSrc}
+      alt={alt}
+      onError={() => {
+        setImgSrc(fallbackSrc);
+      }}
+    />
+  );
+}
 
 interface Props {
   initialImages: ImageType[];
@@ -50,6 +66,7 @@ interface Props {
   total: number;
   initialPage: number;
   initialPageSize: number;
+  token: string;
 }
 
 export default function ImageListClient({ 
@@ -57,7 +74,8 @@ export default function ImageListClient({
   students, 
   total: serverTotal, 
   initialPage, 
-  initialPageSize 
+  initialPageSize,
+  token
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -83,11 +101,51 @@ export default function ImageListClient({
   // Modal Form Inputs
   const [formStudentId, setFormStudentId] = useState("");
   const [formUrl, setFormUrl] = useState("");
+  const [formFileData, setFormFileData] = useState("");
   const [formTimestamp, setFormTimestamp] = useState("");
   const [formEventId, setFormEventId] = useState("");
   const [formMonth, setFormMonth] = useState("");
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // ─── Proxy URL Helpers ───────────────────────────────────────────────────────
+  const getProxiedUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      if (url.includes("/images/proxy/")) {
+        try {
+          const urlObj = new URL(url);
+          if (!urlObj.searchParams.has("token") && token) {
+            urlObj.searchParams.set("token", token);
+          }
+          return urlObj.toString();
+        } catch {
+          return url;
+        }
+      }
+      return url;
+    }
+
+    // Extract filename from relative path
+    let filename = url;
+    if (filename.includes("/")) {
+      filename = filename.split("/").pop() || "";
+    }
+    
+    const tokenParam = token ? `?token=${token}` : "";
+    return `http://localhost:5001/images/proxy/${filename}${tokenParam}`;
+  };
+
+  const sanitizeUrlForDatabase = (url: string) => {
+    if (!url) return "";
+    if (url.includes("/images/proxy/")) {
+      const parts = url.split("/images/proxy/");
+      const filenameWithQuery = parts[1];
+      const filename = filenameWithQuery.split("?")[0];
+      return filename;
+    }
+    return url;
+  };
 
   // Keep student name mapping for quick display lookup
   const studentMap = useMemo(() => {
@@ -204,7 +262,8 @@ export default function ImageListClient({
     setModalMode("create");
     setEditingImage(null);
     setFormStudentId(students[0]?.id || "");
-    setFormUrl("/static/image/ho-tro/gifts-1.jpg");
+    setFormUrl("");
+    setFormFileData("");
     setFormTimestamp(new Date().toISOString().substring(0, 10));
     setFormEventId("EVT_" + new Date().toISOString().substring(5, 7) + "_" + new Date().getFullYear());
     setFormMonth(new Date().toISOString().substring(5, 7) + "/" + new Date().getFullYear());
@@ -217,11 +276,28 @@ export default function ImageListClient({
     setEditingImage(img);
     setFormStudentId(String(img.student_id));
     setFormUrl(img.url);
+    setFormFileData("");
     setFormTimestamp(img.timestamp ? img.timestamp.substring(0, 10) : new Date().toISOString().substring(0, 10));
     setFormEventId(String(img.event_id || ""));
     setFormMonth(String(img.metadata?.month || ""));
     setFormError("");
     setIsModalOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Set filename in formUrl text input
+    setFormUrl(file.name);
+
+    // Read file as base64
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Data = event.target?.result as string;
+      setFormFileData(base64Data);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleModalSubmit = async (e: React.FormEvent) => {
@@ -238,12 +314,13 @@ export default function ImageListClient({
     try {
       const payload = {
         student_id: formStudentId as any,
-        url: formUrl,
+        url: sanitizeUrlForDatabase(formUrl),
         timestamp: new Date(formTimestamp).toISOString(),
         metadata: {
           month: formMonth
         },
-        event_id: formEventId || undefined
+        event_id: formEventId || undefined,
+        fileData: formFileData || undefined
       };
 
       if (modalMode === "create") {
@@ -253,6 +330,7 @@ export default function ImageListClient({
       }
 
       setIsModalOpen(false);
+      setFormFileData("");
       router.refresh();
       
       // If we are in custom filtering, reload that filter, else let the prop update
@@ -398,7 +476,7 @@ export default function ImageListClient({
               >
                 {/* Image Box */}
                 <div className="relative w-full aspect-[4/3] bg-gray-50 border-b border-gray-100 overflow-hidden">
-                  <Image
+                  <SafeImage
                     src={img.url}
                     alt={`Ảnh HS: ${studentName}`}
                     fill
@@ -614,6 +692,28 @@ export default function ImageListClient({
                 </select>
               </div>
 
+              {/* Form Input: Local Image Upload Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Chọn tệp hình ảnh *</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-4 py-2 border border-primary-900 border-dashed rounded-xl cursor-pointer hover:bg-primary-900/5 text-primary-900 text-xs font-bold transition-all">
+                    <Upload size={14} />
+                    <span>Chọn tệp từ máy tính</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {formUrl && (
+                    <span className="text-xs text-gray-500 truncate max-w-[200px]" title={formUrl}>
+                      {formUrl}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               {/* Form Input: Image URL */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Đường dẫn hình ảnh (URL) *</label>
@@ -621,40 +721,22 @@ export default function ImageListClient({
                   type="text"
                   required
                   value={formUrl}
-                  onChange={(e) => setFormUrl(e.target.value)}
+                  onChange={(e) => {
+                    setFormUrl(e.target.value);
+                    setFormFileData("");
+                  }}
                   placeholder="https://example.com/image.jpg"
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
                 />
-                
-                {/* Preset Options for Easy Mock Usage */}
-                <div className="pt-1">
-                  <span className="text-[10px] text-gray-400 font-medium block mb-1">Mẫu ảnh mặc định:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRESET_URLS.map((preset) => (
-                      <button
-                        key={preset.value}
-                        type="button"
-                        onClick={() => setFormUrl(preset.value)}
-                        className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
-                          formUrl === preset.value
-                            ? "bg-primary-900 border-primary-950 text-white"
-                            : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
 
               {/* Image Preview Box */}
-              {formUrl && (formUrl.startsWith("http") || formUrl.startsWith("/")) && (
+              {(formUrl || formFileData) && (
                 <div className="space-y-1 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                   <span className="text-[10px] text-gray-400 font-medium block">Xem trước ảnh:</span>
                   <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 bg-white">
-                    <Image
-                      src={formUrl}
+                    <SafeImage
+                      src={formFileData || getProxiedUrl(formUrl)}
                       alt="Xem trước hình ảnh"
                       fill
                       className="object-cover"

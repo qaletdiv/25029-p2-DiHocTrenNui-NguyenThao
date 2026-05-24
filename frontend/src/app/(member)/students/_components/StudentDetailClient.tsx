@@ -149,6 +149,7 @@ interface Props {
   sponsorDetail?: Sponsor | null;
   teacherDetail?: Teacher | null;
   volunteerDetail?: Volunteer | null;
+  schools?: School[];
 }
 
 export default function StudentDetailClient({
@@ -157,6 +158,7 @@ export default function StudentDetailClient({
   sponsorDetail,
   teacherDetail,
   volunteerDetail,
+  schools = [],
 }: Props) {
   const router = useRouter();
 
@@ -445,7 +447,20 @@ export default function StudentDetailClient({
               isEditing={isEditing}
               value={form.school || "—"}
               editNode={
-                <EditInput value={form.school} onChange={(v) => set("school", v)} />
+                <select
+                  value={form.school}
+                  onChange={(e) => set("school", e.target.value)}
+                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
+                >
+                  <option value="">Không (hoặc Trường khác / Trường mới)</option>
+                  {schools
+                    .filter((school) => school.is_active)
+                    .map((school) => (
+                      <option key={school.id} value={school.name}>
+                        {school.name}
+                      </option>
+                    ))}
+                </select>
               }
             />
             <InfoRow

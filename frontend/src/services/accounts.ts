@@ -35,6 +35,13 @@ export interface ApiResponse<T> {
     data: T;
 }
 
+export interface PaginatedAccounts {
+    accounts: Account[];
+    total: number;
+    page: number;
+    pageSize: number;
+}
+
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
 async function getAuthHeaders(): Promise<HeadersInit> {
@@ -52,10 +59,14 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * GET /accounts
  * Fetch all accounts.
  */
-export async function getAllAccounts(): Promise<ApiResponse<Account[]>> {
+export async function getAllAccounts(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedAccounts | Account[]>> {
     try {
         const headers = await getAuthHeaders();
-        const res = await fetch(`${BASE_URL}/accounts`, {
+        let url = `${BASE_URL}/accounts`;
+        if (page !== undefined && pageSize !== undefined) {
+            url += `?page=${page}&pageSize=${pageSize}`;
+        }
+        const res = await fetch(url, {
             method: "GET",
             headers,
         });
@@ -201,4 +212,31 @@ export async function getCurrentAccount(): Promise<Account | null> {
         return null;
     }
 }
+
+export interface FormState {
+    success: boolean;
+    message: string;
+    errors?: Record<string, string[]>;
+}
+
+export async function createAccountAction(
+    prevState: FormState,
+    formData: FormData
+): Promise<FormState> {
+    try {
+        const payload: CreateAccountPayload = {
+            username: formData.get("username") as string,
+            email: formData.get("email") as string,
+            password: formData.get("password") as string,
+            role_id: Number(formData.get("role_id")),
+        };
+
+        await createAccount(payload);
+        return { success: true, message: "Tài khoản đã được tạo thành công" };
+    } catch (error: any) {
+        console.error("[createAccountAction]", error);
+        return { success: false, message: error.message || "Đã xảy ra lỗi khi tạo tài khoản." };
+    }
+}
+
 

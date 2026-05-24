@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, X } from "lucide-react";
 import { createStudentAction } from "@/services/students";
 import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
+import { School } from "@/services/schools";
 
 
 function SubmitButton() {
@@ -21,7 +22,11 @@ function SubmitButton() {
   );
 }
 
-export default function StudentCreateClient() {
+interface StudentCreateClientProps {
+  schools: School[];
+}
+
+export default function StudentCreateClient({ schools }: StudentCreateClientProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(createStudentAction, { success: false, message: "" });
 
@@ -116,11 +121,20 @@ export default function StudentCreateClient() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">Trường học</label>
-              <input
-                type="text"
+              <select
                 name="school"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30"
-              />
+                defaultValue=""
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-700 focus:ring-1 focus:ring-primary-700/30 bg-white"
+              >
+                <option value="">Không (hoặc Trường khác / Trường mới)</option>
+                {schools
+                  .filter((school) => school.is_active)
+                  .map((school) => (
+                    <option key={school.id} value={school.name}>
+                      {school.name}
+                    </option>
+                  ))}
+              </select>
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">Lớp</label>

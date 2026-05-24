@@ -10,9 +10,17 @@ export default async function TeacherCreatePage() {
   const teachersResponse = await getAllTeachers();
   const schoolsResponse = await getAllSchools();
 
+  const accountsData = accountsResponse.data;
+  const accountsList =
+    accountsData && "accounts" in accountsData
+      ? (accountsData as any).accounts
+      : Array.isArray(accountsData)
+      ? accountsData
+      : [];
+
   // Role ID 3 represents TEACHER in the backend roles list
-  const teacherAccounts = (accountsResponse.data || []).filter(
-    (acc) => acc.role_id === 3
+  const teacherAccounts = accountsList.filter(
+    (acc: any) => acc.role_id === 3
   );
 
   const teachersData = teachersResponse.data;

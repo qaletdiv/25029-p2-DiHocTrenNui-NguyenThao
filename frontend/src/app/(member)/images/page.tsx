@@ -1,5 +1,6 @@
 import React from "react";
 import { Images } from "lucide-react";
+import { cookies } from "next/headers";
 import PageShell from "@/components/member/common/PageShell";
 import { getAllImages } from "@/services/images";
 import { getAllStudents } from "@/services/students";
@@ -29,6 +30,10 @@ export default async function ImagesPage(props: {
   const isStudentsPaginated = "students" in studentsResponse.data;
   const students = isStudentsPaginated ? (studentsResponse.data as any).students : studentsResponse.data;
 
+  // 3. Extract access token for client-side image proxy previews
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value || "";
+
   return (
     <PageShell
       title="Thư viện Hình ảnh"
@@ -42,6 +47,7 @@ export default async function ImagesPage(props: {
         total={total}
         initialPage={page}
         initialPageSize={pageSize}
+        token={token}
       />
     </PageShell>
   );

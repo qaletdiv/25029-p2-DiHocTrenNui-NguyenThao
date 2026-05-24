@@ -9,8 +9,9 @@
  * @returns {Object} The paginated response structure.
  */
 const paginate = (data, req, dataKey = 'data') => {
-  const pageParam = parseInt(req.query.page);
-  const pageSizeParam = parseInt(req.query.pageSize);
+  const query = req && req.query ? req.query : {};
+  const pageParam = parseInt(query.page);
+  const pageSizeParam = parseInt(query.pageSize);
   const total = data.length;
 
   let paginatedData = data;

@@ -8,9 +8,17 @@ export default async function SponsorCreatePage() {
   const accountsResponse = await getAllAccounts();
   const sponsorsResponse = await getAllSponsors();
 
+  const accountsData = accountsResponse.data;
+  const accountsList =
+    accountsData && "accounts" in accountsData
+      ? (accountsData as any).accounts
+      : Array.isArray(accountsData)
+      ? accountsData
+      : [];
+
   // Sponsor role code/id: 4 represents SPONSOR in the mock database roles
-  const sponsorAccounts = (accountsResponse.data || []).filter(
-    (acc) => acc.role_id === 4
+  const sponsorAccounts = accountsList.filter(
+    (acc: any) => acc.role_id === 4
   );
 
   const sponsorsData = sponsorsResponse.data;

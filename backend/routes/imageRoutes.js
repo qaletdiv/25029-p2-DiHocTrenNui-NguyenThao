@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const ImageController = require('../controllers/ImageController');
-const { authorize } = require('../middlewares/authorize');
+const { authenticate, authorize } = require('../middlewares/authorize');
 const { ACTIONS, RESOURCES } = require('../data');
+
+// Image Proxy Route
+router.get('/proxy/:filename', authenticate, ImageController.proxyImage);
 
 // Optimized Retrieval Routes (defined before generic CRUD to avoid conflicts)
 router.get('/student/:studentId', authorize(ACTIONS.READ, RESOURCES.IMAGE), ImageController.getImagesByStudent);

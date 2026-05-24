@@ -8,7 +8,11 @@ const { sendError } = require('../utils/responseHandler');
  */
 const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  let token = authHeader && authHeader.split(' ')[1];
+
+  if (!token && req.query.token) {
+    token = req.query.token;
+  }
 
   if (!token) {
     return sendError(res, 'Authentication required', [], 401);

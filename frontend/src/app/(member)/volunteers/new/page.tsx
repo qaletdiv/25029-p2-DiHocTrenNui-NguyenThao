@@ -8,9 +8,17 @@ export default async function VolunteerCreatePage() {
   const accountsResponse = await getAllAccounts();
   const volunteersResponse = await getAllVolunteers();
 
+  const accountsData = accountsResponse.data;
+  const accountsList =
+    accountsData && "accounts" in accountsData
+      ? (accountsData as any).accounts
+      : Array.isArray(accountsData)
+      ? accountsData
+      : [];
+
   // Role ID 2 represents VOLUNTEER in the backend roles list
-  const volunteerAccounts = (accountsResponse.data || []).filter(
-    (acc) => acc.role_id === 2
+  const volunteerAccounts = accountsList.filter(
+    (acc: any) => acc.role_id === 2
   );
 
   const volunteersData = volunteersResponse.data;
