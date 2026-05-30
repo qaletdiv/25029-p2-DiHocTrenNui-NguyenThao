@@ -25,6 +25,7 @@ import { School } from "@/services/schools";
 import { Sponsor, getAllSponsors, PaginatedSponsors } from "@/services/sponsors";
 import { Teacher, getAllTeachers, PaginatedTeachers } from "@/services/teachers";
 import { Volunteer, getAllVolunteers, PaginatedVolunteers } from "@/services/volunteers";
+import { usePermission } from "@/contexts/PermissionContext";
 
 
 function getInitials(name: string) {
@@ -172,6 +173,7 @@ export default function StudentDetailClient({
   schools = [],
 }: Props) {
   const router = useRouter();
+  const { hasPermission, loading } = usePermission();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -186,14 +188,16 @@ export default function StudentDetailClient({
   const [optionsError, setOptionsError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (loading) return;
+
     async function loadOptions() {
       setOptionsLoading(true);
       setOptionsError(null);
       try {
         const [sponsorsRes, teachersRes, volunteersRes] = await Promise.all([
-          getAllSponsors(),
-          getAllTeachers(),
-          getAllVolunteers(),
+          hasPermission("SPONSOR_READ") ? getAllSponsors() : Promise.resolve({ data: [] }),
+          hasPermission("TEACHER_READ") ? getAllTeachers() : Promise.resolve({ data: [] }),
+          hasPermission("VOLUNTEER_READ") ? getAllVolunteers() : Promise.resolve({ data: [] }),
         ]);
 
         const sponsorsList = Array.isArray(sponsorsRes.data)
@@ -220,7 +224,7 @@ export default function StudentDetailClient({
     }
 
     loadOptions();
-  }, []);
+  }, [loading]);
 
   const set = (field: keyof FormState, val: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: val }));
@@ -298,12 +302,14 @@ export default function StudentDetailClient({
               </button>
             </>
           ) : (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-900 text-white text-sm font-semibold hover:bg-primary-800 shadow-sm transition-colors"
-            >
-              <Pencil size={15} /> Chỉnh sửa
-            </button>
+            hasPermission("STUDENT_UPDATE") && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-900 text-white text-sm font-semibold hover:bg-primary-800 shadow-sm transition-colors"
+              >
+                <Pencil size={15} /> Chỉnh sửa
+              </button>
+            )
           )}
         </div>
       </div>
@@ -549,7 +555,7 @@ export default function StudentDetailClient({
             />
             <InfoRow
               label="Nhà tài trợ"
-              isEditing={isEditing}
+              isEditing={isEditing && hasPermission("SPONSOR_READ")}
               value={sponsorsOptions.find(s => String(s.id) === form.sponsor_id)?.full_name || sponsorDetail?.full_name || "—"}
               editNode={
                 optionsLoading ? (
@@ -576,7 +582,7 @@ export default function StudentDetailClient({
             />
             <InfoRow
               label="Giáo viên"
-              isEditing={isEditing}
+              isEditing={isEditing && hasPermission("TEACHER_READ")}
               value={teachersOptions.find(t => String(t.id) === form.teacher_id)?.full_name || teacherDetail?.full_name || "—"}
               editNode={
                 optionsLoading ? (
@@ -603,7 +609,7 @@ export default function StudentDetailClient({
             />
             <InfoRow
               label="Tình nguyện viên"
-              isEditing={isEditing}
+              isEditing={isEditing && hasPermission("VOLUNTEER_READ")}
               value={volunteersOptions.find(v => String(v.id) === form.volunteer_id)?.full_name || volunteerDetail?.full_name || "—"}
               editNode={
                 optionsLoading ? (

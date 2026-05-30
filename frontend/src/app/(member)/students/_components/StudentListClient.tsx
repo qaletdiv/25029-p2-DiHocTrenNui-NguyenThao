@@ -8,6 +8,7 @@ import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
 import { Student } from "@/services/students";
 import { STUDENT_STATUS, STUDENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
+import { usePermission } from "@/contexts/PermissionContext";
 
 
 // ─────────────────────────────────────────────
@@ -173,6 +174,7 @@ export default function StudentListClient({ students, total, initialPage, initia
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hasPermission } = usePermission();
 
   // Derive unique school names from real data for the school filter
   const schoolNames = useMemo(
@@ -286,7 +288,7 @@ export default function StudentListClient({ students, total, initialPage, initia
         searchValue={search}
         onSearchChange={handleSearch}
         addLabel="Thêm học sinh"
-        onAdd={() => router.push("/students/new")}
+        onAdd={hasPermission("STUDENT_CREATE") ? () => router.push("/students/new") : undefined}
         extras={
           <div className="flex items-center gap-2">
             <FilterSelect

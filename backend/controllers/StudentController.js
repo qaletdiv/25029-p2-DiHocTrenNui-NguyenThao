@@ -73,7 +73,29 @@ class StudentController {
   async getAllStudents(req, res) {
     try {
       const students = await StudentModel.findAll();
-      const formattedStudents = students.map(formatStudentResponse);
+      let formattedStudents = students.map(formatStudentResponse);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { studentIds } = getSponsorLinkedResources(req.user.id);
+        formattedStudents = formattedStudents.filter(student => studentIds.includes(student.id));
+      }
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { studentIds } = getTeacherLinkedResources(req.user.id);
+        formattedStudents = formattedStudents.filter(student => studentIds.includes(student.id));
+      }
+
+      // Volunteer restriction
+      if (req.user && req.user.role_id === 2) {
+        const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
+        const { studentIds } = getVolunteerLinkedResources(req.user.id);
+        formattedStudents = formattedStudents.filter(student => studentIds.includes(student.id));
+      }
+
       console.log("getAllStudents: \n", formattedStudents);
       return sendSuccess(res, paginate(formattedStudents, req, 'students'));
     } catch (error) {
@@ -85,6 +107,33 @@ class StudentController {
     try {
       const student = await StudentModel.findById(req.params.id);
       if (!student) return sendError(res, 'Student not found', [], 404);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { studentIds } = getSponsorLinkedResources(req.user.id);
+        if (!studentIds.includes(student.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { studentIds } = getTeacherLinkedResources(req.user.id);
+        if (!studentIds.includes(student.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
+      // Volunteer restriction
+      if (req.user && req.user.role_id === 2) {
+        const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
+        const { studentIds } = getVolunteerLinkedResources(req.user.id);
+        if (!studentIds.includes(student.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
 
       const responseData = await getFullStudentDetail(student);
 

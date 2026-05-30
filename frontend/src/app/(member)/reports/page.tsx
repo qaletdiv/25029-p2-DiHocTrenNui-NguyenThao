@@ -2,6 +2,9 @@ import React from "react";
 import { BarChart3, TrendingUp, TrendingDown, Users, GraduationCap, HandHeart } from "lucide-react";
 import PageShell from "@/components/member/common/PageShell";
 
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
+
 interface SummaryItem {
   label: string;
   value: string;
@@ -37,7 +40,12 @@ const formatVND = (n: number) =>
 
 const BAR_MAX = 12_000_000;
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("REPORT_READ")) {
+    return <AccessDenied title="Báo cáo tổng hợp" />;
+  }
   return (
     <PageShell
       title="Báo cáo tổng hợp"

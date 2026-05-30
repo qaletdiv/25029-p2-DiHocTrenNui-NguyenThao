@@ -1,10 +1,17 @@
 import React from "react";
 import TeacherCreateClient from "../_components/TeacherCreateClient";
-import { getAllAccounts } from "@/services/accounts";
+import { getAllAccounts, getCurrentAccount } from "@/services/accounts";
 import { getAllTeachers } from "@/services/teachers";
 import { getAllSchools } from "@/services/schools";
+import AccessDenied from "@/components/common/AccessDenied";
 
 export default async function TeacherCreatePage() {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("TEACHER_CREATE")) {
+    return <AccessDenied title="Tạo Giáo viên" />;
+  }
+
   // Fetch accounts, teachers, and schools to feed the creation forms
   const accountsResponse = await getAllAccounts();
   const teachersResponse = await getAllTeachers();

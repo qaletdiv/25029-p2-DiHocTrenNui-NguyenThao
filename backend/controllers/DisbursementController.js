@@ -23,7 +23,15 @@ class DisbursementController {
    */
   async getAllDisbursements(req, res) {
     try {
-      const disbursements = await SupportDisbursementModel.findAll();
+      let disbursements = await SupportDisbursementModel.findAll();
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { teacherId } = getTeacherLinkedResources(req.user.id);
+        disbursements = disbursements.filter(d => d.teacher_id === teacherId);
+      }
+
       const formattedDisbursements = disbursements.map(formatDisbursementResponse);
 
       // Compute remaining balance per bank transaction
@@ -68,6 +76,15 @@ class DisbursementController {
     try {
       const disbursement = await SupportDisbursementModel.findById(parseInt(req.params.id));
       if (!disbursement) return sendError(res, 'Disbursement not found', [], 404);
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { teacherId } = getTeacherLinkedResources(req.user.id);
+        if (disbursement.teacher_id !== teacherId) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
 
       const formatted = formatDisbursementResponse(disbursement);
 

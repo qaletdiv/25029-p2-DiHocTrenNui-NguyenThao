@@ -1,32 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import DashboardHeader from "@/components/member/dashboard/DashboardHeader";
 import DashboardSidebar from "@/components/member/dashboard/DashboardSidebar";
 import DashboardFooter from "@/components/member/dashboard/DashboardFooter";
-import { getCurrentAccount, type Account } from "@/services/accounts";
+import { PermissionProvider, usePermission } from "@/contexts/PermissionContext";
 
 interface MemberLayoutProps {
   children: React.ReactNode;
 }
 
 export default function MemberLayout({ children }: MemberLayoutProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [account, setAccount] = useState<Account | null>(null);
+  return (
+    <PermissionProvider>
+      <MemberLayoutContent>{children}</MemberLayoutContent>
+    </PermissionProvider>
+  );
+}
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const data = await getCurrentAccount();
-        if (data) {
-          setAccount(data);
-        }
-      } catch (err) {
-        console.error("Failed to load layout user info", err);
-      }
-    }
-    loadUser();
-  }, []);
+function MemberLayoutContent({ children }: MemberLayoutProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { account, loading } = usePermission();
 
   const ROLE_MAP: Record<number, string> = {
     1: "Quản trị viên",
@@ -37,6 +31,8 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
 
   const userProp = account
     ? { name: account.username, role: ROLE_MAP[account.role_id] || "Người dùng" }
+    : loading
+    ? { name: "Đang tải...", role: "..." }
     : { name: "Admin", role: "Quản trị viên" };
 
   return (

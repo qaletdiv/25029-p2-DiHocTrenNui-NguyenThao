@@ -1,9 +1,16 @@
 import React from "react";
 import SponsorCreateClient from "../_components/SponsorCreateClient";
-import { getAllAccounts } from "@/services/accounts";
+import { getAllAccounts, getCurrentAccount } from "@/services/accounts";
 import { getAllSponsors } from "@/services/sponsors";
+import AccessDenied from "@/components/common/AccessDenied";
 
 export default async function SponsorCreatePage() {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("SPONSOR_CREATE")) {
+    return <AccessDenied title="Tạo Nhà tài trợ" />;
+  }
+
   // Fetch all accounts and sponsors to determine which accounts are available to be linked
   const accountsResponse = await getAllAccounts();
   const sponsorsResponse = await getAllSponsors();

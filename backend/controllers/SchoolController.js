@@ -8,7 +8,29 @@ class SchoolController {
   async getAllSchools(req, res) {
     try {
       const schools = await SchoolModel.findAll();
-      const formattedSchools = schools.map(formatSchoolResponse);
+      let formattedSchools = schools.map(formatSchoolResponse);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { schoolIds } = getSponsorLinkedResources(req.user.id);
+        formattedSchools = formattedSchools.filter(school => schoolIds.includes(school.id));
+      }
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { schoolIds } = getTeacherLinkedResources(req.user.id);
+        formattedSchools = formattedSchools.filter(school => schoolIds.includes(school.id));
+      }
+
+      // Volunteer restriction
+      if (req.user && req.user.role_id === 2) {
+        const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
+        const { schoolIds } = getVolunteerLinkedResources(req.user.id);
+        formattedSchools = formattedSchools.filter(school => schoolIds.includes(school.id));
+      }
+
       console.log("getAllSchools: \n", formattedSchools);
       return sendSuccess(res, paginate(formattedSchools, req, 'schools'));
     } catch (error) {
@@ -20,6 +42,34 @@ class SchoolController {
     try {
       const school = await SchoolModel.findById(parseInt(req.params.id));
       if (!school) return sendError(res, 'School not found', [], 404);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { schoolIds } = getSponsorLinkedResources(req.user.id);
+        if (!schoolIds.includes(school.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { schoolIds } = getTeacherLinkedResources(req.user.id);
+        if (!schoolIds.includes(school.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
+      // Volunteer restriction
+      if (req.user && req.user.role_id === 2) {
+        const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
+        const { schoolIds } = getVolunteerLinkedResources(req.user.id);
+        if (!schoolIds.includes(school.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
       console.log("getSchoolById: \n", "Id: \n", req.params.id, "\n School: \n", formatSchoolResponse(school));
       return sendSuccess(res, formatSchoolResponse(school));
     } catch (error) {

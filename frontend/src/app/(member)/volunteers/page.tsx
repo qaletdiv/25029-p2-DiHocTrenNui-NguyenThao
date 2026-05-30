@@ -3,6 +3,8 @@ import { Users } from "lucide-react";
 import PageShell from "@/components/member/common/PageShell";
 import { getAllVolunteers } from "@/services/volunteers";
 import VolunteerListClient from "./_components/VolunteerListClient";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches data at request time
@@ -10,6 +12,12 @@ import VolunteerListClient from "./_components/VolunteerListClient";
 export default async function VolunteersPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("VOLUNTEER_READ")) {
+    return <AccessDenied title="Danh sách Tình nguyện viên" />;
+  }
+
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;

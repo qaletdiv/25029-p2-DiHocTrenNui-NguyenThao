@@ -1,8 +1,9 @@
 import React from "react";
 import { ShieldCheck } from "lucide-react";
 import PageShell from "@/components/member/common/PageShell";
-import { getAllAccounts } from "@/services/accounts";
+import { getAllAccounts, getCurrentAccount } from "@/services/accounts";
 import AccountListClient from "./_components/AccountListClient";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches data at request time
@@ -10,6 +11,12 @@ import AccountListClient from "./_components/AccountListClient";
 export default async function AccountsPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("USER_READ")) {
+    return <AccessDenied title="Quản lý Tài khoản" />;
+  }
+
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getTransactionById } from "@/services/transactions";
 import { getAllSponsors } from "@/services/sponsors";
 import TransactionDetailClient from "../_components/TransactionDetailClient";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches single transaction at request time
@@ -12,6 +14,12 @@ export default async function TransactionDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("BANK_TRANSACTION_READ")) {
+    return <AccessDenied title="Chi tiết Giao dịch" />;
+  }
+
   const { id } = await params;
   const numericId = parseInt(id, 10);
 

@@ -17,7 +17,21 @@ class AccountController {
     try {
       const account = await AccountModel.findById(parseInt(req.params.id));
       if (!account) return sendError(res, 'Account not found', [], 404);
-      return sendSuccess(res, account);
+
+      const permissions = require('../data/permissions');
+      const rolePermissions = require('../data/role_permission');
+      const userPermissionIds = rolePermissions
+        .filter(rp => rp.role_id === account.role_id)
+        .map(rp => rp.permission_id);
+      
+      const userPermissions = permissions
+        .filter(p => userPermissionIds.includes(p.id))
+        .map(p => p.code);
+
+      return sendSuccess(res, {
+        ...account,
+        permissions: userPermissions
+      });
     } catch (error) {
       return sendError(res, 'Failed to fetch account', error.message);
     }

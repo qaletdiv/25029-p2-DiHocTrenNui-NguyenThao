@@ -3,6 +3,8 @@ import { HandHeart } from "lucide-react";
 import PageShell from "@/components/member/common/PageShell";
 import { getAllSponsors } from "@/services/sponsors";
 import SponsorListClient from "./_components/SponsorListClient";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches data at request time
@@ -10,6 +12,12 @@ import SponsorListClient from "./_components/SponsorListClient";
 export default async function SponsorsPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("SPONSOR_READ")) {
+    return <AccessDenied title="Danh sách Nhà tài trợ" />;
+  }
+
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getStudentById } from "@/services/students";
 import { getAllSchools } from "@/services/schools";
 import StudentDetailClient from "../_components/StudentDetailClient";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches single student at request time
@@ -12,6 +14,12 @@ export default async function StudentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("STUDENT_READ")) {
+    return <AccessDenied title="Chi tiết Học sinh" />;
+  }
+
   const { id } = await params;
 
   let student;

@@ -8,7 +8,29 @@ class VolunteerController {
   async getAllVolunteers(req, res) {
     try {
       const volunteers = await VolunteerModel.findAll();
-      const formattedVolunteers = volunteers.map(formatVolunteerResponse);
+      let formattedVolunteers = volunteers.map(formatVolunteerResponse);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { volunteerIds } = getSponsorLinkedResources(req.user.id);
+        formattedVolunteers = formattedVolunteers.filter(v => volunteerIds.includes(v.id));
+      }
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { volunteerIds } = getTeacherLinkedResources(req.user.id);
+        formattedVolunteers = formattedVolunteers.filter(v => volunteerIds.includes(v.id));
+      }
+
+      // Volunteer restriction
+      if (req.user && req.user.role_id === 2) {
+        const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
+        const { volunteerId } = getVolunteerLinkedResources(req.user.id);
+        formattedVolunteers = formattedVolunteers.filter(v => v.id === volunteerId);
+      }
+
       console.log("getAllVolunteers: \n", formattedVolunteers);
       return sendSuccess(res, paginate(formattedVolunteers, req, 'volunteers'));
     } catch (error) {
@@ -20,6 +42,34 @@ class VolunteerController {
     try {
       const volunteer = await VolunteerModel.findById(parseInt(req.params.id));
       if (!volunteer) return sendError(res, 'Volunteer not found', [], 404);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { volunteerIds } = getSponsorLinkedResources(req.user.id);
+        if (!volunteerIds.includes(volunteer.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
+      // Teacher restriction
+      if (req.user && req.user.role_id === 3) {
+        const { getTeacherLinkedResources } = require('../utils/teacherAuth');
+        const { volunteerIds } = getTeacherLinkedResources(req.user.id);
+        if (!volunteerIds.includes(volunteer.id)) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
+      // Volunteer restriction
+      if (req.user && req.user.role_id === 2) {
+        const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
+        const { volunteerId } = getVolunteerLinkedResources(req.user.id);
+        if (volunteerId !== volunteer.id) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
       console.log("getVolunteerById: \n", "Id: \n", req.params.id, "\n Volunteer: \n", formatVolunteerResponse(volunteer));
       return sendSuccess(res, formatVolunteerResponse(volunteer));
     } catch (error) {

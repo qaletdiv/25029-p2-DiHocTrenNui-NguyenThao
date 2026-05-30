@@ -1,9 +1,16 @@
 import React from "react";
 import VolunteerCreateClient from "../_components/VolunteerCreateClient";
-import { getAllAccounts } from "@/services/accounts";
+import { getAllAccounts, getCurrentAccount } from "@/services/accounts";
 import { getAllVolunteers } from "@/services/volunteers";
+import AccessDenied from "@/components/common/AccessDenied";
 
 export default async function VolunteerCreatePage() {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("VOLUNTEER_CREATE")) {
+    return <AccessDenied title="Tạo Tình nguyện viên" />;
+  }
+
   // Fetch accounts and volunteers to feed the creation forms
   const accountsResponse = await getAllAccounts();
   const volunteersResponse = await getAllVolunteers();

@@ -4,6 +4,8 @@ import PageShell from "@/components/member/common/PageShell";
 import { getAllSchools } from "@/services/schools";
 import { getAllTeachers } from "@/services/teachers";
 import SchoolListClient from "./_components/SchoolListClient";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches data at request time
@@ -11,6 +13,12 @@ import SchoolListClient from "./_components/SchoolListClient";
 export default async function SchoolsPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("SCHOOL_READ")) {
+    return <AccessDenied title="Danh sách Trường học" />;
+  }
+
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;
@@ -25,15 +33,22 @@ export default async function SchoolsPage(props: {
   const schools = isPaginated ? (response.data as any).schools : (response.data || []);
   const total = isPaginated ? (response.data as any).total : schools.length;
 
-  // Fetch teachers to map teacher_id to teacher names
-  const teachersResponse = await getAllTeachers();
-  const teachersData = teachersResponse.data;
-  const teachersList =
-    teachersData && "teachers" in teachersData
-      ? (teachersData as any).teachers
-      : Array.isArray(teachersData)
-      ? teachersData
-      : [];
+  // Fetch teachers to map teacher_id to teacher names only if permitted
+  let teachersList: any[] = [];
+  if (permissions.includes("TEACHER_READ")) {
+    try {
+      const teachersResponse = await getAllTeachers();
+      const teachersData = teachersResponse.data;
+      teachersList =
+        teachersData && "teachers" in teachersData
+          ? (teachersData as any).teachers
+          : Array.isArray(teachersData)
+          ? teachersData
+          : [];
+    } catch (error) {
+      console.error("[SchoolsPage] Failed to fetch teachers:", error);
+    }
+  }
 
   return (
     <PageShell

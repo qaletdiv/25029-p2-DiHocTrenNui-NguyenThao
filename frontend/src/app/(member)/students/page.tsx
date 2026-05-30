@@ -3,6 +3,8 @@ import { GraduationCap } from "lucide-react";
 import PageShell from "@/components/member/common/PageShell";
 import { getAllStudents } from "@/services/students";
 import StudentListClient from "./_components/StudentListClient";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches data at request time
@@ -10,6 +12,12 @@ import StudentListClient from "./_components/StudentListClient";
 export default async function StudentsPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("STUDENT_READ")) {
+    return <AccessDenied title="Danh sách Học sinh" />;
+  }
+
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;

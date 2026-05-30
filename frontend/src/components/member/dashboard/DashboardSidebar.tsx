@@ -20,25 +20,28 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 
+import { usePermission } from "@/contexts/PermissionContext";
+
 interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
+  permission?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Học sinh", href: "/students", icon: GraduationCap },
-  { label: "Nhà tài trợ", href: "/sponsors", icon: HandHeart },
-  { label: "Trường học", href: "/schools", icon: School },
-  { label: "Giáo viên", href: "/teachers", icon: BookUser },
-  { label: "Tình nguyện viên", href: "/volunteers", icon: Users },
-  { label: "Hình ảnh", href: "/images", icon: Images },
-  { label: "Giao dịch", href: "/transactions", icon: Receipt },
-  { label: "Phân bổ", href: "/allocations", icon: Wallet },
-  { label: "Báo cáo", href: "/reports", icon: BarChart3 },
+  { label: "Học sinh", href: "/students", icon: GraduationCap, permission: "STUDENT_READ" },
+  { label: "Nhà tài trợ", href: "/sponsors", icon: HandHeart, permission: "SPONSOR_READ" },
+  { label: "Trường học", href: "/schools", icon: School, permission: "SCHOOL_READ" },
+  { label: "Giáo viên", href: "/teachers", icon: BookUser, permission: "TEACHER_READ" },
+  { label: "Tình nguyện viên", href: "/volunteers", icon: Users, permission: "VOLUNTEER_READ" },
+  { label: "Hình ảnh", href: "/images", icon: Images, permission: "IMAGE_READ" },
+  { label: "Giao dịch", href: "/transactions", icon: Receipt, permission: "BANK_TRANSACTION_READ" },
+  { label: "Phân bổ", href: "/allocations", icon: Wallet, permission: "DISBURSEMENT_READ" },
+  { label: "Báo cáo", href: "/reports", icon: BarChart3, permission: "REPORT_READ" },
   { label: "Hồ sơ", href: "/profile", icon: UserCircle },
-  { label: "Tài khoản", href: "/accounts", icon: ShieldCheck },
+  { label: "Tài khoản", href: "/accounts", icon: ShieldCheck, permission: "USER_READ" },
 ];
 
 interface DashboardSidebarProps {
@@ -52,6 +55,11 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const { hasPermission, loading } = usePermission();
+
+  const visibleItems = loading
+    ? NAV_ITEMS.filter((item) => !item.permission)
+    : NAV_ITEMS.filter((item) => !item.permission || hasPermission(item.permission));
 
   return (
     <>
@@ -63,7 +71,7 @@ export default function DashboardSidebar({
           aria-hidden="true"
         />
       )}
-
+ 
       {/* Sidebar panel */}
       <aside
         className={[
@@ -80,7 +88,7 @@ export default function DashboardSidebar({
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin">
           <ul className="space-y-1 px-2">
-            {NAV_ITEMS.map((item) => {
+            {visibleItems.map((item) => {
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/dashboard" && pathname.startsWith(item.href));

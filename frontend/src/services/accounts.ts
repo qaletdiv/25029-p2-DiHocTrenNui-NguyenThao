@@ -12,6 +12,7 @@ export interface Account {
     email: string;
     role_id: number;
     is_active: boolean;
+    permissions?: string[];
     [key: string]: unknown;
 }
 

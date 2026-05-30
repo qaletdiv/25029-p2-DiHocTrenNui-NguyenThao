@@ -13,13 +13,14 @@ router.post('/', async (req, res) => {
         if (user) {
             const currentUser = { id: user.id, username: user.username, role_id: user.role_id, email: user.email };
             
-            // Fetch permissions for this role
             const permissions = require('../data/permissions');
             const rolePermissions = require('../data/role_permission');
             const userPermissionIds = rolePermissions
                 .filter(rp => rp.role_id === user.role_id)
                 .map(rp => rp.permission_id);
-            const userPermissions = permissions.filter(p => userPermissionIds.includes(p.id));
+            const userPermissions = permissions
+                .filter(p => userPermissionIds.includes(p.id))
+                .map(p => p.code);
 
             const accessToken = jwt.sign(currentUser, req.app.get('SECRET_KEY'), { expiresIn: '24h' });
             

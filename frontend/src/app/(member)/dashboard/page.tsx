@@ -19,6 +19,7 @@ import { getAllTeachers } from "@/services/teachers";
 import { getAllVolunteers } from "@/services/volunteers";
 import { getAllImages } from "@/services/images";
 import { getAllTransactions } from "@/services/transactions";
+import { getCurrentAccount } from "@/services/accounts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -79,7 +80,12 @@ export default async function DashboardPage() {
     day: "numeric",
   });
 
-  // Fetch totals from the backend in parallel
+  // Get current account permissions
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  const hasPermission = (code: string) => permissions.includes(code);
+
+  // Fetch totals from the backend in parallel only if user has permission
   const [
     studentsTotal,
     sponsorsTotal,
@@ -89,17 +95,18 @@ export default async function DashboardPage() {
     imagesTotal,
     transactionsTotal,
   ] = await Promise.all([
-    fetchSafeTotal(() => getAllStudents(1, 1), "students"),
-    fetchSafeTotal(() => getAllSponsors(1, 1), "sponsors"),
-    fetchSafeTotal(() => getAllSchools(), "schools"),
-    fetchSafeTotal(() => getAllTeachers(1, 1), "teachers"),
-    fetchSafeTotal(() => getAllVolunteers(1, 1), "volunteers"),
-    fetchSafeTotal(() => getAllImages(), "images"),
-    fetchSafeTotal(() => getAllTransactions(), "transactions"),
+    hasPermission("STUDENT_READ") ? fetchSafeTotal(() => getAllStudents(1, 1), "students") : Promise.resolve(0),
+    hasPermission("SPONSOR_READ") ? fetchSafeTotal(() => getAllSponsors(1, 1), "sponsors") : Promise.resolve(0),
+    hasPermission("SCHOOL_READ") ? fetchSafeTotal(() => getAllSchools(), "schools") : Promise.resolve(0),
+    hasPermission("TEACHER_READ") ? fetchSafeTotal(() => getAllTeachers(1, 1), "teachers") : Promise.resolve(0),
+    hasPermission("VOLUNTEER_READ") ? fetchSafeTotal(() => getAllVolunteers(1, 1), "volunteers") : Promise.resolve(0),
+    hasPermission("IMAGE_READ") ? fetchSafeTotal(() => getAllImages(), "images") : Promise.resolve(0),
+    hasPermission("BANK_TRANSACTION_READ") ? fetchSafeTotal(() => getAllTransactions(), "transactions") : Promise.resolve(0),
   ]);
 
-  const stats: Stat[] = [
+  const statsConfig = [
     {
+      permission: "STUDENT_READ",
       label: "Tổng số Học sinh",
       value: studentsTotal,
       icon: GraduationCap,
@@ -108,6 +115,7 @@ export default async function DashboardPage() {
       linkTo: "/students",
     },
     {
+      permission: "SPONSOR_READ",
       label: "Tổng số Nhà tài trợ",
       value: sponsorsTotal,
       icon: HandHeart,
@@ -116,6 +124,7 @@ export default async function DashboardPage() {
       linkTo: "/sponsors",
     },
     {
+      permission: "SCHOOL_READ",
       label: "Tổng số Trường học",
       value: schoolsTotal,
       icon: SchoolIcon,
@@ -123,6 +132,7 @@ export default async function DashboardPage() {
       linkTo: "/schools",
     },
     {
+      permission: "TEACHER_READ",
       label: "Tổng số Giáo viên",
       value: teachersTotal,
       icon: BookUser,
@@ -131,6 +141,7 @@ export default async function DashboardPage() {
       linkTo: "/teachers",
     },
     {
+      permission: "VOLUNTEER_READ",
       label: "Tổng số Tình nguyện viên",
       value: volunteersTotal,
       icon: Users,
@@ -139,6 +150,7 @@ export default async function DashboardPage() {
       linkTo: "/volunteers",
     },
     {
+      permission: "IMAGE_READ",
       label: "Tổng số Hình ảnh",
       value: imagesTotal,
       icon: Images,
@@ -147,6 +159,7 @@ export default async function DashboardPage() {
       linkTo: "/images",
     },
     {
+      permission: "BANK_TRANSACTION_READ",
       label: "Tổng số Giao dịch",
       value: transactionsTotal,
       icon: Receipt,
@@ -155,6 +168,8 @@ export default async function DashboardPage() {
       linkTo: "/transactions",
     },
   ];
+
+  const stats = statsConfig.filter((stat) => hasPermission(stat.permission));
 
   return (
     <section className="space-y-8">
