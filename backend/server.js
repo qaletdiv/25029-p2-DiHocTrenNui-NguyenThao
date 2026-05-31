@@ -16,6 +16,7 @@ const { sendError } = require('./utils/responseHandler');
 
 // Route Imports
 const loginRoute = require('./routes/login');
+const registerRoute = require('./routes/register');
 const accountRoutes = require('./routes/accountRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const sponsorRoutes = require('./routes/sponsorRoutes');
@@ -29,6 +30,7 @@ const disbursementRoutes = require('./routes/disbursementRoutes');
 
 // Public Routes
 app.use('/login', loginRoute);
+app.use('/register', registerRoute);
 
 // Protected Routes
 app.use('/accounts', authenticate, accountRoutes);

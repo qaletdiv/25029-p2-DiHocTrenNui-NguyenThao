@@ -2,6 +2,8 @@
 import React, { useActionState } from "react";
 import { Lock, User } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import heartBg from "@/assets/images/background/heart.jpg";
 import { loginAction } from "@/services/login";
 
@@ -10,6 +12,8 @@ interface LoginPageProps { }
 
 export default function LoginPage({ }: LoginPageProps) {
     const [preState, formAction, isPending] = useActionState(loginAction, { username: null, password: null, error: null });
+    const searchParams = useSearchParams();
+    const registered = searchParams.get("registered");
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-yellow-400 selection:text-primary-900">
@@ -75,7 +79,19 @@ export default function LoginPage({ }: LoginPageProps) {
                                     </button>
                                 </div>
 
-                                {preState.error && <p className="text-red-500 mt-2 text-sm">{preState.error}</p>}
+                                <div className="text-center pt-4 border-t border-gray-100">
+                                    <span className="text-xs text-gray-500">Chưa có tài khoản? </span>
+                                    <Link href="/register" className="text-xs text-green-600 hover:underline font-bold transition-colors">
+                                        Đăng ký ngay
+                                    </Link>
+                                </div>
+
+                                {preState.error && <p className="text-red-500 mt-2 text-sm text-center">{preState.error}</p>}
+                                {registered === "true" && (
+                                    <p className="text-green-600 mt-2 text-sm font-semibold text-center bg-green-50 p-2 rounded-lg border border-green-200">
+                                        Đăng ký thành công! Vui lòng đăng nhập.
+                                    </p>
+                                )}
                             </form>
                         </div>
                     </div>

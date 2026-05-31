@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Wallet, TrendingDown, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wallet, TrendingDown, CheckCircle2, Loader2 } from "lucide-react";
 import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
 import { Disbursement, BudgetSummary } from "@/services/disbursements";
+import { usePermission } from "@/contexts/PermissionContext";
 import { DISBURSEMENT_STATUS, DISBURSEMENT_STATUS_TRANSLATIONS } from "@/hooks/constants";
 import { fmtAmount } from "@/hooks/convertData";
 
@@ -194,12 +195,15 @@ function Pagination({
 // ─────────────────────────────────────────────
 // Main Client Component
 // ─────────────────────────────────────────────
+const SEARCH_DEBOUNCE_MS = 400;
+
 interface Props {
   disbursements: Disbursement[];
   total: number;
   initialPage: number;
   initialPageSize: number;
   budgetSummary: BudgetSummary;
+  initialSearch: string;
 }
 
 export default function AllocationListClient({
@@ -208,25 +212,83 @@ export default function AllocationListClient({
   initialPage,
   initialPageSize,
   budgetSummary,
+  initialSearch,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hasPermission } = usePermission();
+  const [isPending, startTransition] = useTransition();
 
   // Filter state
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("");
   const [monthFilter, setMonthFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const page = initialPage;
   const pageSize = initialPageSize;
 
-  const setPageAndSize = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    params.set("pageSize", newPageSize.toString());
-    router.push(`${pathname}?${params.toString()}`);
+  // Keep local state in sync when URL-driven props change
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
+  const navigateWithParams = useCallback(
+    (overrides: { page?: number; pageSize?: number; search?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      const newPage = overrides.page ?? 1;
+      const newPageSize = overrides.pageSize ?? pageSize;
+      const newSearch = overrides.search ?? search;
+
+      params.set("page", String(newPage));
+      params.set("pageSize", String(newPageSize));
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [searchParams, pathname, pageSize, search, router, startTransition]
+  );
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    (v: string) => {
+      setSearch(v);
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigateWithParams({ search: v, page: 1 });
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [navigateWithParams]
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const handleStatus = (v: string) => {
+    setStatusFilter(v);
+  };
+
+  const handleMonth = (v: string) => {
+    setMonthFilter(v);
+  };
+
+  const handleYear = (v: string) => {
+    setYearFilter(v);
   };
 
   // Compute summary stats
@@ -237,22 +299,15 @@ export default function AllocationListClient({
     return { totalAllocated, totalRemaining, totalDelivered };
   }, [budgetSummary, disbursements]);
 
-  // Derived: filtered rows
+  // Derived: filtered rows (client-side status/month/year filter only; search is server-side)
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
     return disbursements.filter((d) => {
-      const matchSearch =
-        !q ||
-        (d.student_name && d.student_name.toLowerCase().includes(q)) ||
-        String(d.student_id).toLowerCase().includes(q) ||
-        (d.sponsor_name && d.sponsor_name.toLowerCase().includes(q)) ||
-        (d.transaction_code && d.transaction_code.toLowerCase().includes(q));
       const matchStatus = !statusFilter || d.status === statusFilter;
       const matchMonth = !monthFilter || d.support_month === Number(monthFilter);
       const matchYear = !yearFilter || d.support_year === Number(yearFilter);
-      return matchSearch && matchStatus && matchMonth && matchYear;
+      return matchStatus && matchMonth && matchYear;
     });
-  }, [search, statusFilter, monthFilter, yearFilter, disbursements]);
+  }, [statusFilter, monthFilter, yearFilter, disbursements]);
 
   const paginated = filtered;
 
@@ -359,50 +414,58 @@ export default function AllocationListClient({
       <ListToolbar
         searchPlaceholder="Tìm theo học sinh, nhà tài trợ, mã GD..."
         searchValue={search}
-        onSearchChange={(v) => setSearch(v)}
+        onSearchChange={handleSearch}
         addLabel="Thêm phân bổ"
-        onAdd={() => router.push("/allocations/new")}
+        onAdd={hasPermission("DISBURSEMENT_CREATE") ? () => router.push("/allocations/new") : undefined}
         extras={
           <div className="flex items-center gap-2 flex-wrap">
             <FilterSelect
               id="filter-status"
               value={statusFilter}
-              onChange={(v) => setStatusFilter(v)}
+              onChange={handleStatus}
               options={ALL_STATUSES}
             />
             <FilterSelect
               id="filter-month"
               value={monthFilter}
-              onChange={(v) => setMonthFilter(v)}
+              onChange={handleMonth}
               options={[{ value: "", label: "Tất cả tháng" }, ...MONTHS]}
             />
             <FilterSelect
               id="filter-year"
               value={yearFilter}
-              onChange={(v) => setYearFilter(v)}
+              onChange={handleYear}
               options={[{ value: "", label: "Tất cả năm" }, ...YEARS]}
             />
+            {isPending && (
+              <div className="flex items-center gap-1.5 text-primary-700">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-medium">Đang tìm...</span>
+              </div>
+            )}
           </div>
         }
       />
 
       {/* ── Data table ── */}
-      <DataTable<Disbursement>
-        columns={columns}
-        rows={paginated}
-        rowKey="id"
-        emptyLabel="Không tìm thấy phân bổ phù hợp"
-        stickyHeader
-        onRowClick={(row) => router.push(`/allocations/${row.id}`)}
-      />
+      <div className={isPending ? "opacity-60 transition-opacity duration-200" : "transition-opacity duration-200"}>
+        <DataTable<Disbursement>
+          columns={columns}
+          rows={paginated}
+          rowKey="id"
+          emptyLabel="Không tìm thấy phân bổ phù hợp"
+          stickyHeader
+          onRowClick={(row) => router.push(`/allocations/${row.id}`)}
+        />
+      </div>
 
       {/* ── Pagination ── */}
       <Pagination
         total={total}
         page={page}
         pageSize={pageSize}
-        onPage={(p) => setPageAndSize(p, pageSize)}
-        onPageSize={(s) => setPageAndSize(1, s)}
+        onPage={(p) => navigateWithParams({ page: p, pageSize })}
+        onPageSize={(s) => navigateWithParams({ page: 1, pageSize: s })}
       />
     </>
   );

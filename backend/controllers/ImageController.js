@@ -94,7 +94,19 @@ function saveUploadedFile(filename, fileData) {
 class ImageController {
   async getAllImages(req, res) {
     try {
-      const images = await ImageModel.findAll();
+      let images = await ImageModel.findAll(req.user);
+
+      // Search filter (by student_id or event_id)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        images = images.filter(img => {
+          const studentIdMatch = String(img.student_id).toLowerCase().includes(searchQuery);
+          const eventIdMatch = img.event_id && String(img.event_id).toLowerCase().includes(searchQuery);
+          const monthMatch = img.metadata && img.metadata.month && String(img.metadata.month).toLowerCase().includes(searchQuery);
+          return studentIdMatch || eventIdMatch || monthMatch;
+        });
+      }
+
       const paginated = paginate(images, req, 'images');
       paginated.images = paginated.images.map(img => formatImageResponse(img, req));
       return sendSuccess(res, paginated);
@@ -105,8 +117,19 @@ class ImageController {
 
   async getImageById(req, res) {
     try {
-      const image = await ImageModel.findById(parseInt(req.params.id));
-      if (!image) return sendError(res, 'Image not found', [], 404);
+      const imageId = parseInt(req.params.id);
+      // First check if the image exists in the database
+      const rawImage = await ImageModel.findOne({ id: imageId });
+      if (!rawImage) {
+        return sendError(res, 'Image not found', [], 404);
+      }
+
+      // Check access permission
+      const image = await ImageModel.findById(imageId, req.user);
+      if (!image) {
+        return sendError(res, 'Access Denied: You are not authorized to view this image', [], 403);
+      }
+
       return sendSuccess(res, formatImageResponse(image, req));
     } catch (error) {
       return sendError(res, 'Failed to fetch image', error.message);
@@ -115,7 +138,13 @@ class ImageController {
 
   async getImagesByStudent(req, res) {
     try {
-      const images = await ImageModel.findByStudentId(req.params.studentId);
+      const studentId = req.params.studentId;
+      // If user is not authorized to view this student's data, return a 403 Forbidden error
+      if (req.user && !ImageModel.isStudentAuthorized(studentId, req.user)) {
+        return sendError(res, 'Access Denied: You are not authorized to view this student\'s images', [], 403);
+      }
+
+      const images = await ImageModel.findByStudentId(studentId, req.user);
       const formatted = images.map(img => formatImageResponse(img, req));
       return sendSuccess(res, formatted);
     } catch (error) {
@@ -129,7 +158,7 @@ class ImageController {
       if (!start || !end) {
         return sendError(res, 'Start and end dates are required', [], 400);
       }
-      const images = await ImageModel.findByTimeRange(start, end);
+      const images = await ImageModel.findByTimeRange(start, end, req.user);
       const formatted = images.map(img => formatImageResponse(img, req));
       return sendSuccess(res, formatted);
     } catch (error) {
@@ -215,6 +244,16 @@ class ImageController {
       const filename = path.basename(req.params.filename);
       const filePath = path.join(__dirname, '../public/upload/event', filename);
       const fallbackPath = path.join(__dirname, '../public/placeholder.jpg');
+
+      // Check access permission at the repository/model layer
+      const image = await ImageModel.findOne({ url: filename }, req.user);
+      if (!image) {
+        // Find if the image exists at all to determine if it is unauthorized (403) or just not found (404)
+        const rawImage = await ImageModel.findOne({ url: filename });
+        if (rawImage) {
+          return res.status(403).send('Forbidden: Access Denied');
+        }
+      }
 
       const options = {
         maxAge: '1d', // Cache for 1 day

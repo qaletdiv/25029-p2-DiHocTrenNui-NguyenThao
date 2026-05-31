@@ -85,15 +85,24 @@ export interface PaginatedStudents {
 
 /**
  * GET /students
- * Fetch all students. Supports pagination.
+ * Fetch all students. Supports pagination, search, and status filtering.
  */
-export async function getAllStudents(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedStudents | Student[]>> {
+export async function getAllStudents(
+    page?: number,
+    pageSize?: number,
+    search?: string,
+    status?: string
+): Promise<ApiResponse<PaginatedStudents | Student[]>> {
     const headers = await getAuthHeaders();
     try {
-        let url = `${BASE_URL}/students`;
-        if (page !== undefined && pageSize !== undefined) {
-            url += `?page=${page}&pageSize=${pageSize}`;
-        }
+        const params = new URLSearchParams();
+        if (page !== undefined) params.set('page', String(page));
+        if (pageSize !== undefined) params.set('pageSize', String(pageSize));
+        if (search) params.set('search', search);
+        if (status) params.set('status', status);
+
+        const queryString = params.toString();
+        const url = `${BASE_URL}/students${queryString ? `?${queryString}` : ''}`;
         const res = await fetch(url, {
             method: "GET",
             headers,

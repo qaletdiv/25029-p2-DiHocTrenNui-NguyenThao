@@ -24,8 +24,9 @@ export default async function SponsorsPage(props: {
 
   const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === 'string' ? parseInt(pageSizeParam, 10) : 10;
+  const search = typeof searchParams?.search === 'string' ? searchParams.search : '';
 
-  const response = await getAllSponsors(page, pageSize);
+  const response = await getAllSponsors(page, pageSize, search || undefined);
 
   // Handle both paginated and non-paginated responses gracefully
   const isPaginated = 'sponsors' in response.data;
@@ -39,7 +40,7 @@ export default async function SponsorsPage(props: {
       icon={HandHeart}
       iconColor="bg-accent-yellow/20 text-yellow-700"
     >
-      <SponsorListClient sponsors={sponsors} total={total} initialPage={page} initialPageSize={pageSize} />
+      <SponsorListClient sponsors={sponsors} total={total} initialPage={page} initialPageSize={pageSize} initialSearch={search} />
     </PageShell>
   );
 }

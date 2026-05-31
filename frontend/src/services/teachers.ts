@@ -74,13 +74,16 @@ export interface PaginatedTeachers {
  * GET /teachers
  * Fetch all teachers. Supports pagination.
  */
-export async function getAllTeachers(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedTeachers | Teacher[]>> {
+export async function getAllTeachers(page?: number, pageSize?: number, search?: string): Promise<ApiResponse<PaginatedTeachers | Teacher[]>> {
     const headers = await getAuthHeaders();
     try {
         let url = `${BASE_URL}/teachers`;
-        if (page !== undefined && pageSize !== undefined) {
-            url += `?page=${page}&pageSize=${pageSize}`;
-        }
+        const params = new URLSearchParams();
+        if (page !== undefined) params.set('page', String(page));
+        if (pageSize !== undefined) params.set('pageSize', String(pageSize));
+        if (search) params.set('search', search);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
         const res = await fetch(url, {
             method: "GET",
             headers,

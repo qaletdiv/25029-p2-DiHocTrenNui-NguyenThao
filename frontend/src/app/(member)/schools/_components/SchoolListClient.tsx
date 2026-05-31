@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
 import { School } from "@/services/schools";
 import { Teacher } from "@/services/teachers";
+import { usePermission } from "@/contexts/PermissionContext";
 
 // ─────────────────────────────────────────────
 // Constants
@@ -154,6 +155,8 @@ function Pagination({
   );
 }
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 // ─────────────────────────────────────────────
 // Main Client Component
 // ─────────────────────────────────────────────
@@ -163,6 +166,7 @@ interface Props {
   initialPage: number;
   initialPageSize: number;
   teachers: Teacher[];
+  initialSearch: string;
 }
 
 export default function SchoolListClient({
@@ -171,50 +175,85 @@ export default function SchoolListClient({
   initialPage,
   initialPageSize,
   teachers,
+  initialSearch,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hasPermission } = usePermission();
+  const [isPending, startTransition] = useTransition();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const page = initialPage;
   const pageSize = initialPageSize;
 
-  const setPageAndSize = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    params.set("pageSize", newPageSize.toString());
-    router.push(`${pathname}?${params.toString()}`);
+  // Keep local state in sync when URL-driven props change
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
+  const navigateWithParams = useCallback(
+    (overrides: { page?: number; pageSize?: number; search?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      const newPage = overrides.page ?? 1;
+      const newPageSize = overrides.pageSize ?? pageSize;
+      const newSearch = overrides.search ?? search;
+
+      params.set("page", String(newPage));
+      params.set("pageSize", String(newPageSize));
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [searchParams, pathname, pageSize, search, router, startTransition]
+  );
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    (v: string) => {
+      setSearch(v);
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigateWithParams({ search: v, page: 1 });
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [navigateWithParams]
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const handleStatus = (v: string) => {
+    setStatusFilter(v);
   };
 
   // Pre-calculate lookup map for teacher names
   const teacherMap = useMemo(() => new Map(teachers.map((t) => [t.id, t.full_name])), [teachers]);
 
-  // Client-side search and status filter over the current page results
+  // Client-side status filter over the current page results (search is server-side)
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
     return schools.filter((s) => {
-      const matchSearch =
-        !q ||
-        s.name.toLowerCase().includes(q) ||
-        (s.address && s.address.toLowerCase().includes(q)) ||
-        String(s.id).toLowerCase().includes(q);
-
       const statusVal = s.is_active ? "active" : "inactive";
       const matchStatus = !statusFilter || statusVal === statusFilter;
-
-      return matchSearch && matchStatus;
+      return matchStatus;
     });
-  }, [search, statusFilter, schools]);
-
-  const handleSearch = (v: string) => {
-    setSearch(v);
-  };
-  const handleStatus = (v: string) => {
-    setStatusFilter(v);
-  };
+  }, [statusFilter, schools]);
 
   // Columns definition
   const columns: Column<School>[] = [
@@ -279,7 +318,7 @@ export default function SchoolListClient({
         searchValue={search}
         onSearchChange={handleSearch}
         addLabel="Thêm trường học"
-        onAdd={() => router.push("/schools/new")}
+        onAdd={hasPermission("SCHOOL_CREATE") ? () => router.push("/schools/new") : undefined}
         extras={
           <div className="flex items-center gap-2">
             <FilterSelect
@@ -288,25 +327,33 @@ export default function SchoolListClient({
               onChange={handleStatus}
               options={ALL_STATUSES}
             />
+            {isPending && (
+              <div className="flex items-center gap-1.5 text-primary-700">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-medium">Đang tìm...</span>
+              </div>
+            )}
           </div>
         }
       />
 
-      <DataTable<School>
-        columns={columns}
-        rows={filtered}
-        rowKey="id"
-        emptyLabel="Không tìm thấy trường học phù hợp"
-        stickyHeader
-        onRowClick={(row) => router.push(`/schools/${row.id}`)}
-      />
+      <div className={isPending ? "opacity-60 transition-opacity duration-200" : "transition-opacity duration-200"}>
+        <DataTable<School>
+          columns={columns}
+          rows={filtered}
+          rowKey="id"
+          emptyLabel="Không tìm thấy trường học phù hợp"
+          stickyHeader
+          onRowClick={(row) => router.push(`/schools/${row.id}`)}
+        />
+      </div>
 
       <Pagination
         total={total}
         page={page}
         pageSize={pageSize}
-        onPage={(p) => setPageAndSize(p, pageSize)}
-        onPageSize={(s) => setPageAndSize(1, s)}
+        onPage={(p) => navigateWithParams({ page: p, pageSize })}
+        onPageSize={(s) => navigateWithParams({ page: 1, pageSize: s })}
       />
     </>
   );

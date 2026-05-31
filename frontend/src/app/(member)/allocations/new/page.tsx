@@ -2,12 +2,20 @@ import React from "react";
 import { getAllStudents } from "@/services/students";
 import { getAllDisbursements } from "@/services/disbursements";
 import { getAllTeachers } from "@/services/teachers";
+import { getCurrentAccount } from "@/services/accounts";
+import AccessDenied from "@/components/common/AccessDenied";
 import AllocationCreateClient from "../_components/AllocationCreateClient";
 
 // ─────────────────────────────────────────────
 // Server Component — fetches lookup data for the create form
 // ─────────────────────────────────────────────
 export default async function NewAllocationPage() {
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  if (!permissions.includes("DISBURSEMENT_CREATE")) {
+    return <AccessDenied title="Tạo Phân bổ" />;
+  }
+
   let students: any[] = [];
   let teachers: any[] = [];
   let budgetSummary: any = {};
@@ -42,4 +50,5 @@ export default async function NewAllocationPage() {
     />
   );
 }
+
 

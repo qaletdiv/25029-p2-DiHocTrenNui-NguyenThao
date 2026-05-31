@@ -18,9 +18,10 @@ export default async function ImagesPage(props: {
 
   const page = typeof pageParam === "string" ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === "string" ? parseInt(pageSizeParam, 10) : 8;
+  const search = typeof searchParams?.search === 'string' ? searchParams.search : '';
 
   // 1. Fetch images (paginated)
-  const imagesResponse = await getAllImages(page, pageSize);
+  const imagesResponse = await getAllImages(page, pageSize, search || undefined);
   const isImagesPaginated = "images" in imagesResponse.data;
   const images = isImagesPaginated ? (imagesResponse.data as any).images : imagesResponse.data;
   const total = isImagesPaginated ? (imagesResponse.data as any).total : images.length;
@@ -48,6 +49,7 @@ export default async function ImagesPage(props: {
         initialPage={page}
         initialPageSize={pageSize}
         token={token}
+        initialSearch={search}
       />
     </PageShell>
   );

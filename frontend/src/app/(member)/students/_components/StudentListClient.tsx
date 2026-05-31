@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
@@ -15,6 +15,7 @@ import { usePermission } from "@/contexts/PermissionContext";
 // Constants
 // ─────────────────────────────────────────────
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const SEARCH_DEBOUNCE_MS = 400;
 
 const ALL_STATUSES: { value: string; label: string }[] = [
   { value: "", label: "Tất cả trạng thái" },
@@ -168,56 +169,107 @@ interface Props {
   total: number;
   initialPage: number;
   initialPageSize: number;
+  initialSearch: string;
+  initialStatus: string;
 }
 
-export default function StudentListClient({ students, total, initialPage, initialPageSize }: Props) {
+export default function StudentListClient({
+  students,
+  total,
+  initialPage,
+  initialPageSize,
+  initialSearch,
+  initialStatus,
+}: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { hasPermission } = usePermission();
+  const [isPending, startTransition] = useTransition();
 
-  // Derive unique school names from real data for the school filter
-  const schoolNames = useMemo(
-    () => Array.from(new Set(students.map((s) => s.school).filter(Boolean))),
-    [students]
-  );
-
-  // Filter state
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  // Local input state (for instant typing feedback)
+  const [search, setSearch] = useState(initialSearch);
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const page = initialPage;
   const pageSize = initialPageSize;
 
-  const setPageAndSize = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    params.set("pageSize", newPageSize.toString());
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  // Keep local state in sync when URL-driven props change
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
 
-  // Derived: filtered rows
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return students.filter((s) => {
-      const matchSearch =
-        !q ||
-        s.full_name.toLowerCase().includes(q) ||
-        String(s.id).toLowerCase().includes(q);
-      const matchStatus = !statusFilter || s.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [search, statusFilter, students]);
+  useEffect(() => {
+    setStatusFilter(initialStatus);
+  }, [initialStatus]);
 
-  const handleSearch = (v: string) => {
-    setSearch(v);
-  };
-  const handleStatus = (v: string) => {
-    setStatusFilter(v);
-  };
+  /**
+   * Build a new URL with updated query params and navigate.
+   * Resets to page 1 when search/status/pageSize changes.
+   */
+  const navigateWithParams = useCallback(
+    (overrides: { page?: number; pageSize?: number; search?: string; status?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-  // The rows are already paginated by the server, so we don't slice them again.
-  const paginated = filtered;
+      const newPage = overrides.page ?? 1;
+      const newPageSize = overrides.pageSize ?? pageSize;
+      const newSearch = overrides.search ?? search;
+      const newStatus = overrides.status ?? statusFilter;
+
+      params.set("page", String(newPage));
+      params.set("pageSize", String(newPageSize));
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      if (newStatus) {
+        params.set("status", newStatus);
+      } else {
+        params.delete("status");
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [searchParams, pathname, pageSize, search, statusFilter, router, startTransition]
+  );
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    (v: string) => {
+      setSearch(v);
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigateWithParams({ search: v, page: 1 });
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [navigateWithParams]
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  // Status filter handler (immediate, no debounce)
+  const handleStatus = useCallback(
+    (v: string) => {
+      setStatusFilter(v);
+      navigateWithParams({ status: v, page: 1 });
+    },
+    [navigateWithParams]
+  );
+
+  // The rows are already filtered + paginated by the server
+  const paginated = students;
 
   // Column definitions
   const columns: Column<Student>[] = [
@@ -297,27 +349,36 @@ export default function StudentListClient({ students, total, initialPage, initia
               onChange={handleStatus}
               options={ALL_STATUSES}
             />
+            {/* Loading indicator while fetching new results */}
+            {isPending && (
+              <div className="flex items-center gap-1.5 text-primary-700">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-medium">Đang tìm...</span>
+              </div>
+            )}
           </div>
         }
       />
 
       {/* ── Data table ── */}
-      <DataTable<Student>
-        columns={columns}
-        rows={paginated}
-        rowKey="id"
-        emptyLabel="Không tìm thấy học sinh phù hợp"
-        stickyHeader
-        onRowClick={(row) => router.push(`/students/${row.id}`)}
-      />
+      <div className={isPending ? "opacity-60 transition-opacity duration-200" : "transition-opacity duration-200"}>
+        <DataTable<Student>
+          columns={columns}
+          rows={paginated}
+          rowKey="id"
+          emptyLabel="Không tìm thấy học sinh phù hợp"
+          stickyHeader
+          onRowClick={(row) => router.push(`/students/${row.id}`)}
+        />
+      </div>
 
       {/* ── Pagination ── */}
       <Pagination
         total={total}
         page={page}
         pageSize={pageSize}
-        onPage={(p) => setPageAndSize(p, pageSize)}
-        onPageSize={(s) => setPageAndSize(1, s)}
+        onPage={(p) => navigateWithParams({ page: p, pageSize })}
+        onPageSize={(s) => navigateWithParams({ page: 1, pageSize: s })}
       />
     </>
   );

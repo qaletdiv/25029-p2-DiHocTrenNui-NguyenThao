@@ -34,6 +34,19 @@ class DisbursementController {
 
       const formattedDisbursements = disbursements.map(formatDisbursementResponse);
 
+      // Search filter (by student_name, sponsor_name, student_id, or transaction_code)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      let searchedDisbursements = formattedDisbursements;
+      if (searchQuery) {
+        searchedDisbursements = formattedDisbursements.filter(d => {
+          const studentMatch = d.student_name && d.student_name.toLowerCase().includes(searchQuery);
+          const studentIdMatch = String(d.student_id).toLowerCase().includes(searchQuery);
+          const sponsorMatch = d.sponsor_name && d.sponsor_name.toLowerCase().includes(searchQuery);
+          const codeMatch = d.transaction_code && d.transaction_code.toLowerCase().includes(searchQuery);
+          return studentMatch || studentIdMatch || sponsorMatch || codeMatch;
+        });
+      }
+
       // Compute remaining balance per bank transaction
       const txAllocated = {};
       for (const d of disbursements) {
@@ -57,7 +70,7 @@ class DisbursementController {
         }
       }
 
-      const paginatedResult = paginate(formattedDisbursements, req, 'disbursements');
+      const paginatedResult = paginate(searchedDisbursements, req, 'disbursements');
 
       return sendSuccess(res, {
         ...paginatedResult,

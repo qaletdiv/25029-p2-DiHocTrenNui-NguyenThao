@@ -25,8 +25,9 @@ export default async function SchoolsPage(props: {
 
   const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === 'string' ? parseInt(pageSizeParam, 10) : 10;
+  const search = typeof searchParams?.search === 'string' ? searchParams.search : '';
 
-  const response = await getAllSchools(page, pageSize);
+  const response = await getAllSchools(page, pageSize, search || undefined);
 
   // Handle both paginated and non-paginated responses gracefully
   const isPaginated = response.data && 'schools' in response.data;
@@ -63,6 +64,7 @@ export default async function SchoolsPage(props: {
         initialPage={page}
         initialPageSize={pageSize}
         teachers={teachersList}
+        initialSearch={search}
       />
     </PageShell>
   );

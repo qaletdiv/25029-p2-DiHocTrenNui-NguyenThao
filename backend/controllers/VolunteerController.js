@@ -10,6 +10,18 @@ class VolunteerController {
       const volunteers = await VolunteerModel.findAll();
       let formattedVolunteers = volunteers.map(formatVolunteerResponse);
 
+      // Search filter (by full_name, id, phone, or username)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        formattedVolunteers = formattedVolunteers.filter(v => {
+          const nameMatch = v.full_name && v.full_name.toLowerCase().includes(searchQuery);
+          const idMatch = String(v.id).toLowerCase().includes(searchQuery);
+          const phoneMatch = v.phone && v.phone.toLowerCase().includes(searchQuery);
+          const usernameMatch = v.username && v.username.toLowerCase().includes(searchQuery);
+          return nameMatch || idMatch || phoneMatch || usernameMatch;
+        });
+      }
+
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');

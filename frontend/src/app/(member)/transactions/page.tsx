@@ -26,10 +26,11 @@ export default async function TransactionsPage(props: {
   const page = typeof pageParam === "string" ? parseInt(pageParam, 10) : 1;
   const pageSize =
     typeof pageSizeParam === "string" ? parseInt(pageSizeParam, 10) : 10;
+  const search = typeof searchParams?.search === 'string' ? searchParams.search : '';
 
   // Fetch transactions and sponsors in parallel
   const [txResponse, sponsorResponse] = await Promise.all([
-    getAllTransactions(page, pageSize),
+    getAllTransactions(page, pageSize, search || undefined),
     getAllSponsors(),
   ]);
 
@@ -64,6 +65,7 @@ export default async function TransactionsPage(props: {
         total={total}
         initialPage={page}
         initialPageSize={pageSize}
+        initialSearch={search}
       />
     </PageShell>
   );

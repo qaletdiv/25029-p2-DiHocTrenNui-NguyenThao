@@ -4,6 +4,7 @@ import { getDisbursementById, getAllDisbursements } from "@/services/disbursemen
 import { getAllStudents } from "@/services/students";
 import { getAllTeachers } from "@/services/teachers";
 import { getAllTransactions } from "@/services/transactions";
+import { getCurrentAccount } from "@/services/accounts";
 import AllocationDetailClient from "../_components/AllocationDetailClient";
 
 // ─────────────────────────────────────────────
@@ -15,6 +16,9 @@ export default async function AllocationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const account = await getCurrentAccount();
+  const permissions = account?.permissions || [];
+  const hasTxRead = permissions.includes("BANK_TRANSACTION_READ");
 
   let disbursement;
   let students: any[] = [];
@@ -33,7 +37,7 @@ export default async function AllocationDetailPage({
       getDisbursementById(parseInt(id)),
       getAllStudents(),
       getAllTeachers(),
-      getAllTransactions(),
+      hasTxRead ? getAllTransactions() : Promise.resolve({ data: [] }),
       getAllDisbursements(),
     ]);
     disbursement = disbursementResponse.data;
@@ -74,5 +78,6 @@ export default async function AllocationDetailPage({
     />
   );
 }
+
 
 

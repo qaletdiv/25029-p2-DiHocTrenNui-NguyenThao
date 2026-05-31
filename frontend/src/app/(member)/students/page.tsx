@@ -21,11 +21,15 @@ export default async function StudentsPage(props: {
   const searchParams = await props.searchParams;
   const pageParam = searchParams?.page;
   const pageSizeParam = searchParams?.pageSize;
+  const searchParam = searchParams?.search;
+  const statusParam = searchParams?.status;
 
   const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === 'string' ? parseInt(pageSizeParam, 10) : 10;
+  const search = typeof searchParam === 'string' ? searchParam : '';
+  const status = typeof statusParam === 'string' ? statusParam : '';
 
-  const response = await getAllStudents(page, pageSize);
+  const response = await getAllStudents(page, pageSize, search, status);
 
   // Handle both paginated and non-paginated responses gracefully
   const isPaginated = 'students' in response.data;
@@ -39,7 +43,14 @@ export default async function StudentsPage(props: {
       icon={GraduationCap}
       iconColor="bg-primary-900/10 text-primary-900"
     >
-      <StudentListClient students={students} total={total} initialPage={page} initialPageSize={pageSize} />
+      <StudentListClient
+        students={students}
+        total={total}
+        initialPage={page}
+        initialPageSize={pageSize}
+        initialSearch={search}
+        initialStatus={status}
+      />
     </PageShell>
   );
 }

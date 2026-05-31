@@ -10,6 +10,17 @@ class SponsorController {
       const sponsors = await SponsorModel.findAll();
       let formattedSponsors = sponsors.map(formatSponsorResponse);
 
+      // Search filter (by full_name, id, or phone)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        formattedSponsors = formattedSponsors.filter(s => {
+          const nameMatch = s.full_name && s.full_name.toLowerCase().includes(searchQuery);
+          const idMatch = String(s.id).toLowerCase().includes(searchQuery);
+          const phoneMatch = s.phone && s.phone.toLowerCase().includes(searchQuery);
+          return nameMatch || idMatch || phoneMatch;
+        });
+      }
+
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');

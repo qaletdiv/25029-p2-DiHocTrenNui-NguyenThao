@@ -72,13 +72,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * GET /schools
  * Fetch schools. Supports pagination.
  */
-export async function getAllSchools(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedSchools>> {
+export async function getAllSchools(page?: number, pageSize?: number, search?: string): Promise<ApiResponse<PaginatedSchools>> {
     const headers = await getAuthHeaders();
     try {
         let url = `${BASE_URL}/schools`;
-        if (page !== undefined && pageSize !== undefined) {
-            url += `?page=${page}&pageSize=${pageSize}`;
-        }
+        const params = new URLSearchParams();
+        if (page !== undefined) params.set('page', String(page));
+        if (pageSize !== undefined) params.set('pageSize', String(pageSize));
+        if (search) params.set('search', search);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
         const res = await fetch(url, {
             method: "GET",
             headers,

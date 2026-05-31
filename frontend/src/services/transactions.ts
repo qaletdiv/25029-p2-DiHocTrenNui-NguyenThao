@@ -70,13 +70,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 // ─── Service Functions ────────────────────────────────────────────────────────
 
 /** GET /bank-transactions — Fetch all bank transactions. Supports pagination. */
-export async function getAllTransactions(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedTransactions | Transaction[]>> {
+export async function getAllTransactions(page?: number, pageSize?: number, search?: string): Promise<ApiResponse<PaginatedTransactions | Transaction[]>> {
     const headers = await getAuthHeaders();
     try {
         let url = `${BASE_URL}/bank-transactions`;
-        if (page !== undefined && pageSize !== undefined) {
-            url += `?page=${page}&pageSize=${pageSize}`;
-        }
+        const params = new URLSearchParams();
+        if (page !== undefined) params.set('page', String(page));
+        if (pageSize !== undefined) params.set('pageSize', String(pageSize));
+        if (search) params.set('search', search);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
         const res = await fetch(url, { method: "GET", headers });
         if (!res.ok) throw new Error(`Failed to fetch transactions: ${res.status} ${res.statusText}`);
         return res.json();

@@ -10,6 +10,17 @@ class SchoolController {
       const schools = await SchoolModel.findAll();
       let formattedSchools = schools.map(formatSchoolResponse);
 
+      // Search filter (by name, id, or address)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        formattedSchools = formattedSchools.filter(s => {
+          const nameMatch = s.name && s.name.toLowerCase().includes(searchQuery);
+          const idMatch = String(s.id).toLowerCase().includes(searchQuery);
+          const addrMatch = s.address && s.address.toLowerCase().includes(searchQuery);
+          return nameMatch || idMatch || addrMatch;
+        });
+      }
+
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');

@@ -16,8 +16,9 @@ export default async function AllocationsPage(props: {
 
   const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === 'string' ? parseInt(pageSizeParam, 10) : 10;
+  const search = typeof searchParams?.search === 'string' ? searchParams.search : '';
 
-  const response = await getAllDisbursements(page, pageSize);
+  const response = await getAllDisbursements(page, pageSize, search || undefined);
 
   // Handle both paginated and non-paginated responses gracefully
   const isPaginated = 'disbursements' in response.data;
@@ -38,6 +39,7 @@ export default async function AllocationsPage(props: {
         initialPage={page}
         initialPageSize={pageSize}
         budgetSummary={budgetSummary}
+        initialSearch={search}
       />
     </PageShell>
   );

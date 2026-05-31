@@ -75,6 +75,22 @@ class StudentController {
       const students = await StudentModel.findAll();
       let formattedStudents = students.map(formatStudentResponse);
 
+      // Search filter (by full_name or id)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        formattedStudents = formattedStudents.filter(student => {
+          const nameMatch = student.full_name && student.full_name.toLowerCase().includes(searchQuery);
+          const idMatch = String(student.id).toLowerCase().includes(searchQuery);
+          return nameMatch || idMatch;
+        });
+      }
+
+      // Status filter
+      const statusQuery = req.query.status ? req.query.status.trim() : '';
+      if (statusQuery) {
+        formattedStudents = formattedStudents.filter(student => student.status === statusQuery);
+      }
+
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');

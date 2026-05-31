@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
 import { Sponsor } from "@/services/sponsors";
+import { usePermission } from "@/contexts/PermissionContext";
 
 // ─────────────────────────────────────────────
 // Constants
@@ -153,6 +154,8 @@ function Pagination({
   );
 }
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 // ─────────────────────────────────────────────
 // Main Client Component
 // ─────────────────────────────────────────────
@@ -161,54 +164,95 @@ interface Props {
   total: number;
   initialPage: number;
   initialPageSize: number;
+  initialSearch: string;
 }
 
-export default function SponsorListClient({ sponsors, total, initialPage, initialPageSize }: Props) {
+export default function SponsorListClient({
+  sponsors,
+  total,
+  initialPage,
+  initialPageSize,
+  initialSearch,
+}: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hasPermission } = usePermission();
+  const [isPending, startTransition] = useTransition();
 
   // Filter state
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const page = initialPage;
   const pageSize = initialPageSize;
 
-  const setPageAndSize = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    params.set("pageSize", newPageSize.toString());
-    router.push(`${pathname}?${params.toString()}`);
+  // Keep local state in sync when URL-driven props change
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
+  const navigateWithParams = useCallback(
+    (overrides: { page?: number; pageSize?: number; search?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      const newPage = overrides.page ?? 1;
+      const newPageSize = overrides.pageSize ?? pageSize;
+      const newSearch = overrides.search ?? search;
+
+      params.set("page", String(newPage));
+      params.set("pageSize", String(newPageSize));
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [searchParams, pathname, pageSize, search, router, startTransition]
+  );
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    (v: string) => {
+      setSearch(v);
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigateWithParams({ search: v, page: 1 });
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [navigateWithParams]
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const handleStatus = (v: string) => {
+    setStatusFilter(v);
   };
 
-  // Derived: filtered rows
+  // Derived: filtered rows (still filter status client-side on the retrieved page results, search is done on server)
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
     return sponsors.filter((s) => {
-      const matchSearch =
-        !q ||
-        s.full_name.toLowerCase().includes(q) ||
-        String(s.id).toLowerCase().includes(q) ||
-        (s.phone && s.phone.toLowerCase().includes(q)) ||
-        (s.address && s.address.toLowerCase().includes(q));
-      
       let matchStatus = true;
       if (statusFilter === "active") {
         matchStatus = s.is_active === true;
       } else if (statusFilter === "inactive") {
         matchStatus = s.is_active === false;
       }
-      return matchSearch && matchStatus;
+      return matchStatus;
     });
-  }, [search, statusFilter, sponsors]);
-
-  const handleSearch = (v: string) => {
-    setSearch(v);
-  };
-  const handleStatus = (v: string) => {
-    setStatusFilter(v);
-  };
+  }, [statusFilter, sponsors]);
 
   // Column definitions
   const columns: Column<Sponsor>[] = [
@@ -265,7 +309,7 @@ export default function SponsorListClient({ sponsors, total, initialPage, initia
         searchValue={search}
         onSearchChange={handleSearch}
         addLabel="Thêm nhà tài trợ"
-        onAdd={() => router.push("/sponsors/new")}
+        onAdd={hasPermission("SPONSOR_CREATE") ? () => router.push("/sponsors/new") : undefined}
         extras={
           <div className="flex items-center gap-2">
             <FilterSelect
@@ -274,27 +318,35 @@ export default function SponsorListClient({ sponsors, total, initialPage, initia
               onChange={handleStatus}
               options={ALL_STATUSES}
             />
+            {isPending && (
+              <div className="flex items-center gap-1.5 text-primary-700">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-medium">Đang tìm...</span>
+              </div>
+            )}
           </div>
         }
       />
 
       {/* ── Data table ── */}
-      <DataTable<Sponsor>
-        columns={columns}
-        rows={filtered}
-        rowKey="id"
-        emptyLabel="Không tìm thấy nhà tài trợ phù hợp"
-        stickyHeader
-        onRowClick={(row) => router.push(`/sponsors/${row.id}`)}
-      />
+      <div className={isPending ? "opacity-60 transition-opacity duration-200" : "transition-opacity duration-200"}>
+        <DataTable<Sponsor>
+          columns={columns}
+          rows={filtered}
+          rowKey="id"
+          emptyLabel="Không tìm thấy nhà tài trợ phù hợp"
+          stickyHeader
+          onRowClick={(row) => router.push(`/sponsors/${row.id}`)}
+        />
+      </div>
 
       {/* ── Pagination ── */}
       <Pagination
         total={total}
         page={page}
         pageSize={pageSize}
-        onPage={(p) => setPageAndSize(p, pageSize)}
-        onPageSize={(s) => setPageAndSize(1, s)}
+        onPage={(p) => navigateWithParams({ page: p, pageSize })}
+        onPageSize={(s) => navigateWithParams({ page: 1, pageSize: s })}
       />
     </>
   );

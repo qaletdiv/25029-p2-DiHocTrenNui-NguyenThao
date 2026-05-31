@@ -10,6 +10,18 @@ class TeacherController {
       const teachers = await TeacherModel.findAll();
       let formattedTeachers = teachers.map(formatTeacherResponse);
 
+      // Search filter (by full_name, id, phone, or school)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        formattedTeachers = formattedTeachers.filter(t => {
+          const nameMatch = t.full_name && t.full_name.toLowerCase().includes(searchQuery);
+          const idMatch = String(t.id).toLowerCase().includes(searchQuery);
+          const phoneMatch = t.phone && t.phone.toLowerCase().includes(searchQuery);
+          const schoolMatch = t.school && t.school.toLowerCase().includes(searchQuery);
+          return nameMatch || idMatch || phoneMatch || schoolMatch;
+        });
+      }
+
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');

@@ -38,6 +38,7 @@ const ROLE_PERMISSIONS = [
   { id: 52, role_id: 4, permission_id: 10 }, // SCHOOL_READ
   { id: 53, role_id: 4, permission_id: 30 }, // TEACHER_READ
   { id: 54, role_id: 4, permission_id: 34 }, // VOLUNTEER_READ
+  { id: 60, role_id: 4, permission_id: 23 }, // IMAGE_READ
 ];
 
 module.exports = ROLE_PERMISSIONS;

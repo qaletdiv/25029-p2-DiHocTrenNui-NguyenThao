@@ -8,9 +8,20 @@ router.post('/', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const user = await AccountModel.findOne({ username, password });
+        const bcrypt = require('bcryptjs');
+        const user = await AccountModel.findByUsername(username);
         
+        let isValidPassword = false;
         if (user) {
+            // Support both bcrypt-hashed passwords and plaintext passwords (for seeding or backward compatibility)
+            if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+                isValidPassword = await bcrypt.compare(password, user.password);
+            } else {
+                isValidPassword = user.password === password;
+            }
+        }
+        
+        if (user && isValidPassword) {
             const currentUser = { id: user.id, username: user.username, role_id: user.role_id, email: user.email };
             
             const permissions = require('../data/permissions');

@@ -100,13 +100,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * GET /disbursements
  * Fetch all disbursements. Supports pagination.
  */
-export async function getAllDisbursements(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedDisbursements | Disbursement[]>> {
+export async function getAllDisbursements(page?: number, pageSize?: number, search?: string): Promise<ApiResponse<PaginatedDisbursements | Disbursement[]>> {
     const headers = await getAuthHeaders();
     try {
         let url = `${BASE_URL}/disbursements`;
-        if (page !== undefined && pageSize !== undefined) {
-            url += `?page=${page}&pageSize=${pageSize}`;
-        }
+        const params = new URLSearchParams();
+        if (page !== undefined) params.set('page', String(page));
+        if (pageSize !== undefined) params.set('pageSize', String(pageSize));
+        if (search) params.set('search', search);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
         const res = await fetch(url, {
             method: "GET",
             headers,

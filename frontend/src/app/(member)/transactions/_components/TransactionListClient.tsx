@@ -15,10 +15,12 @@ import {
   Banknote,
   Clock,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
+import { usePermission } from "@/contexts/PermissionContext";
 import {
   Transaction,
   createTransaction,
@@ -505,6 +507,8 @@ function DeleteConfirmModal({
   );
 }
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 // ─────────────────────────────────────────────
 // Main Client Component
 // ─────────────────────────────────────────────
@@ -514,6 +518,7 @@ interface Props {
   total: number;
   initialPage: number;
   initialPageSize: number;
+  initialSearch: string;
 }
 
 export default function TransactionListClient({
@@ -522,11 +527,13 @@ export default function TransactionListClient({
   total: initialTotal,
   initialPage,
   initialPageSize,
+  initialSearch,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
+  const { hasPermission } = usePermission();
 
   // Local state that gets refreshed on server refetch
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -539,8 +546,9 @@ export default function TransactionListClient({
   }, [initialTransactions, initialTotal]);
 
   // Filter state
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("");
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -550,31 +558,67 @@ export default function TransactionListClient({
   const page = initialPage;
   const pageSize = initialPageSize;
 
-  const setPageAndSize = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    params.set("pageSize", newPageSize.toString());
-    router.push(`${pathname}?${params.toString()}`);
+  // Keep local state in sync when URL-driven props change
+  React.useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
+  const navigateWithParams = React.useCallback(
+    (overrides: { page?: number; pageSize?: number; search?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      const newPage = overrides.page ?? 1;
+      const newPageSize = overrides.pageSize ?? pageSize;
+      const newSearch = overrides.search ?? search;
+
+      params.set("page", String(newPage));
+      params.set("pageSize", String(newPageSize));
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [searchParams, pathname, pageSize, search, router, startTransition]
+  );
+
+  // Debounced search handler
+  const handleSearch = React.useCallback(
+    (v: string) => {
+      setSearch(v);
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigateWithParams({ search: v, page: 1 });
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [navigateWithParams]
+  );
+
+  // Cleanup debounce on unmount
+  React.useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const handleStatus = (v: string) => {
+    setStatusFilter(v);
   };
 
-  // Derived: filtered rows
+  // Derived: filtered rows (client-side status filter only)
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
     return transactions.filter((t) => {
-      const matchSearch =
-        !q ||
-        t.transfer_content.toLowerCase().includes(q) ||
-        String(t.id).includes(q) ||
-        (t.transaction_code &&
-          t.transaction_code.toLowerCase().includes(q)) ||
-        (t.bank_name && t.bank_name.toLowerCase().includes(q));
-
       const matchStatus =
         !statusFilter || String(t.status_id) === statusFilter;
-
-      return matchSearch && matchStatus;
+      return matchStatus;
     });
-  }, [search, statusFilter, transactions]);
+  }, [statusFilter, transactions]);
 
   // Summary stats
   const summaryStats = useMemo(() => {
@@ -777,38 +821,46 @@ export default function TransactionListClient({
       <ListToolbar
         searchPlaceholder="Tìm theo nội dung, mã giao dịch, ngân hàng..."
         searchValue={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearch}
         addLabel="Thêm giao dịch"
-        onAdd={() => setShowCreateModal(true)}
+        onAdd={hasPermission("BANK_TRANSACTION_CREATE") ? () => setShowCreateModal(true) : undefined}
         extras={
           <div className="flex items-center gap-2">
             <FilterSelect
               id="filter-status"
               value={statusFilter}
-              onChange={setStatusFilter}
+              onChange={handleStatus}
               options={ALL_STATUSES}
             />
+            {isPending && (
+              <div className="flex items-center gap-1.5 text-primary-700">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-medium">Đang tìm...</span>
+              </div>
+            )}
           </div>
         }
       />
 
       {/* ── Data table ── */}
-      <DataTable<Transaction>
-        columns={columns}
-        rows={filtered}
-        rowKey="id"
-        emptyLabel="Không tìm thấy giao dịch phù hợp"
-        stickyHeader
-        onRowClick={(row) => router.push(`/transactions/${row.id}`)}
-      />
+      <div className={isPending ? "opacity-60 transition-opacity duration-200" : "transition-opacity duration-200"}>
+        <DataTable<Transaction>
+          columns={columns}
+          rows={filtered}
+          rowKey="id"
+          emptyLabel="Không tìm thấy giao dịch phù hợp"
+          stickyHeader
+          onRowClick={(row) => router.push(`/transactions/${row.id}`)}
+        />
+      </div>
 
       {/* ── Pagination ── */}
       <Pagination
         total={total}
         page={page}
         pageSize={pageSize}
-        onPage={(p) => setPageAndSize(p, pageSize)}
-        onPageSize={(s) => setPageAndSize(1, s)}
+        onPage={(p) => navigateWithParams({ page: p, pageSize })}
+        onPageSize={(s) => navigateWithParams({ page: 1, pageSize: s })}
       />
 
       {/* ── Create Modal ── */}

@@ -71,13 +71,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * GET /volunteers
  * Fetch all volunteers. Supports pagination.
  */
-export async function getAllVolunteers(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedVolunteers>> {
+export async function getAllVolunteers(page?: number, pageSize?: number, search?: string): Promise<ApiResponse<PaginatedVolunteers>> {
     const headers = await getAuthHeaders();
     try {
         let url = `${BASE_URL}/volunteers`;
-        if (page !== undefined && pageSize !== undefined) {
-            url += `?page=${page}&pageSize=${pageSize}`;
-        }
+        const params = new URLSearchParams();
+        if (page !== undefined) params.set('page', String(page));
+        if (pageSize !== undefined) params.set('pageSize', String(pageSize));
+        if (search) params.set('search', search);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
         const res = await fetch(url, {
             method: "GET",
             headers,

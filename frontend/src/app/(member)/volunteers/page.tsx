@@ -24,8 +24,9 @@ export default async function VolunteersPage(props: {
 
   const page = typeof pageParam === "string" ? parseInt(pageParam, 10) : 1;
   const pageSize = typeof pageSizeParam === "string" ? parseInt(pageSizeParam, 10) : 10;
+  const search = typeof searchParams?.search === 'string' ? searchParams.search : '';
 
-  const response = await getAllVolunteers(page, pageSize);
+  const response = await getAllVolunteers(page, pageSize, search || undefined);
 
   const volunteers = response.data?.volunteers ?? [];
   const total = response.data?.total ?? volunteers.length;
@@ -42,6 +43,7 @@ export default async function VolunteersPage(props: {
         total={total}
         initialPage={page}
         initialPageSize={pageSize}
+        initialSearch={search}
       />
     </PageShell>
   );

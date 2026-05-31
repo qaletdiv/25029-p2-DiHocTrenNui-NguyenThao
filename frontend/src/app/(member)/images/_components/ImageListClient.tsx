@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
   Images,
@@ -16,10 +16,12 @@ import {
   Image as ImageIcon,
   Sparkles,
   RefreshCw,
-  Upload
+  Upload,
+  Loader2
 } from "lucide-react";
 import Image from "next/image";
 import ListToolbar from "@/components/member/common/ListToolbar";
+import { usePermission } from "@/contexts/PermissionContext";
 import {
   Image as ImageType,
   getAllImages,
@@ -60,6 +62,8 @@ function SafeImage({ src, alt, fallbackSrc = "/images/default-avatar.jpg", ...pr
   );
 }
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 interface Props {
   initialImages: ImageType[];
   students: Student[];
@@ -67,6 +71,7 @@ interface Props {
   initialPage: number;
   initialPageSize: number;
   token: string;
+  initialSearch: string;
 }
 
 export default function ImageListClient({
@@ -75,11 +80,14 @@ export default function ImageListClient({
   total: serverTotal,
   initialPage,
   initialPageSize,
-  token
+  token,
+  initialSearch,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hasPermission } = usePermission();
+  const [isPending, startTransition] = useTransition();
 
   // Primary list state
   const [displayedImages, setDisplayedImages] = useState<ImageType[]>(initialImages);
@@ -87,11 +95,12 @@ export default function ImageListClient({
   const [loading, setLoading] = useState(false);
 
   // Filters State
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [selectedStudent, setSelectedStudent] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [activeFilterMode, setActiveFilterMode] = useState<"none" | "student" | "range">("none");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -161,16 +170,63 @@ export default function ImageListClient({
     }
   }, [initialImages, serverTotal, activeFilterMode]);
 
+  // Keep local state in sync when URL-driven props change
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
   // Pagination parameters from URL
   const page = initialPage;
   const pageSize = initialPageSize;
 
-  const setPageAndSize = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    params.set("pageSize", newPageSize.toString());
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  const navigateWithParams = useCallback(
+    (overrides: { page?: number; pageSize?: number; search?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      const newPage = overrides.page ?? 1;
+      const newPageSize = overrides.pageSize ?? pageSize;
+      const newSearch = overrides.search ?? search;
+
+      params.set("page", String(newPage));
+      params.set("pageSize", String(newPageSize));
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [searchParams, pathname, pageSize, search, router, startTransition]
+  );
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    (v: string) => {
+      setSearch(v);
+      // Reset other custom filter modes
+      setActiveFilterMode("none");
+      setSelectedStudent("");
+      setStartDate("");
+      setEndDate("");
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigateWithParams({ search: v, page: 1 });
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [navigateWithParams]
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   // ─── Fetching / Filter Actions ─────────────────────────────────────────────
 
@@ -233,29 +289,16 @@ export default function ImageListClient({
     setDisplayedImages(initialImages);
     setTotal(serverTotal);
     // Reset pagination to first page
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     params.set("page", "1");
-    router.push(`${pathname}?${params.toString()}`);
+    params.set("pageSize", String(pageSize));
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
   };
 
   // Derived: filtered rows locally based on search term
-  const filteredImages = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return displayedImages;
-
-    return displayedImages.filter((img) => {
-      const studentName = studentMap.get(String(img.student_id)) || "";
-      const eventId = String(img.event_id || "").toLowerCase();
-      const month = String(img.metadata?.month || "").toLowerCase();
-
-      return (
-        studentName.toLowerCase().includes(q) ||
-        String(img.student_id).toLowerCase().includes(q) ||
-        eventId.includes(q) ||
-        month.includes(q)
-      );
-    });
-  }, [search, displayedImages, studentMap]);
+  const filteredImages = displayedImages;
 
   // ─── Modal Functions ───────────────────────────────────────────────────────
 
@@ -375,11 +418,17 @@ export default function ImageListClient({
       <ListToolbar
         searchPlaceholder="Tìm theo học sinh, mã HS, tháng..."
         searchValue={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearch}
         addLabel="Tải ảnh lên"
-        onAdd={openCreateModal}
+        onAdd={hasPermission("IMAGE_CREATE") ? openCreateModal : undefined}
         extras={
           <div className="flex flex-wrap items-center gap-3">
+            {isPending && (
+              <div className="flex items-center gap-1.5 text-primary-700">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-medium">Đang tìm...</span>
+              </div>
+            )}
             {/* Student Dropdown Filter */}
             <div className="relative">
               <select
@@ -577,7 +626,7 @@ export default function ImageListClient({
               <select
                 value={pageSize}
                 onChange={(e) => {
-                  setPageAndSize(1, Number(e.target.value));
+                  navigateWithParams({ page: 1, pageSize: Number(e.target.value) });
                 }}
                 className="border border-gray-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-primary-700 cursor-pointer"
               >
@@ -591,7 +640,7 @@ export default function ImageListClient({
 
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setPageAndSize(page - 1, pageSize)}
+                onClick={() => navigateWithParams({ page: page - 1 })}
                 disabled={page <= 1}
                 className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Trang trước"
@@ -614,7 +663,7 @@ export default function ImageListClient({
                   ) : (
                     <button
                       key={p}
-                      onClick={() => setPageAndSize(p as number, pageSize)}
+                      onClick={() => navigateWithParams({ page: p as number })}
                       className={[
                         "w-7 h-7 rounded-lg text-xs font-medium transition-colors",
                         p === page
@@ -628,7 +677,7 @@ export default function ImageListClient({
                 )}
 
               <button
-                onClick={() => setPageAndSize(page + 1, pageSize)}
+                onClick={() => navigateWithParams({ page: page + 1 })}
                 disabled={page >= totalPages}
                 className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Trang sau"

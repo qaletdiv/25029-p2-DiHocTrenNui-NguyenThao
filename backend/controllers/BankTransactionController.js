@@ -9,11 +9,23 @@ class BankTransactionController {
       const transactions = await BankTransactionModel.findAll();
       let filteredTransactions = transactions;
 
+      // Search filter (by transfer_content, transaction_code, or bank_name)
+      const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
+      if (searchQuery) {
+        filteredTransactions = filteredTransactions.filter(t => {
+          const contentMatch = t.transfer_content && t.transfer_content.toLowerCase().includes(searchQuery);
+          const codeMatch = t.transaction_code && t.transaction_code.toLowerCase().includes(searchQuery);
+          const bankMatch = t.bank_name && t.bank_name.toLowerCase().includes(searchQuery);
+          const idMatch = String(t.id).includes(searchQuery);
+          return contentMatch || codeMatch || bankMatch || idMatch;
+        });
+      }
+
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
         const { sponsorId } = getSponsorLinkedResources(req.user.id);
-        filteredTransactions = transactions.filter(t => t.sponsor_id === sponsorId);
+        filteredTransactions = filteredTransactions.filter(t => t.sponsor_id === sponsorId);
       }
 
       return sendSuccess(res, paginate(filteredTransactions, req, 'transactions'));

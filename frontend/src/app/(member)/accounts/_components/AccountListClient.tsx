@@ -7,6 +7,7 @@ import DataTable, { Column } from "@/components/member/common/DataTable";
 import StatusBadge from "@/components/member/common/StatusBadge";
 import ListToolbar from "@/components/member/common/ListToolbar";
 import { Account } from "@/services/accounts";
+import { usePermission } from "@/contexts/PermissionContext";
 
 // ─────────────────────────────────────────────
 // Constants
@@ -191,6 +192,7 @@ export default function AccountListClient({ accounts, total, initialPage, initia
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hasPermission } = usePermission();
 
   // Filter state
   const [search, setSearch] = useState("");
@@ -291,7 +293,7 @@ export default function AccountListClient({ accounts, total, initialPage, initia
         searchValue={search}
         onSearchChange={handleSearch}
         addLabel="Thêm tài khoản"
-        onAdd={() => router.push("/accounts/new")}
+        onAdd={hasPermission("USER_CREATE") ? () => router.push("/accounts/new") : undefined}
         extras={
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect
