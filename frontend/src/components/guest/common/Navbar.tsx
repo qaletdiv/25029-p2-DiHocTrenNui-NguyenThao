@@ -1,12 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Menu, User, X } from "lucide-react";
 import Button from "@/components/guest/common/Button";
 
 const NAV_ITEMS = [
     { label: 'Trang chủ', href: '/#home' },
-    { label: 'Phương thức', href: '/#campaigns' },
     { label: 'Giới thiệu', href: '/#about' },
     { label: 'Hoạt động', href: '/#services' },
     { label: 'Tin tức', href: '/#news' },
@@ -50,10 +50,12 @@ export default function Navbar({ }: NavbarProps) {
 
                         {/* Right Actions */}
                         <div className="hidden lg:flex items-center gap-6">
-                            <button className="text-primary-900 hover:text-primary-700 transition-colors">
-                                <User size={30} onClick={() => window.location.href = '/login'} />
-                            </button>
-                            <Button variant="primary" size="md">ỦNG HỘ NGAY</Button>
+                            <Link href="/login" className="text-primary-900 hover:text-primary-700 transition-colors">
+                                <User size={30} />
+                            </Link>
+                            <Link href="/register">
+                                <Button variant="primary" size="md">ỦNG HỘ NGAY</Button>
+                            </Link>
                         </div>
 
                         {/* Mobile Menu Button */}
@@ -84,9 +86,13 @@ export default function Navbar({ }: NavbarProps) {
                             ))}
                             <div className="pt-4 flex flex-col gap-4 px-3 pb-4">
                                 <div className="flex gap-4">
-                                    <button className="flex items-center gap-2 text-primary-900" onClick={() => window.location.href = '/login'}><User size={20} /> Login</button>
+                                    <Link href="/login" className="flex items-center gap-2 text-primary-900">
+                                        <User size={20} /> Login
+                                    </Link>
                                 </div>
-                                <Button variant="primary" fullWidth>ỦNG HỘ NGAY</Button>
+                                <Link href="/register" className="w-full">
+                                    <Button variant="primary" fullWidth>ỦNG HỘ NGAY</Button>
+                                </Link>
                             </div>
                         </div>
                     </div>

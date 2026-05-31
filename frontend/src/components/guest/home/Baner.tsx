@@ -2,6 +2,7 @@ import React from "react";
 import { Play } from "lucide-react";
 import Button from "@/components/guest/common/Button"
 import Image from "next/image";
+import Link from "next/link";
 import baner2 from "@/assets/images/baner2.jpg"
 
 interface BanerProps { }
@@ -36,7 +37,9 @@ export default function Baner({ }: BanerProps) {
 
 
                     <div className="flex flex-wrap items-center gap-6 pt-4">
-                        <Button variant="accent" size="lg" className="rounded-full px-8">ỦNG HỘ NGAY</Button>
+                        <Link href="/register">
+                            <Button variant="accent" size="lg" className="rounded-full px-8">ỦNG HỘ NGAY</Button>
+                        </Link>
                     </div>
                 </div>
 

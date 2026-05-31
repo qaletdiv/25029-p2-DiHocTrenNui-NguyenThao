@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, Bell, ChevronDown, LogOut } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import { logoutAction } from "@/services/login";
 
 interface DashboardHeaderProps {
@@ -73,14 +73,14 @@ export default function DashboardHeader({
 
       {/* Right: Notification + User */}
       <div className="ml-auto flex items-center gap-3">
-        {/* Notification bell */}
-        <button
+        {/* TODO:Notification bell */}
+        {/* <button
           className="relative flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-primary-900 transition-colors"
           aria-label="Thông báo"
         >
           <Bell size={18} />
           <span className="absolute top-1.5 right-1.5 block w-2 h-2 bg-accent-orange rounded-full ring-2 ring-white" />
-        </button>
+        </button> */}
 
         {/* User info */}
         <Link

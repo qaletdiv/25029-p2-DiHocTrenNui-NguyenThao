@@ -15,8 +15,8 @@ interface Tab {
 
 const TABS: Tab[] = [
   { id: "info", label: "Thông tin cá nhân", icon: UserCircle },
-  { id: "security", label: "Bảo mật", icon: KeyRound },
-  { id: "notifications", label: "Thông báo", icon: Bell },
+  { id: "security", label: "Bảo mật", icon: KeyRound }
+  // TODO{ id: "notifications", label: "Thông báo", icon: Bell },
 ];
 
 /* ── Reusable field row ─────────────────────────────────── */
@@ -65,14 +65,12 @@ function NotifRow({ label, desc, defaultChecked }: { label: string; desc: string
         role="switch"
         aria-checked={on}
         onClick={() => setOn(!on)}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-          on ? "bg-primary-900" : "bg-gray-200"
-        }`}
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${on ? "bg-primary-900" : "bg-gray-200"
+          }`}
       >
         <span
-          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
-            on ? "translate-x-5" : "translate-x-0"
-          }`}
+          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${on ? "translate-x-5" : "translate-x-0"
+            }`}
         />
       </button>
     </div>
@@ -283,14 +281,13 @@ export default function ProfilePage() {
           {activeTab === "info" && (
             <form onSubmit={handleSaveInfo} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
               <h3 className="text-base font-semibold text-gray-700">Thông tin cơ bản</h3>
-              
+
               {infoMessage && (
                 <div
-                  className={`p-4 rounded-xl text-sm ${
-                    infoMessage.type === "success"
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                      : "bg-red-50 text-red-700 border border-red-100"
-                  }`}
+                  className={`p-4 rounded-xl text-sm ${infoMessage.type === "success"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                    : "bg-red-50 text-red-700 border border-red-100"
+                    }`}
                 >
                   {infoMessage.text}
                 </div>
@@ -362,11 +359,10 @@ export default function ProfilePage() {
 
               {securityMessage && (
                 <div
-                  className={`p-4 rounded-xl text-sm ${
-                    securityMessage.type === "success"
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                      : "bg-red-50 text-red-700 border border-red-100"
-                  }`}
+                  className={`p-4 rounded-xl text-sm ${securityMessage.type === "success"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                    : "bg-red-50 text-red-700 border border-red-100"
+                    }`}
                 >
                   {securityMessage.text}
                 </div>
