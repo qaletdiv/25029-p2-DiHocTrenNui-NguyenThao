@@ -7,10 +7,10 @@ export default function About({}: AboutProps) {
     return (
         <div className="py-20 bg-gray-50" id="about">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid lg:grid-cols-12 gap-16 items-start">
+                <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-start">
                     <div className="lg:col-span-8">
                         {/* Left Images */}
-                        <div className="grid grid-cols-2 gap-6 items-stretch">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
                             {/* Column 1: Image + Quote */}
                             <div className="space-y-6 flex flex-col">
                                 <Image
@@ -34,14 +34,14 @@ export default function About({}: AboutProps) {
                                     alt="Children smiling"
                                     width={400}
                                     height={600}
-                                    className="rounded-2xl object-cover w-full h-full shadow-lg min-h-[300px]"
+                                    className="rounded-2xl object-cover w-full h-72 sm:h-full shadow-lg min-h-[300px]"
                                 />
                             </div>
                         </div>
                     </div>
                     <div className="lg:col-span-4">
                         {/* Right Content */}
-                        <div className="lg:col-span-5 space-y-8 pt-4">
+                        <div className="space-y-8 pt-4 lg:pt-0">
                             <h2 className="text-4xl md:text-5xl font-sans font-bold text-primary-900 leading-tight">
                                 Giới thiệu dự án
                             </h2>

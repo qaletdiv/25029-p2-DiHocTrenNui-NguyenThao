@@ -29,7 +29,7 @@ export default function Values({ }: ValuesProps) {
     return (
         <div className="py-24 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid lg:grid-cols-2 gap-16">
+                <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
 
                     <div className="space-y-12">
                         <div className="grid sm:grid-cols-2 gap-y-12 gap-x-8">

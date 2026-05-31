@@ -11,7 +11,7 @@ export default function Baner({ }: BanerProps) {
     return (
         <div className="relative overflow-hidden min-h-[600px] flex items-center bg-yellow-400" id="home">
             {/* Background Split */}
-            <div className="absolute top-0 left-0 w-full lg:w-[45%] h-full bg-primary-900 z-0"></div>
+            <div className="absolute top-0 left-0 w-full lg:w-[50%] h-full bg-primary-900 z-0"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 grid lg:grid-cols-2 gap-12 items-center py-12 lg:py-20">
 

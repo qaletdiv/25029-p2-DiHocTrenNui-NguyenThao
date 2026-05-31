@@ -25,6 +25,7 @@ import { getCurrentAccount } from "@/services/accounts";
 // Types
 // ---------------------------------------------------------------------------
 interface Stat {
+  permission: string;
   label: string;
   value: number;
   icon: LucideIcon;
@@ -43,25 +44,25 @@ async function fetchSafeTotal(
   try {
     const res = await fetchFn();
     if (!res || !res.data) return 0;
-    
+
     const data = res.data;
-    
+
     // Case 1: Standard pagination shape with a 'total' property
     if (typeof data === "object" && data !== null && "total" in data) {
       return data.total;
     }
-    
+
     // Case 2: Response contains the array keyed by the dataKey
     if (typeof data === "object" && data !== null && dataKey in data) {
       const arr = data[dataKey];
       return Array.isArray(arr) ? arr.length : 0;
     }
-    
+
     // Case 3: Response data itself is a direct array
     if (Array.isArray(data)) {
       return data.length;
     }
-    
+
     return 0;
   } catch (error) {
     console.error(`[fetchSafeTotal] Failed to fetch total for key ${dataKey}:`, error);
@@ -104,14 +105,13 @@ export default async function DashboardPage() {
     hasPermission("BANK_TRANSACTION_READ") ? fetchSafeTotal(() => getAllTransactions(), "transactions") : Promise.resolve(0),
   ]);
 
-  const statsConfig = [
+  const statsConfig: Stat[] = [
     {
       permission: "STUDENT_READ",
       label: "Tổng số Học sinh",
       value: studentsTotal,
       icon: GraduationCap,
       colorClass: "bg-primary-900/10 text-primary-900",
-      trend: { value: "+12 tháng này", positive: true },
       linkTo: "/students",
     },
     {
@@ -120,7 +120,6 @@ export default async function DashboardPage() {
       value: sponsorsTotal,
       icon: HandHeart,
       colorClass: "bg-accent-yellow/20 text-yellow-700",
-      trend: { value: "+5 tháng này", positive: true },
       linkTo: "/sponsors",
     },
     {
@@ -137,7 +136,6 @@ export default async function DashboardPage() {
       value: teachersTotal,
       icon: BookUser,
       colorClass: "bg-sky-100 text-sky-700",
-      trend: { value: "+2 tháng này", positive: true },
       linkTo: "/teachers",
     },
     {
@@ -146,7 +144,6 @@ export default async function DashboardPage() {
       value: volunteersTotal,
       icon: Users,
       colorClass: "bg-violet-100 text-violet-700",
-      trend: { value: "-3 tháng này", positive: false },
       linkTo: "/volunteers",
     },
     {
@@ -155,7 +152,6 @@ export default async function DashboardPage() {
       value: imagesTotal,
       icon: Images,
       colorClass: "bg-pink-100 text-pink-700",
-      trend: { value: "+68 tháng này", positive: true },
       linkTo: "/images",
     },
     {
@@ -164,7 +160,6 @@ export default async function DashboardPage() {
       value: transactionsTotal,
       icon: Receipt,
       colorClass: "bg-orange-100 text-orange-700",
-      trend: { value: "+24 tháng này", positive: true },
       linkTo: "/transactions",
     },
   ];
@@ -188,7 +183,8 @@ export default async function DashboardPage() {
           <span className="font-semibold text-accent-yellow">
             Đi Học Trên Núi
           </span>
-          . Mọi con số đều là một câu chuyện yêu thương.
+          . <br />
+          Mỗi con số đều là một câu chuyện yêu thương.
         </p>
       </div>
 
@@ -218,20 +214,6 @@ export default async function DashboardPage() {
             linkTo={stat.linkTo}
           />
         ))}
-      </div>
-
-      {/* Placeholder for future chart / activity sections */}
-      <div className="grid lg:grid-cols-2 gap-5">
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-6 flex flex-col items-center justify-center text-center min-h-[180px] text-gray-400 hover:border-primary-700/40 transition-colors">
-          <Receipt size={28} className="mb-3 opacity-30" />
-          <p className="text-sm font-medium">Biểu đồ giao dịch</p>
-          <p className="text-xs mt-1 opacity-70">Sắp ra mắt</p>
-        </div>
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-6 flex flex-col items-center justify-center text-center min-h-[180px] text-gray-400 hover:border-primary-700/40 transition-colors">
-          <Users size={28} className="mb-3 opacity-30" />
-          <p className="text-sm font-medium">Hoạt động gần đây</p>
-          <p className="text-xs mt-1 opacity-70">Sắp ra mắt</p>
-        </div>
       </div>
     </section>
   );

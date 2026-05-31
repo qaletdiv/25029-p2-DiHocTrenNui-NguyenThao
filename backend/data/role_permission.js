@@ -15,6 +15,9 @@ const ROLE_PERMISSIONS = [
   { id: 38, role_id: 2, permission_id: 25 }, // REPORT_READ
   { id: 49, role_id: 2, permission_id: 30 }, // TEACHER_READ
   { id: 50, role_id: 2, permission_id: 34 }, // VOLUNTEER_READ
+  { id: 57, role_id: 2, permission_id: 26 }, // DISBURSEMENT_CREATE
+  { id: 58, role_id: 2, permission_id: 27 }, // DISBURSEMENT_READ
+  { id: 59, role_id: 2, permission_id: 28 }, // DISBURSEMENT_UPDATE
 
   // Teacher (Role ID 3)
   { id: 39, role_id: 3, permission_id: 1 }, // STUDENT_CREATE
