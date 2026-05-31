@@ -1,8 +1,12 @@
-import React from "react";
-import { useTheme } from "../../context/ThemeContext";
+import React, { useState } from "react";
 
 export const ThemeToggleButton: React.FC = () => {
-  const { toggleTheme } = useTheme();
+  const [, setDark] = useState(false);
+  const toggleTheme = () =>
+    setDark((prev) => {
+      document.documentElement.classList.toggle("dark", !prev);
+      return !prev;
+    });
 
   return (
     <button

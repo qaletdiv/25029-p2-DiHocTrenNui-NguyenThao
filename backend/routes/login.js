@@ -5,21 +5,22 @@ const AccountModel = require('../models/AccountModel');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 
 router.post('/', async (req, res) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     try {
-        const user = await AccountModel.findOne({ email, password });
+        const user = await AccountModel.findOne({ username, password });
         
         if (user) {
-            const currentUser = { id: user.id, email: user.email, role_id: user.role_id, username: user.username };
+            const currentUser = { id: user.id, username: user.username, role_id: user.role_id, email: user.email };
             
-            // Fetch permissions for this role
             const permissions = require('../data/permissions');
             const rolePermissions = require('../data/role_permission');
             const userPermissionIds = rolePermissions
                 .filter(rp => rp.role_id === user.role_id)
                 .map(rp => rp.permission_id);
-            const userPermissions = permissions.filter(p => userPermissionIds.includes(p.id));
+            const userPermissions = permissions
+                .filter(p => userPermissionIds.includes(p.id))
+                .map(p => p.code);
 
             const accessToken = jwt.sign(currentUser, req.app.get('SECRET_KEY'), { expiresIn: '24h' });
             
@@ -28,7 +29,7 @@ router.post('/', async (req, res) => {
                 user: { ...currentUser, permissions: userPermissions } 
             }, 'Login successful');
         } else {
-            return sendError(res, 'Email hoặc mật khẩu không đúng.', [], 401);
+            return sendError(res, 'Tên đăng nhập hoặc mật khẩu không đúng.', [], 401);
         }
 
     } catch (error) {

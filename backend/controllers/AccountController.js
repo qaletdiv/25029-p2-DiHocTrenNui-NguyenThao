@@ -1,12 +1,13 @@
 const AccountModel = require('../models/AccountModel');
 const { validateAccount } = require('../validations/accountValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class AccountController {
   async getAllAccounts(req, res) {
     try {
       const accounts = await AccountModel.findAll();
-      return sendSuccess(res, accounts);
+      return sendSuccess(res, paginate(accounts, req, 'accounts'));
     } catch (error) {
       return sendError(res, 'Failed to fetch accounts', error.message);
     }
@@ -16,7 +17,21 @@ class AccountController {
     try {
       const account = await AccountModel.findById(parseInt(req.params.id));
       if (!account) return sendError(res, 'Account not found', [], 404);
-      return sendSuccess(res, account);
+
+      const permissions = require('../data/permissions');
+      const rolePermissions = require('../data/role_permission');
+      const userPermissionIds = rolePermissions
+        .filter(rp => rp.role_id === account.role_id)
+        .map(rp => rp.permission_id);
+      
+      const userPermissions = permissions
+        .filter(p => userPermissionIds.includes(p.id))
+        .map(p => p.code);
+
+      return sendSuccess(res, {
+        ...account,
+        permissions: userPermissions
+      });
     } catch (error) {
       return sendError(res, 'Failed to fetch account', error.message);
     }

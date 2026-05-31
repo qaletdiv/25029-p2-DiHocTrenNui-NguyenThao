@@ -4,7 +4,7 @@ const port = 5001;
 
 const app = express();
 app.use(cors({ credentials: true, origin: 'http://localhost:5000' }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Set global constant
 app.set('SECRET_KEY', 'dihoctrennui-example-secret-key-2026');
@@ -21,6 +21,9 @@ const sponsorRoutes = require('./routes/sponsorRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const bankTransactionRoutes = require('./routes/bankTransactionRoutes');
 const imageRoutes = require('./routes/imageRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
+const volunteerRoutes = require('./routes/volunteerRoutes');
+const disbursementRoutes = require('./routes/disbursementRoutes');
 
 
 // Public Routes
@@ -32,8 +35,10 @@ app.use('/students', authenticate, studentRoutes);
 app.use('/sponsors', authenticate, sponsorRoutes);
 app.use('/schools', authenticate, schoolRoutes);
 app.use('/bank-transactions', authenticate, bankTransactionRoutes);
-
 app.use('/images', authenticate, imageRoutes);
+app.use('/teachers', authenticate, teacherRoutes);
+app.use('/volunteers', authenticate, volunteerRoutes);
+app.use('/disbursements', authenticate, disbursementRoutes);
 
 
 // Home Route

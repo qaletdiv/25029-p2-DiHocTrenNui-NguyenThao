@@ -1,0 +1,35 @@
+export const STUDENT_STATUS = {
+    INFO: 'INFO',
+    CONTACTED: 'CONTACTED',
+    ACTIVE: 'ACTIVE',
+    PAUSED: 'PAUSED',
+    DROPPED_OUT: 'DROPPED_OUT',
+    GRADUATED: 'GRADUATED',
+};
+
+export const BANK_TRANSACTION_STATUS = {
+    PENDING: 'PENDING',
+    VERIFIED: 'VERIFIED',
+    REJECTED: 'REJECTED',
+};
+
+export const DISBURSEMENT_STATUS = {
+    HOLDING: 'HOLDING',
+    SENT_TO_TEACHER: 'SENT_TO_TEACHER',
+    DELIVERED_TO_STUDENT: 'DELIVERED_TO_STUDENT',
+};
+
+export const STUDENT_STATUS_TRANSLATIONS = {
+    [STUDENT_STATUS.INFO]: 'Đang lấy thông tin',
+    [STUDENT_STATUS.CONTACTED]: 'Đã liên hệ',
+    [STUDENT_STATUS.ACTIVE]: 'Đang hỗ trợ',
+    [STUDENT_STATUS.PAUSED]: 'Tạm dừng',
+    [STUDENT_STATUS.DROPPED_OUT]: 'Đã nghỉ học',
+    [STUDENT_STATUS.GRADUATED]: 'Đã tốt nghiệp',
+};
+
+export const DISBURSEMENT_STATUS_TRANSLATIONS: Record<string, string> = {
+    [DISBURSEMENT_STATUS.HOLDING]: 'Đang giữ',
+    [DISBURSEMENT_STATUS.SENT_TO_TEACHER]: 'Đã gửi giáo viên',
+    [DISBURSEMENT_STATUS.DELIVERED_TO_STUDENT]: 'Đã giao học sinh',
+};

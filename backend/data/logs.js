@@ -12,7 +12,7 @@ const logs = [
     timestamp: "2025-10-01T10:15:00Z",
     user_id: "QTV0001",
     action: "UPDATE_STUDENT",
-    details: "Updated student DH92.001 funds",
+    details: "Updated student HS0001 funds",
     status: "SUCCESS"
   },
   {
@@ -20,7 +20,7 @@ const logs = [
     timestamp: "2025-10-02T08:30:00Z",
     user_id: "TNV0001",
     action: "CREATE_TRANSACTION",
-    details: "Created transaction for student DH92.003",
+    details: "Created transaction for student HS0005",
     status: "SUCCESS"
   },
   {

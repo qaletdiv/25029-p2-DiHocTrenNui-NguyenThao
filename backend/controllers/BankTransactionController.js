@@ -1,12 +1,22 @@
 const BankTransactionModel = require('../models/BankTransactionModel');
 const { validateBankTransaction } = require('../validations/bankTransactionValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { paginate } = require('../utils/pagination');
 
 class BankTransactionController {
   async getAllTransactions(req, res) {
     try {
       const transactions = await BankTransactionModel.findAll();
-      return sendSuccess(res, transactions);
+      let filteredTransactions = transactions;
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { sponsorId } = getSponsorLinkedResources(req.user.id);
+        filteredTransactions = transactions.filter(t => t.sponsor_id === sponsorId);
+      }
+
+      return sendSuccess(res, paginate(filteredTransactions, req, 'transactions'));
     } catch (error) {
       return sendError(res, 'Failed to fetch transactions', error.message);
     }
@@ -16,6 +26,16 @@ class BankTransactionController {
     try {
       const transaction = await BankTransactionModel.findById(parseInt(req.params.id));
       if (!transaction) return sendError(res, 'Transaction not found', [], 404);
+
+      // Sponsor restriction
+      if (req.user && req.user.role_id === 4) {
+        const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
+        const { sponsorId } = getSponsorLinkedResources(req.user.id);
+        if (transaction.sponsor_id !== sponsorId) {
+          return sendError(res, 'Access Denied', [], 403);
+        }
+      }
+
       return sendSuccess(res, transaction);
     } catch (error) {
       return sendError(res, 'Failed to fetch transaction', error.message);

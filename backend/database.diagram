@@ -61,40 +61,12 @@ Table audit_logs {
   created_at timestamp
 }
 
-Table provinces {
-  id integer [primary key]
-  name varchar [not null]
-  code varchar
-  created_at timestamp
-  updated_at timestamp
-}
-
-Table wards {
-  id integer [primary key]
-  province_id integer [not null]
-  name varchar [not null]
-  code varchar
-  created_at timestamp
-  updated_at timestamp
-}
-
-Table addresses {
-  id integer [primary key, increment]
-  address_line varchar
-  note text
-  ward_id integer
-  latitude decimal(10,7)
-  longitude decimal(10,7)
-  created_at timestamp
-  updated_at timestamp
-}
-
 Table schools {
   id integer [primary key, increment]
   name varchar [not null]
   phone varchar
   email varchar
-  address_id integer
+  address varchar
   note text
   is_active boolean [default: true]
   created_by integer
@@ -105,41 +77,42 @@ Table schools {
 
 Table teachers {
   id integer [primary key, increment]
-  account_id integer [unique]
+  account_id integer [unique, not null]
   school_id integer
   full_name varchar [not null]
   phone varchar
-  email varchar
   gender varchar
-  address_id integer
+  address varchar
   note text
   is_active boolean [default: true]
+  created_by integer
+  updated_by integer
   created_at timestamp
   updated_at timestamp
 }
 
 Table volunteers {
   id integer [primary key, increment]
-  account_id integer [unique]
+  account_id integer [unique, not null]
   full_name varchar [not null]
   phone varchar
-  email varchar
   gender varchar
-  address_id integer
+  address varchar
   note text
   is_active boolean [default: true]
+  created_by integer
+  updated_by integer
   created_at timestamp
   updated_at timestamp
 }
 
 Table sponsors {
   id integer [primary key, increment]
-  account_id integer [unique]
+  account_id integer [unique, not null]
   full_name varchar [not null]
   phone varchar
-  email varchar
   gender varchar
-  address_id integer
+  address varchar
   note text
   is_active boolean [default: true]
   created_by integer
@@ -154,7 +127,7 @@ Table students {
   date_of_birth date
   gender varchar
   phone varchar
-  address_id integer
+  address varchar
   school_id integer
   grade varchar
   family_condition text
@@ -170,7 +143,7 @@ Table students {
 
 Table teacher_students {
   id integer [primary key, increment]
-  student_id integer [not null]
+  student_id varchar(10) [not null]
   teacher_id integer [not null]
   start_date timestamp
   end_date timestamp
@@ -183,7 +156,7 @@ Table teacher_students {
 
 Table volunteer_students {
   id integer [primary key, increment]
-  student_id integer [not null]
+  student_id varchar(10) [not null]
   volunteer_id integer [not null]
   start_date timestamp
   end_date timestamp
@@ -196,7 +169,7 @@ Table volunteer_students {
 
 Table sponsor_students {
   id integer [primary key, increment]
-  student_id integer [not null]
+  student_id varchar(10) [not null]
   sponsor_id integer [not null]
   monthly_amount decimal(12,0)
   created_at timestamp
@@ -230,7 +203,7 @@ Table support_disbursements {
   id integer [primary key, increment]
   bank_transaction_id integer
   sponsor_student_id integer
-  student_id integer [not null]
+  student_id varchar(10) [not null]
   event_id integer
   teacher_id integer
   support_month integer [not null]
@@ -254,7 +227,7 @@ Table events {
   description varchar
   start_date timestamp
   end_date timestamp
-  address_id integer
+  address varchar
   is_public boolean [default: true]
   created_by integer
   updated_by integer
@@ -282,7 +255,7 @@ Table disbursement_statuses {
 
 Table student_images {
   id integer [primary key, increment]
-  student_id integer [not null]
+  student_id varchar(10) [not null]
   image_url varchar [not null]
   created_at timestamp
   updated_at timestamp
@@ -306,23 +279,14 @@ Ref role_permissions_permissions: role_permissions.permission_id > permissions.i
 
 Ref audit_logs_accounts: audit_logs.account_id > accounts.id
 
-Ref wards_provinces: wards.province_id > provinces.id
-
-Ref addresses_wards: addresses.ward_id > wards.id
-
-Ref schools_addresses: schools.address_id > addresses.id
 
 Ref teachers_accounts: teachers.account_id > accounts.id
 Ref teachers_schools: teachers.school_id > schools.id
-Ref teachers_addresses: teachers.address_id > addresses.id
 
 Ref volunteers_accounts: volunteers.account_id > accounts.id
-Ref volunteers_addresses: volunteers.address_id > addresses.id
 
 Ref sponsors_accounts: sponsors.account_id > accounts.id
-Ref sponsors_addresses: sponsors.address_id > addresses.id
 
-Ref students_addresses: students.address_id > addresses.id
 Ref students_schools: students.school_id > schools.id
 Ref students_statuses: students.status_id > student_statuses.id
 
@@ -346,13 +310,18 @@ Ref disbursements_students: support_disbursements.student_id > students.id
 Ref disbursements_events: support_disbursements.event_id > events.id
 Ref disbursements_statuses: support_disbursements.status_id > disbursement_statuses.id
 
-Ref events_addresses: events.address_id > addresses.id
 
 Ref student_images_students: student_images.student_id > students.id
 Ref event_images_events: event_images.event_id > events.id
 
 Ref schools_created_by: schools.created_by > accounts.id
 Ref schools_updated_by: schools.updated_by > accounts.id
+
+Ref teachers_created_by: teachers.created_by > accounts.id
+Ref teachers_updated_by: teachers.updated_by > accounts.id
+
+Ref volunteers_created_by: volunteers.created_by > accounts.id
+Ref volunteers_updated_by: volunteers.updated_by > accounts.id
 
 Ref sponsors_created_by: sponsors.created_by > accounts.id
 Ref sponsors_updated_by: sponsors.updated_by > accounts.id
