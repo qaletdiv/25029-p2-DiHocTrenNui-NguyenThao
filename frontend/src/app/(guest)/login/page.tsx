@@ -1,5 +1,5 @@
 "use client";
-import React, { useActionState } from "react";
+import React, { useActionState, Suspense } from "react";
 import { Lock, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,10 +7,7 @@ import { useSearchParams } from "next/navigation";
 import heartBg from "@/assets/images/background/heart.jpg";
 import { loginAction } from "@/services/login";
 
-
-interface LoginPageProps { }
-
-export default function LoginPage({ }: LoginPageProps) {
+function LoginForm() {
     const [preState, formAction, isPending] = useActionState(loginAction, { username: null, password: null, error: null });
     const searchParams = useSearchParams();
     const registered = searchParams.get("registered");
@@ -100,5 +97,19 @@ export default function LoginPage({ }: LoginPageProps) {
             </div>
 
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center font-sans text-gray-900">
+                <div className="text-center">
+                    <p className="text-sm text-gray-500 animate-pulse font-medium">Đang tải...</p>
+                </div>
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     );
 }
