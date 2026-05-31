@@ -72,8 +72,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * Fetch all volunteers. Supports pagination.
  */
 export async function getAllVolunteers(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedVolunteers>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/volunteers`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -99,8 +99,8 @@ export async function getAllVolunteers(page?: number, pageSize?: number): Promis
  * Fetch a single volunteer by ID.
  */
 export async function getVolunteerById(id: number): Promise<ApiResponse<Volunteer>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/volunteers/${id}`, {
             method: "GET",
             headers,
@@ -124,8 +124,8 @@ export async function getVolunteerById(id: number): Promise<ApiResponse<Voluntee
 export async function createVolunteer(
     payload: CreateVolunteerPayload
 ): Promise<ApiResponse<Volunteer>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/volunteers`, {
             method: "POST",
             headers,
@@ -151,8 +151,8 @@ export async function updateVolunteer(
     id: number,
     payload: UpdateVolunteerPayload
 ): Promise<ApiResponse<Volunteer>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/volunteers/${id}`, {
             method: "PATCH",
             headers,
@@ -177,8 +177,8 @@ export async function updateVolunteer(
 export async function deleteVolunteer(
     id: number
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/volunteers/${id}`, {
             method: "DELETE",
             headers,

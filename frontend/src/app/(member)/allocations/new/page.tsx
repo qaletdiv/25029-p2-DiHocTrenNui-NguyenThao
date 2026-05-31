@@ -27,7 +27,10 @@ export default async function NewAllocationPage() {
 
     const teachersData = teachersResponse.data;
     teachers = 'teachers' in teachersData ? (teachersData as any).teachers : teachersData;
-  } catch (error) {
+  } catch (error: any) {
+    if (error && error.digest === "DYNAMIC_SERVER_USAGE") {
+      throw error;
+    }
     console.error("[NewAllocationPage] Error fetching data:", error);
   }
 

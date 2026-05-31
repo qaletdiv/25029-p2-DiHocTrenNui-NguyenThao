@@ -88,8 +88,8 @@ export interface PaginatedStudents {
  * Fetch all students. Supports pagination.
  */
 export async function getAllStudents(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedStudents | Student[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/students`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -115,8 +115,8 @@ export async function getAllStudents(page?: number, pageSize?: number): Promise<
  * Fetch a single student by ID.
  */
 export async function getStudentById(id: string): Promise<ApiResponse<Student>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/students/${id}`, {
             method: "GET",
             headers,
@@ -140,10 +140,10 @@ export async function getStudentById(id: string): Promise<ApiResponse<Student>> 
 export async function createStudent(
     payload: CreateStudentPayload
 ): Promise<ApiResponse<Student>> {
+    const headers = await getAuthHeaders();
     try {
         console.log("payload create student:", payload);
 
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/students`, {
             method: "POST",
             headers,
@@ -202,9 +202,9 @@ export async function updateStudent(
     id: string,
     payload: UpdateStudentPayload
 ): Promise<ApiResponse<Student>> {
+    const headers = await getAuthHeaders();
     try {
         console.log("payload update student: ", payload);
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/students/${id}`, {
             method: "PATCH",
             headers,
@@ -229,8 +229,8 @@ export async function updateStudent(
 export async function deleteStudent(
     id: string
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/students/${id}`, {
             method: "DELETE",
             headers,

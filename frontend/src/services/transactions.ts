@@ -71,8 +71,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 
 /** GET /bank-transactions — Fetch all bank transactions. Supports pagination. */
 export async function getAllTransactions(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedTransactions | Transaction[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/bank-transactions`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -88,8 +88,9 @@ export async function getAllTransactions(page?: number, pageSize?: number): Prom
 
 /** GET /bank-transactions/:id — Fetch a single transaction by ID. */
 export async function getTransactionById(id: number): Promise<ApiResponse<Transaction>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/bank-transactions/${id}`, { method: "GET", headers: await getAuthHeaders() });
+        const res = await fetch(`${BASE_URL}/bank-transactions/${id}`, { method: "GET", headers });
         if (!res.ok) throw new Error(`Failed to fetch transaction ${id}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -100,8 +101,9 @@ export async function getTransactionById(id: number): Promise<ApiResponse<Transa
 
 /** POST /bank-transactions — Create a new bank transaction. */
 export async function createTransaction(payload: CreateTransactionPayload): Promise<ApiResponse<Transaction>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/bank-transactions`, { method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(payload) });
+        const res = await fetch(`${BASE_URL}/bank-transactions`, { method: "POST", headers, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`Failed to create transaction: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -112,8 +114,9 @@ export async function createTransaction(payload: CreateTransactionPayload): Prom
 
 /** PATCH /bank-transactions/:id — Partially update a transaction. */
 export async function updateTransaction(id: number, payload: UpdateTransactionPayload): Promise<ApiResponse<Transaction>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/bank-transactions/${id}`, { method: "PATCH", headers: await getAuthHeaders(), body: JSON.stringify(payload) });
+        const res = await fetch(`${BASE_URL}/bank-transactions/${id}`, { method: "PATCH", headers, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`Failed to update transaction ${id}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -124,8 +127,9 @@ export async function updateTransaction(id: number, payload: UpdateTransactionPa
 
 /** DELETE /bank-transactions/:id — Delete a transaction. */
 export async function deleteTransaction(id: number): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/bank-transactions/${id}`, { method: "DELETE", headers: await getAuthHeaders() });
+        const res = await fetch(`${BASE_URL}/bank-transactions/${id}`, { method: "DELETE", headers });
         if (!res.ok) throw new Error(`Failed to delete transaction ${id}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {

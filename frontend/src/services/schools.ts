@@ -73,8 +73,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * Fetch schools. Supports pagination.
  */
 export async function getAllSchools(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedSchools>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/schools`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -100,8 +100,8 @@ export async function getAllSchools(page?: number, pageSize?: number): Promise<A
  * Fetch a single school by ID.
  */
 export async function getSchoolById(id: number): Promise<ApiResponse<School>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/schools/${id}`, {
             method: "GET",
             headers,
@@ -125,8 +125,8 @@ export async function getSchoolById(id: number): Promise<ApiResponse<School>> {
 export async function createSchool(
     payload: CreateSchoolPayload
 ): Promise<ApiResponse<School>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/schools`, {
             method: "POST",
             headers,
@@ -153,8 +153,8 @@ export async function updateSchool(
     id: number,
     payload: UpdateSchoolPayload
 ): Promise<ApiResponse<School>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/schools/${id}`, {
             method: "PATCH",
             headers,
@@ -180,8 +180,8 @@ export async function updateSchool(
 export async function deleteSchool(
     id: number
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/schools/${id}`, {
             method: "DELETE",
             headers,

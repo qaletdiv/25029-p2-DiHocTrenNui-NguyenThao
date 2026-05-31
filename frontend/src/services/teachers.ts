@@ -75,8 +75,8 @@ export interface PaginatedTeachers {
  * Fetch all teachers. Supports pagination.
  */
 export async function getAllTeachers(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedTeachers | Teacher[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/teachers`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -102,8 +102,8 @@ export async function getAllTeachers(page?: number, pageSize?: number): Promise<
  * Fetch a single teacher by ID.
  */
 export async function getTeacherById(id: number): Promise<ApiResponse<Teacher>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/teachers/${id}`, {
             method: "GET",
             headers,
@@ -127,8 +127,8 @@ export async function getTeacherById(id: number): Promise<ApiResponse<Teacher>> 
 export async function createTeacher(
     payload: CreateTeacherPayload
 ): Promise<ApiResponse<Teacher>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/teachers`, {
             method: "POST",
             headers,
@@ -154,8 +154,8 @@ export async function updateTeacher(
     id: number,
     payload: UpdateTeacherPayload
 ): Promise<ApiResponse<Teacher>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/teachers/${id}`, {
             method: "PATCH",
             headers,
@@ -180,8 +180,8 @@ export async function updateTeacher(
 export async function deleteTeacher(
     id: number
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/teachers/${id}`, {
             method: "DELETE",
             headers,

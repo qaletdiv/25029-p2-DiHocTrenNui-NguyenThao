@@ -73,8 +73,8 @@ export interface PaginatedSponsors {
  * Fetch all sponsors. Supports pagination.
  */
 export async function getAllSponsors(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedSponsors | Sponsor[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/sponsors`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -100,8 +100,8 @@ export async function getAllSponsors(page?: number, pageSize?: number): Promise<
  * Fetch a single sponsor by ID.
  */
 export async function getSponsorById(id: number): Promise<ApiResponse<Sponsor>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/sponsors/${id}`, {
             method: "GET",
             headers,
@@ -125,8 +125,8 @@ export async function getSponsorById(id: number): Promise<ApiResponse<Sponsor>> 
 export async function createSponsor(
     payload: CreateSponsorPayload
 ): Promise<ApiResponse<Sponsor>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/sponsors`, {
             method: "POST",
             headers,
@@ -152,8 +152,8 @@ export async function updateSponsor(
     id: number,
     payload: UpdateSponsorPayload
 ): Promise<ApiResponse<Sponsor>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/sponsors/${id}`, {
             method: "PATCH",
             headers,
@@ -178,8 +178,8 @@ export async function updateSponsor(
 export async function deleteSponsor(
     id: number
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/sponsors/${id}`, {
             method: "DELETE",
             headers,

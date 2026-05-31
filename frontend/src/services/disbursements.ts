@@ -101,8 +101,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * Fetch all disbursements. Supports pagination.
  */
 export async function getAllDisbursements(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedDisbursements | Disbursement[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/disbursements`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -128,8 +128,8 @@ export async function getAllDisbursements(page?: number, pageSize?: number): Pro
  * Fetch a single disbursement by ID with full related data.
  */
 export async function getDisbursementById(id: number): Promise<ApiResponse<Disbursement>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/disbursements/${id}`, {
             method: "GET",
             headers,
@@ -153,8 +153,8 @@ export async function getDisbursementById(id: number): Promise<ApiResponse<Disbu
 export async function createDisbursement(
     payload: CreateDisbursementPayload
 ): Promise<ApiResponse<Disbursement>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/disbursements`, {
             method: "POST",
             headers,
@@ -212,8 +212,8 @@ export async function updateDisbursement(
     id: number,
     payload: UpdateDisbursementPayload
 ): Promise<ApiResponse<Disbursement>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/disbursements/${id}`, {
             method: "PATCH",
             headers,
@@ -239,8 +239,8 @@ export async function updateDisbursement(
 export async function deleteDisbursement(
     id: number
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/disbursements/${id}`, {
             method: "DELETE",
             headers,

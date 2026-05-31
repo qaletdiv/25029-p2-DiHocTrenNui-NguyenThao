@@ -61,8 +61,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * Fetch all accounts.
  */
 export async function getAllAccounts(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedAccounts | Account[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/accounts`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -88,8 +88,8 @@ export async function getAllAccounts(page?: number, pageSize?: number): Promise<
  * Fetch a single account by ID.
  */
 export async function getAccountById(id: number): Promise<ApiResponse<Account>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/accounts/${id}`, {
             method: "GET",
             headers,
@@ -113,8 +113,8 @@ export async function getAccountById(id: number): Promise<ApiResponse<Account>> 
 export async function createAccount(
     payload: CreateAccountPayload
 ): Promise<ApiResponse<Account>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/accounts`, {
             method: "POST",
             headers,
@@ -140,8 +140,8 @@ export async function updateAccount(
     id: number,
     payload: UpdateAccountPayload
 ): Promise<ApiResponse<Account>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/accounts/${id}`, {
             method: "PATCH",
             headers,
@@ -166,8 +166,8 @@ export async function updateAccount(
 export async function deleteAccount(
     id: number
 ): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         const res = await fetch(`${BASE_URL}/accounts/${id}`, {
             method: "DELETE",
             headers,
@@ -188,8 +188,8 @@ export async function deleteAccount(
  * Decode access token cookie and fetch current signed-in account details.
  */
 export async function getCurrentAccount(): Promise<Account | null> {
+    const cookieStore = await cookies();
     try {
-        const cookieStore = await cookies();
         const token = cookieStore.get("accessToken")?.value;
         if (!token) return null;
 

@@ -66,8 +66,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 
 /** GET /images — Fetch all images. Supports pagination. */
 export async function getAllImages(page?: number, pageSize?: number): Promise<ApiResponse<PaginatedImages | Image[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const headers = await getAuthHeaders();
         let url = `${BASE_URL}/images`;
         if (page !== undefined && pageSize !== undefined) {
             url += `?page=${page}&pageSize=${pageSize}`;
@@ -83,8 +83,9 @@ export async function getAllImages(page?: number, pageSize?: number): Promise<Ap
 
 /** GET /images/:id — Fetch a single image by ID. */
 export async function getImageById(id: number): Promise<ApiResponse<Image>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/images/${id}`, { method: "GET", headers: await getAuthHeaders() });
+        const res = await fetch(`${BASE_URL}/images/${id}`, { method: "GET", headers });
         if (!res.ok) throw new Error(`Failed to fetch image ${id}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -95,8 +96,9 @@ export async function getImageById(id: number): Promise<ApiResponse<Image>> {
 
 /** GET /images/student/:studentId — Fetch all images for a specific student. */
 export async function getImagesByStudent(studentId: number): Promise<ApiResponse<Image[]>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/images/student/${studentId}`, { method: "GET", headers: await getAuthHeaders() });
+        const res = await fetch(`${BASE_URL}/images/student/${studentId}`, { method: "GET", headers });
         if (!res.ok) throw new Error(`Failed to fetch images for student ${studentId}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -107,9 +109,10 @@ export async function getImagesByStudent(studentId: number): Promise<ApiResponse
 
 /** GET /images/range?start=&end= — Fetch images within a date range. */
 export async function getImagesByRange(params: ImageRangeParams): Promise<ApiResponse<Image[]>> {
+    const headers = await getAuthHeaders();
     try {
         const query = new URLSearchParams({ start: params.start, end: params.end });
-        const res = await fetch(`${BASE_URL}/images/range?${query.toString()}`, { method: "GET", headers: await getAuthHeaders() });
+        const res = await fetch(`${BASE_URL}/images/range?${query.toString()}`, { method: "GET", headers });
         if (!res.ok) throw new Error(`Failed to fetch images by range: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -120,8 +123,9 @@ export async function getImagesByRange(params: ImageRangeParams): Promise<ApiRes
 
 /** POST /images — Create a new image record. */
 export async function createImage(payload: CreateImagePayload): Promise<ApiResponse<Image>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/images`, { method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(payload) });
+        const res = await fetch(`${BASE_URL}/images`, { method: "POST", headers, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`Failed to create image: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -132,8 +136,9 @@ export async function createImage(payload: CreateImagePayload): Promise<ApiRespo
 
 /** PATCH /images/:id — Partially update an image record. */
 export async function updateImage(id: number, payload: UpdateImagePayload): Promise<ApiResponse<Image>> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/images/${id}`, { method: "PATCH", headers: await getAuthHeaders(), body: JSON.stringify(payload) });
+        const res = await fetch(`${BASE_URL}/images/${id}`, { method: "PATCH", headers, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`Failed to update image ${id}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
@@ -144,8 +149,9 @@ export async function updateImage(id: number, payload: UpdateImagePayload): Prom
 
 /** DELETE /images/:id — Delete an image record. */
 export async function deleteImage(id: number): Promise<{ status: string; message: string }> {
+    const headers = await getAuthHeaders();
     try {
-        const res = await fetch(`${BASE_URL}/images/${id}`, { method: "DELETE", headers: await getAuthHeaders() });
+        const res = await fetch(`${BASE_URL}/images/${id}`, { method: "DELETE", headers });
         if (!res.ok) throw new Error(`Failed to delete image ${id}: ${res.status} ${res.statusText}`);
         return res.json();
     } catch (error) {
