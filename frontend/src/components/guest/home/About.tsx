@@ -1,5 +1,7 @@
 import React from "react";
 import Image from "next/image";
+import girlToSchoolImg from "@/assets/images/Girl to school.jpg";
+import childrenSmilingImg from "@/assets/images/Children smiling.jpg";
 
 interface AboutProps {}
 
@@ -14,7 +16,7 @@ export default function About({}: AboutProps) {
                             {/* Column 1: Image + Quote */}
                             <div className="space-y-6 flex flex-col">
                                 <Image
-                                    src="/Images/Girl to school.jpg"
+                                    src={girlToSchoolImg}
                                     alt="Girl to school"
                                     width={400}
                                     height={200}
@@ -30,7 +32,7 @@ export default function About({}: AboutProps) {
                             {/* Column 2: Tall Image */}
                             <div className="h-full">
                                 <Image
-                                    src="/Images/Children smiling.jpg"
+                                    src={childrenSmilingImg}
                                     alt="Children smiling"
                                     width={400}
                                     height={600}
