@@ -1,13 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const port = 5001;
+const port = process.env.PORT;
 
 const app = express();
-app.use(cors({ credentials: true, origin: 'http://localhost:5000' }));
+app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
 app.use(express.json({ limit: '10mb' }));
 
 // Set global constant
-app.set('SECRET_KEY', 'dihoctrennui-example-secret-key-2026');
+app.set('SECRET_KEY', process.env.SECRET_KEY);
 
 // Middlewares
 const { authenticate } = require('./middlewares/authorize');
