@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-const BASE_URL = "http://localhost:5001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 

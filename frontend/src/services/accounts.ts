@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-const BASE_URL = "http://localhost:5001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -197,11 +197,11 @@ export async function getCurrentAccount(): Promise<Account | null> {
         if (parts.length !== 3) {
             return null;
         }
-        
+
         // Decode base64 payload of JWT
         const payloadStr = parts[1];
         const payload = JSON.parse(Buffer.from(payloadStr, 'base64').toString('utf-8'));
-        
+
         if (!payload || !payload.id) {
             return null;
         }

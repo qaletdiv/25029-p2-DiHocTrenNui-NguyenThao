@@ -2,17 +2,17 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { 
-  Images, 
-  Download, 
-  Trash2, 
-  Pencil, 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar, 
-  User, 
-  Plus, 
-  X, 
+import {
+  Images,
+  Download,
+  Trash2,
+  Pencil,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  User,
+  Plus,
+  X,
   Image as ImageIcon,
   Sparkles,
   RefreshCw,
@@ -20,14 +20,14 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import ListToolbar from "@/components/member/common/ListToolbar";
-import { 
-  Image as ImageType, 
-  getAllImages, 
-  createImage, 
-  updateImage, 
-  deleteImage, 
-  getImagesByStudent, 
-  getImagesByRange 
+import {
+  Image as ImageType,
+  getAllImages,
+  createImage,
+  updateImage,
+  deleteImage,
+  getImagesByStudent,
+  getImagesByRange
 } from "@/services/images";
 import { Student } from "@/services/students";
 
@@ -69,11 +69,11 @@ interface Props {
   token: string;
 }
 
-export default function ImageListClient({ 
-  initialImages, 
-  students, 
-  total: serverTotal, 
-  initialPage, 
+export default function ImageListClient({
+  initialImages,
+  students,
+  total: serverTotal,
+  initialPage,
   initialPageSize,
   token
 }: Props) {
@@ -131,9 +131,10 @@ export default function ImageListClient({
     if (filename.includes("/")) {
       filename = filename.split("/").pop() || "";
     }
-    
+
     const tokenParam = token ? `?token=${token}` : "";
-    return `http://localhost:5001/images/proxy/${filename}${tokenParam}`;
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
+    return `${apiBase}/images/proxy/${filename}${tokenParam}`;
   };
 
   const sanitizeUrlForDatabase = (url: string) => {
@@ -178,7 +179,7 @@ export default function ImageListClient({
     setSelectedStudent(studentId);
     setStartDate("");
     setEndDate("");
-    
+
     if (!studentId) {
       setActiveFilterMode("none");
       setDisplayedImages(initialImages);
@@ -246,7 +247,7 @@ export default function ImageListClient({
       const studentName = studentMap.get(String(img.student_id)) || "";
       const eventId = String(img.event_id || "").toLowerCase();
       const month = String(img.metadata?.month || "").toLowerCase();
-      
+
       return (
         studentName.toLowerCase().includes(q) ||
         String(img.student_id).toLowerCase().includes(q) ||
@@ -332,7 +333,7 @@ export default function ImageListClient({
       setIsModalOpen(false);
       setFormFileData("");
       router.refresh();
-      
+
       // If we are in custom filtering, reload that filter, else let the prop update
       if (activeFilterMode === "student") {
         handleStudentFilterChange(selectedStudent);
@@ -421,8 +422,8 @@ export default function ImageListClient({
                 className="border-none focus:outline-none focus:ring-0 text-xs text-gray-700 cursor-pointer"
                 title="Đến ngày"
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="px-2 py-1 rounded bg-primary-900 text-white text-xs font-semibold hover:bg-primary-800 transition-colors"
               >
                 Lọc
@@ -450,7 +451,7 @@ export default function ImageListClient({
             <Sparkles size={13} className="animate-pulse" />
             Đang lọc: {activeFilterMode === "student" ? `Hình ảnh học sinh ${studentMap.get(selectedStudent)} (${selectedStudent})` : `Hình ảnh từ ${startDate} đến ${endDate}`}
           </span>
-          <button 
+          <button
             onClick={handleClearFilters}
             className="text-xs text-primary-900 hover:underline font-semibold"
           >
@@ -491,21 +492,21 @@ export default function ImageListClient({
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:text-primary-900 hover:scale-105 shadow transition-all duration-200" 
+                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:text-primary-900 hover:scale-105 shadow transition-all duration-200"
                       title="Mở hình ảnh trong tab mới"
                     >
                       <Download size={16} />
                     </a>
-                    <button 
+                    <button
                       onClick={() => openEditModal(img)}
-                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:text-primary-900 hover:scale-105 shadow transition-all duration-200" 
+                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:text-primary-900 hover:scale-105 shadow transition-all duration-200"
                       title="Chỉnh sửa hình ảnh"
                     >
                       <Pencil size={16} />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDeleteImage(img.id)}
-                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:text-red-600 hover:scale-105 shadow transition-all duration-200" 
+                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:text-red-600 hover:scale-105 shadow transition-all duration-200"
                       title="Xoá hình ảnh"
                     >
                       <Trash2 size={16} />
@@ -643,8 +644,8 @@ export default function ImageListClient({
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" 
+          <div
+            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
             onClick={() => setIsModalOpen(false)}
           />
 
@@ -658,7 +659,7 @@ export default function ImageListClient({
                   {modalMode === "create" ? "Tải ảnh học sinh lên" : "Chỉnh sửa hình ảnh"}
                 </h3>
               </div>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-white/80 hover:text-white transition-colors"
               >
