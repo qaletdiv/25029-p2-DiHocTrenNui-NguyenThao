@@ -1,16 +1,35 @@
 const BaseModel = require('./BaseModel');
-const teachersData = require('../data/teachers');
+const { Teacher } = require('./schemas');
 
 class TeacherModel extends BaseModel {
   constructor() {
-    super(teachersData);
+    super(
+      'teachers',
+      'id',
+      [
+        'id',
+        'account_id',
+        'school_id',
+        'full_name',
+        'phone',
+        'gender',
+        'address',
+        'note',
+        'is_active',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+      ],
+      Teacher
+    );
   }
 
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const maxId = Math.max(...this.data.map(t => t.id));
-    return maxId + 1;
+  async findByAccountId(accountId) {
+    return this.findOne({ account_id: accountId });
   }
 }
 
-module.exports = new TeacherModel();
+const instance = new TeacherModel();
+instance.Model = Teacher;
+module.exports = instance;

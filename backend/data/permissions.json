@@ -1,0 +1,224 @@
+[
+  {
+    "id": 1,
+    "resource_id": 1,
+    "action_id": 1,
+    "code": "STUDENT_CREATE"
+  },
+  {
+    "id": 2,
+    "resource_id": 1,
+    "action_id": 2,
+    "code": "STUDENT_READ"
+  },
+  {
+    "id": 3,
+    "resource_id": 1,
+    "action_id": 3,
+    "code": "STUDENT_UPDATE"
+  },
+  {
+    "id": 4,
+    "resource_id": 1,
+    "action_id": 4,
+    "code": "STUDENT_DELETE"
+  },
+  {
+    "id": 5,
+    "resource_id": 2,
+    "action_id": 1,
+    "code": "SPONSOR_CREATE"
+  },
+  {
+    "id": 6,
+    "resource_id": 2,
+    "action_id": 2,
+    "code": "SPONSOR_READ"
+  },
+  {
+    "id": 7,
+    "resource_id": 2,
+    "action_id": 3,
+    "code": "SPONSOR_UPDATE"
+  },
+  {
+    "id": 8,
+    "resource_id": 2,
+    "action_id": 4,
+    "code": "SPONSOR_DELETE"
+  },
+  {
+    "id": 9,
+    "resource_id": 3,
+    "action_id": 1,
+    "code": "SCHOOL_CREATE"
+  },
+  {
+    "id": 10,
+    "resource_id": 3,
+    "action_id": 2,
+    "code": "SCHOOL_READ"
+  },
+  {
+    "id": 11,
+    "resource_id": 3,
+    "action_id": 3,
+    "code": "SCHOOL_UPDATE"
+  },
+  {
+    "id": 12,
+    "resource_id": 3,
+    "action_id": 4,
+    "code": "SCHOOL_DELETE"
+  },
+  {
+    "id": 13,
+    "resource_id": 4,
+    "action_id": 1,
+    "code": "BANK_TRANSACTION_CREATE"
+  },
+  {
+    "id": 14,
+    "resource_id": 4,
+    "action_id": 2,
+    "code": "BANK_TRANSACTION_READ"
+  },
+  {
+    "id": 15,
+    "resource_id": 4,
+    "action_id": 3,
+    "code": "BANK_TRANSACTION_UPDATE"
+  },
+  {
+    "id": 16,
+    "resource_id": 4,
+    "action_id": 4,
+    "code": "BANK_TRANSACTION_DELETE"
+  },
+  {
+    "id": 17,
+    "resource_id": 4,
+    "action_id": 5,
+    "code": "BANK_TRANSACTION_APPROVE"
+  },
+  {
+    "id": 18,
+    "resource_id": 5,
+    "action_id": 1,
+    "code": "USER_CREATE"
+  },
+  {
+    "id": 19,
+    "resource_id": 5,
+    "action_id": 2,
+    "code": "USER_READ"
+  },
+  {
+    "id": 20,
+    "resource_id": 5,
+    "action_id": 3,
+    "code": "USER_UPDATE"
+  },
+  {
+    "id": 21,
+    "resource_id": 5,
+    "action_id": 4,
+    "code": "USER_DELETE"
+  },
+  {
+    "id": 22,
+    "resource_id": 6,
+    "action_id": 1,
+    "code": "IMAGE_CREATE"
+  },
+  {
+    "id": 23,
+    "resource_id": 6,
+    "action_id": 2,
+    "code": "IMAGE_READ"
+  },
+  {
+    "id": 24,
+    "resource_id": 6,
+    "action_id": 4,
+    "code": "IMAGE_DELETE"
+  },
+  {
+    "id": 25,
+    "resource_id": 7,
+    "action_id": 2,
+    "code": "REPORT_READ"
+  },
+  {
+    "id": 26,
+    "resource_id": 8,
+    "action_id": 1,
+    "code": "DISBURSEMENT_CREATE"
+  },
+  {
+    "id": 27,
+    "resource_id": 8,
+    "action_id": 2,
+    "code": "DISBURSEMENT_READ"
+  },
+  {
+    "id": 28,
+    "resource_id": 8,
+    "action_id": 3,
+    "code": "DISBURSEMENT_UPDATE"
+  },
+  {
+    "id": 29,
+    "resource_id": 9,
+    "action_id": 1,
+    "code": "TEACHER_CREATE"
+  },
+  {
+    "id": 30,
+    "resource_id": 9,
+    "action_id": 2,
+    "code": "TEACHER_READ"
+  },
+  {
+    "id": 31,
+    "resource_id": 9,
+    "action_id": 3,
+    "code": "TEACHER_UPDATE"
+  },
+  {
+    "id": 32,
+    "resource_id": 9,
+    "action_id": 4,
+    "code": "TEACHER_DELETE"
+  },
+  {
+    "id": 33,
+    "resource_id": 10,
+    "action_id": 1,
+    "code": "VOLUNTEER_CREATE"
+  },
+  {
+    "id": 34,
+    "resource_id": 10,
+    "action_id": 2,
+    "code": "VOLUNTEER_READ"
+  },
+  {
+    "id": 35,
+    "resource_id": 10,
+    "action_id": 3,
+    "code": "VOLUNTEER_UPDATE"
+  },
+  {
+    "id": 36,
+    "resource_id": 10,
+    "action_id": 4,
+    "code": "VOLUNTEER_DELETE"
+  },
+  {
+    "id": 37,
+    "resource_id": 6,
+    "action_id": 3,
+    "code": "IMAGE_UPDATE"
+  }
+]

@@ -1,33 +1,73 @@
 const BaseModel = require('./BaseModel');
-const studentsData = require('../data/students');
+const { Student } = require('./schemas');
 
 class StudentModel extends BaseModel {
   constructor() {
-    super(studentsData);
+    super(
+      'students',
+      'id',
+      [
+        'id',
+        'full_name',
+        'date_of_birth',
+        'gender',
+        'phone',
+        'address',
+        'school_id',
+        'grade',
+        'family_condition',
+        'status_id',
+        'monthly_amount',
+        'avatar_url',
+        'is_active',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+      ],
+      Student
+    );
   }
 
   /**
-   * Helper to generate a new student ID (HS0001)
+   * Helper to generate next student ID (e.g. HS0001, HS0031) via Sequelize
    */
   async generateNextId() {
     const prefix = 'HS';
-    const allStudents = this.data;
+    const latest = await this.model.findOne({
+      where: { id: { [this.Op.like]: 'HS%' } },
+      order: [
+        [this.sequelize.fn('LENGTH', this.sequelize.col('id')), 'DESC'],
+        ['id', 'DESC'],
+      ],
+      raw: true,
+    });
 
-    if (allStudents.length === 0) return 'HS0001';
+    if (!latest) {
+      return 'HS0001';
+    }
 
-    const getNumber = (str) => parseInt(str.replace(prefix, '')) || 0;
-
-    const latestStudent = allStudents.reduce((max, current) =>
-      getNumber(current.id) > getNumber(max.id) ? current : max
-    );
-
-    const idNumber = getNumber(latestStudent.id) + 1;
-    return `${prefix}${String(idNumber).padStart(4, '0')}`;
+    const latestId = latest.id;
+    const num = parseInt(latestId.replace(prefix, ''), 10) || 0;
+    const nextNum = num + 1;
+    return `${prefix}${String(nextNum).padStart(4, '0')}`;
   }
 
+  /**
+   * Check for duplicate student record via Sequelize
+   */
   async findByNameAndInfo(full_name, address, date_of_birth) {
-    return this.findOne({ full_name, address, date_of_birth });
+    let dob = date_of_birth;
+    if (dob instanceof Date) {
+      dob = dob.toISOString().split('T')[0];
+    } else if (typeof dob === 'string') {
+      dob = dob.split('T')[0];
+    }
+
+    return this.findOne({ full_name, address, date_of_birth: dob });
   }
 }
 
-module.exports = new StudentModel();
+const instance = new StudentModel();
+instance.Model = Student;
+module.exports = instance;

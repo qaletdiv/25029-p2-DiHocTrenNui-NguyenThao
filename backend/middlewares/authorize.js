@@ -1,12 +1,32 @@
 const jwt = require('jsonwebtoken');
-const ROLES = require('../data/roles');
-const PERMISSIONS = require('../data/permissions');
-const ROLE_PERMISSIONS = require('../data/role_permission');
+const RoleModel = require('../models/RoleModel');
+const PermissionModel = require('../models/PermissionModel');
 const { sendError } = require('../utils/responseHandler');
+
+const ACTIONS = {
+  CREATE: { id: 1, code: 'CREATE', name: 'Create' },
+  READ: { id: 2, code: 'READ', name: 'Read' },
+  UPDATE: { id: 3, code: 'UPDATE', name: 'Update' },
+  DELETE: { id: 4, code: 'DELETE', name: 'Delete' },
+  APPROVE: { id: 5, code: 'APPROVE', name: 'Approve' },
+};
+
+const RESOURCES = {
+  STUDENT: { id: 1, code: 'STUDENT', name: 'Student' },
+  SPONSOR: { id: 2, code: 'SPONSOR', name: 'Sponsor' },
+  SCHOOL: { id: 3, code: 'SCHOOL', name: 'School' },
+  BANK_TRANSACTION: { id: 4, code: 'BANK_TRANSACTION', name: 'Bank Transaction' },
+  USER: { id: 5, code: 'USER', name: 'User' },
+  IMAGE: { id: 6, code: 'IMAGE', name: 'Image' },
+  REPORT: { id: 7, code: 'REPORT', name: 'Report' },
+  DISBURSEMENT: { id: 8, code: 'DISBURSEMENT', name: 'Disbursement' },
+  TEACHER: { id: 9, code: 'TEACHER', name: 'Teacher' },
+  VOLUNTEER: { id: 10, code: 'VOLUNTEER', name: 'Volunteer' },
+};
 
 /**
  * Authentication Middleware
- * Validates JWT token and attaches user/permissions to request
+ * Validates JWT token and attaches user and real-time TiDB permissions to request
  */
 const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -22,7 +42,7 @@ const authenticate = (req, res, next) => {
 
   const secretKey = req.app.get('SECRET_KEY');
 
-  jwt.verify(token, secretKey, (err, user) => {
+  jwt.verify(token, secretKey, async (err, user) => {
     if (err) {
       return sendError(res, 'Invalid or expired token', [], 403);
     }
@@ -31,30 +51,27 @@ const authenticate = (req, res, next) => {
       return sendError(res, 'Forbidden: Account has no assigned role', [], 403);
     }
 
-    const roleExists = ROLES.some(role => role.id === user.role_id);
-    if (!roleExists) {
-      return sendError(res, 'Forbidden: Account has an invalid assigned role', [], 403);
-    }
+    try {
+      const role = await RoleModel.findById(user.role_id);
+      if (!role) {
+        return sendError(res, 'Forbidden: Account has an invalid assigned role', [], 403);
+      }
 
-    req.user = user;
-    
-    // Attach permissions (ids) to request based on role
-    const userPermissionIds = ROLE_PERMISSIONS
-      .filter(rp => rp.role_id === user.role_id)
-      .map(rp => rp.permission_id);
-    
-    req.permissions = PERMISSIONS.filter(p => userPermissionIds.includes(p.id));
-    next();
+      req.user = user;
+      // Fetch permissions for this role directly from TiDB
+      req.permissions = await PermissionModel.findByRoleId(user.role_id);
+      next();
+    } catch (dbError) {
+      console.error('[TiDB Auth Error]', dbError.message);
+      return sendError(res, 'Database error during authentication', dbError.message, 500);
+    }
   });
 };
 
-const RESOURCES = require('../data/resources');
-const ACTIONS = require('../data/actions');
-
 /**
  * Authorization Middleware
- * @param {object} action - Action object from data/actions
- * @param {object} resource - Resource object from data/resources
+ * @param {object} action - Action definition
+ * @param {object} resource - Resource definition
  */
 const authorize = (action, resource) => {
   return (req, res, next) => {
@@ -65,11 +82,6 @@ const authorize = (action, resource) => {
 
     if (!req.user || req.user.role_id === undefined || req.user.role_id === null) {
       return sendError(res, 'Forbidden: Account has no assigned role', [], 403);
-    }
-
-    const roleExists = ROLES.some(role => role.id === req.user.role_id);
-    if (!roleExists) {
-      return sendError(res, 'Forbidden: Account has an invalid assigned role', [], 403);
     }
 
     const userPermissions = req.permissions || [];
@@ -96,5 +108,6 @@ const authorize = (action, resource) => {
 module.exports = {
   authenticate,
   authorize,
+  ACTIONS,
+  RESOURCES,
 };
-

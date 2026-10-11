@@ -1,16 +1,38 @@
 const BaseModel = require('./BaseModel');
-const bankTransactionsData = require('../data/bank_transactions');
+const { BankTransaction } = require('./schemas');
 
 class BankTransactionModel extends BaseModel {
   constructor() {
-    super(bankTransactionsData);
+    super(
+      'bank_transactions',
+      'id',
+      [
+        'id',
+        'sponsor_id',
+        'transaction_code',
+        'bank_name',
+        'account_number',
+        'transfer_date',
+        'amount',
+        'transfer_content',
+        'status_id',
+        'verified_by',
+        'verified_at',
+        'created_at',
+      ],
+      BankTransaction
+    );
   }
 
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const maxId = Math.max(...this.data.map(t => t.id));
-    return maxId + 1;
+  async findByTransactionCode(code) {
+    return this.findOne({ transaction_code: code });
+  }
+
+  async findBySponsorId(sponsorId) {
+    return this.findAll({ sponsor_id: sponsorId });
   }
 }
 
-module.exports = new BankTransactionModel();
+const instance = new BankTransactionModel();
+instance.Model = BankTransaction;
+module.exports = instance;

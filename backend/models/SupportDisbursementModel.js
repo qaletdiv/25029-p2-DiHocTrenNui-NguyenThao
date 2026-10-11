@@ -1,24 +1,37 @@
 const BaseModel = require('./BaseModel');
-const supportDisbursementsData = require('../data/support_disbursements');
+const { SupportDisbursement } = require('./schemas');
 
 class SupportDisbursementModel extends BaseModel {
   constructor() {
-    super(supportDisbursementsData);
-  }
-
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const maxId = Math.max(...this.data.map(d => d.id));
-    return maxId + 1;
+    super(
+      'support_disbursements',
+      'id',
+      [
+        'id',
+        'bank_transaction_id',
+        'sponsor_student_id',
+        'student_id',
+        'teacher_id',
+        'support_month',
+        'support_year',
+        'amount',
+        'delivered_at',
+        'status_id',
+        'created_at',
+      ],
+      SupportDisbursement
+    );
   }
 
   async findByStudentId(studentId) {
-    return this.data.filter(d => d.student_id === studentId);
+    return this.findAll({ student_id: studentId });
   }
 
   async findByBankTransactionId(txId) {
-    return this.data.filter(d => d.bank_transaction_id === txId);
+    return this.findAll({ bank_transaction_id: txId });
   }
 }
 
-module.exports = new SupportDisbursementModel();
+const instance = new SupportDisbursementModel();
+instance.Model = SupportDisbursement;
+module.exports = instance;

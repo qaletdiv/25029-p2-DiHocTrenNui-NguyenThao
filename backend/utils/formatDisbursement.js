@@ -1,24 +1,17 @@
-const students = require('../data/students');
-const teachers = require('../data/teachers');
-const sponsors = require('../data/sponsors');
-const sponsorStudents = require('../data/sponsor_students');
-const bankTransactions = require('../data/bank_transactions');
-const disbursementStatuses = require('../data/disbursement_statuses');
-const accounts = require('../data/accounts');
+const lookupService = require('./lookupService');
 
 /**
  * Transforms a raw support_disbursement object by replacing relation IDs with actual values
  */
-const formatDisbursementResponse = (rawDisbursement) => {
+const formatDisbursementResponse = (rawDisbursement, lookups = null) => {
   if (!rawDisbursement) return rawDisbursement;
 
-  // Build maps dynamically to support in-memory updates
-  const studentMap = new Map(students.map(s => [s.id, s.full_name]));
-  const teacherMap = new Map(teachers.map(t => [t.id, t.full_name]));
-  const sponsorMap = new Map(sponsors.map(s => [s.id, s.full_name]));
-  const statusMap = new Map(disbursementStatuses.map(s => [s.id, { code: s.code, name: s.name }]));
-  const bankTxMap = new Map(bankTransactions.map(tx => [tx.id, tx]));
-  const sponsorStudentMap = new Map(sponsorStudents.map(ss => [ss.id, ss]));
+  const studentMap = (lookups && lookups.students) || lookupService.cache.students;
+  const teacherMap = (lookups && lookups.teachers) || lookupService.cache.teachers;
+  const sponsorMap = (lookups && lookups.sponsors) || lookupService.cache.sponsors;
+  const statusMap = (lookups && lookups.disbursementStatuses) || lookupService.cache.disbursementStatuses;
+  const bankTxMap = (lookups && lookups.bankTransactions) || lookupService.cache.bankTransactions;
+  const sponsorStudentMap = (lookups && lookups.sponsorStudents) || lookupService.cache.sponsorStudents;
 
   const {
     status_id,
@@ -26,24 +19,24 @@ const formatDisbursementResponse = (rawDisbursement) => {
   } = rawDisbursement;
 
   // Resolve student name
-  const studentName = studentMap.get(rawDisbursement.student_id) || null;
+  const studentName = (studentMap && studentMap.get(rawDisbursement.student_id)) || rawDisbursement.student_name || null;
 
   // Resolve teacher name
-  const teacherName = teacherMap.get(rawDisbursement.teacher_id) || null;
+  const teacherName = (teacherMap && teacherMap.get(rawDisbursement.teacher_id)) || rawDisbursement.teacher_name || null;
 
   // Resolve status
-  const statusObj = statusMap.get(status_id);
-  const status = statusObj ? statusObj.code : null;
-  const statusName = statusObj ? statusObj.name : null;
+  const statusObj = statusMap && statusMap.get(status_id);
+  const status = statusObj ? statusObj.code : (rawDisbursement.status || null);
+  const statusName = statusObj ? statusObj.name : (rawDisbursement.status_name || null);
 
   // Resolve bank transaction
-  const bankTx = bankTxMap.get(rawDisbursement.bank_transaction_id);
-  const transactionCode = bankTx ? bankTx.transaction_code : null;
+  const bankTx = bankTxMap && bankTxMap.get(rawDisbursement.bank_transaction_id);
+  const transactionCode = bankTx ? bankTx.transaction_code : (rawDisbursement.transaction_code || null);
 
   // Resolve sponsor via sponsor_student relationship
-  const sponsorStudentRel = sponsorStudentMap.get(rawDisbursement.sponsor_student_id);
-  const sponsorName = sponsorStudentRel ? (sponsorMap.get(sponsorStudentRel.sponsor_id) || null) : null;
-  const sponsorId = sponsorStudentRel ? sponsorStudentRel.sponsor_id : null;
+  const sponsorStudentRel = sponsorStudentMap && sponsorStudentMap.get(rawDisbursement.sponsor_student_id);
+  const sponsorId = sponsorStudentRel ? sponsorStudentRel.sponsor_id : (rawDisbursement.sponsor_id || null);
+  const sponsorName = (sponsorStudentRel && sponsorMap && sponsorMap.get(sponsorStudentRel.sponsor_id)) || rawDisbursement.sponsor_name || null;
 
   return {
     ...restOfData,
@@ -60,10 +53,10 @@ const formatDisbursementResponse = (rawDisbursement) => {
 /**
  * Transforms a received disbursement object from the client back to the database-compatible format.
  */
-const parseDisbursementRequest = (receivedDisbursement) => {
+const parseDisbursementRequest = (receivedDisbursement, lookups = null) => {
   if (!receivedDisbursement) return receivedDisbursement;
 
-  const statusMap = new Map(disbursementStatuses.map(s => [s.id, { code: s.code, name: s.name }]));
+  const statusMap = (lookups && lookups.disbursementStatuses) || lookupService.cache.disbursementStatuses;
 
   const {
     student_name,
@@ -83,7 +76,7 @@ const parseDisbursementRequest = (receivedDisbursement) => {
   if (status !== undefined) {
     if (status === null || status === '') {
       original.status_id = null;
-    } else {
+    } else if (statusMap) {
       for (const [id, obj] of statusMap.entries()) {
         if (obj.code === status) {
           original.status_id = id;
@@ -109,4 +102,3 @@ const parseDisbursementRequest = (receivedDisbursement) => {
 };
 
 module.exports = { formatDisbursementResponse, parseDisbursementRequest };
-

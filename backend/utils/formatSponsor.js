@@ -1,13 +1,12 @@
-const accounts = require('../data/accounts');
-
-// Pre-compute lookup map for O(1) access time
-const accountMap = new Map(accounts.map(a => [a.id, a.username]));
+const lookupService = require('./lookupService');
 
 /**
  * Transforms a raw sponsor object by replacing relation IDs with actual string values
  */
-const formatSponsorResponse = (rawSponsor) => {
+const formatSponsorResponse = (rawSponsor, lookups = null) => {
   if (!rawSponsor) return rawSponsor;
+
+  const accountMap = (lookups && lookups.accounts) || lookupService.cache.accounts;
 
   const {
     account_id,
@@ -16,9 +15,9 @@ const formatSponsorResponse = (rawSponsor) => {
     ...restOfSponsorData
   } = rawSponsor;
 
-  const usernameVal = accountMap.get(account_id) || null;
-  const creatorVal = accountMap.get(created_by) || null;
-  const updaterVal = accountMap.get(updated_by) || null;
+  const usernameVal = (accountMap && accountMap.get(account_id)) || rawSponsor.username || null;
+  const creatorVal = (accountMap && accountMap.get(created_by)) || rawSponsor.creator || null;
+  const updaterVal = (accountMap && accountMap.get(updated_by)) || rawSponsor.updater || null;
 
   return {
     ...restOfSponsorData,

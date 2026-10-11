@@ -1,136 +1,182 @@
 const BaseModel = require('./BaseModel');
-const imagesData = require('../data/images');
-const ImageManager = require('../utils/imageManager');
+const { Image } = require('./schemas');
 
 /**
  * Resolves list of student IDs authorized for the user session.
  * Returns null if user is admin or undefined/null (for compatibility in CLI test scripts).
  */
-function getAuthorizedStudentIds(user) {
+async function getAuthorizedStudentIds(user) {
   if (!user) return null;
   if (user.role_id === 1) return null; // Admin has unrestricted access
 
   let studentIds = [];
   if (user.role_id === 2) { // VOLUNTEER
     const { getVolunteerLinkedResources } = require('../utils/volunteerAuth');
-    studentIds = getVolunteerLinkedResources(user.id).studentIds || [];
+    const res = await getVolunteerLinkedResources(user.id);
+    studentIds = res.studentIds || [];
   } else if (user.role_id === 3) { // TEACHER
     const { getTeacherLinkedResources } = require('../utils/teacherAuth');
-    studentIds = getTeacherLinkedResources(user.id).studentIds || [];
+    const res = await getTeacherLinkedResources(user.id);
+    studentIds = res.studentIds || [];
   } else if (user.role_id === 4) { // SPONSOR
     const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
-    studentIds = getSponsorLinkedResources(user.id).studentIds || [];
+    const res = await getSponsorLinkedResources(user.id);
+    studentIds = res.studentIds || [];
   }
   return studentIds;
 }
 
 class ImageModel extends BaseModel {
   constructor() {
-    super(imagesData);
+    super('images', 'id', ['id', 'student_id', 'event_id', 'timestamp', 'url', 'metadata'], Image);
   }
 
   /**
-   * Helper to filter list of images based on authorized student IDs
+   * Helper to check if a student ID is authorized for a user
    */
-  filterImagesByUser(images, user) {
-    const allowedIds = getAuthorizedStudentIds(user);
-    if (allowedIds === null) return images;
-    return images.filter(img => allowedIds.includes(img.student_id));
+  async isStudentAuthorized(studentId, user) {
+    const allowedIds = await getAuthorizedStudentIds(user);
+    if (allowedIds === null) return true;
+    return allowedIds.includes(studentId);
   }
 
   /**
-   * Helper to check if a single image is authorized
+   * Helper to check if a single image record is authorized
    */
-  isImageAuthorized(image, user) {
+  async isImageAuthorized(image, user) {
     if (!image) return false;
-    const allowedIds = getAuthorizedStudentIds(user);
+    const allowedIds = await getAuthorizedStudentIds(user);
     if (allowedIds === null) return true;
     return allowedIds.includes(image.student_id);
   }
 
   /**
-   * Helper to check if a student ID is authorized
+   * Helper to filter list of images based on authorized student IDs
    */
-  isStudentAuthorized(studentId, user) {
-    const allowedIds = getAuthorizedStudentIds(user);
-    if (allowedIds === null) return true;
-    return allowedIds.includes(studentId);
+  async filterImagesByUser(images, user) {
+    const allowedIds = await getAuthorizedStudentIds(user);
+    if (allowedIds === null) return images;
+    return images.filter(img => allowedIds.includes(img.student_id));
   }
 
+  /**
+   * Find all images, filtered by user authorization if applicable.
+   */
   async findAll(user) {
-    const images = await super.findAll();
-    return this.filterImagesByUser(images, user);
+    const allowedIds = await getAuthorizedStudentIds(user);
+    if (allowedIds === null) {
+      return this.model.findAll({
+        order: [['timestamp', 'DESC']],
+        raw: true,
+      });
+    }
+
+    if (allowedIds.length === 0) {
+      return [];
+    }
+
+    return this.model.findAll({
+      where: { student_id: { [this.Op.in]: allowedIds } },
+      order: [['timestamp', 'DESC']],
+      raw: true,
+    });
   }
 
+  /**
+   * Find image by primary key, checking user authorization.
+   */
   async findById(id, user) {
     const image = await super.findById(id);
     if (!image) return null;
-    if (!this.isImageAuthorized(image, user)) {
-      return null;
-    }
+    const authorized = await this.isImageAuthorized(image, user);
+    if (!authorized) return null;
     return image;
   }
 
+  /**
+   * Find one image by query, checking user authorization.
+   */
   async findOne(query, user) {
     const image = await super.findOne(query);
     if (!image) return null;
-    if (!this.isImageAuthorized(image, user)) {
-      return null;
+    if (user) {
+      const authorized = await this.isImageAuthorized(image, user);
+      if (!authorized) return null;
     }
     return image;
   }
 
   /**
-   * Optimized retrieval using the ImageManager singleton
+   * Find images by student ID, checking user authorization.
    */
   async findByStudentId(studentId, user) {
-    const allowedIds = getAuthorizedStudentIds(user);
-    if (allowedIds !== null && !allowedIds.includes(studentId)) {
-      return [];
-    }
-    return ImageManager.getByStudentId(studentId);
-  }
+    const isAuth = await this.isStudentAuthorized(studentId, user);
+    if (!isAuth) return [];
 
-  async findByEvent(eventId, user) {
-    const images = ImageManager.getByEvent(eventId);
-    return this.filterImagesByUser(images, user);
-  }
-
-  async findByTimeRange(startDate, endDate, user) {
-    const images = ImageManager.getByTimeRange(startDate, endDate);
-    return this.filterImagesByUser(images, user);
+    return this.model.findAll({
+      where: { student_id: studentId },
+      order: [['timestamp', 'DESC']],
+      raw: true,
+    });
   }
 
   /**
-   * Helper to generate a new image ID
+   * Find images by event ID, filtered by user authorization.
    */
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const latestImage = this.data.reduce((max, current) =>
-      current.id > max.id ? current : max
-    );
-    return latestImage.id + 1;
+  async findByEvent(eventId, user) {
+    const allowedIds = await getAuthorizedStudentIds(user);
+    if (allowedIds === null) {
+      return this.model.findAll({
+        where: { event_id: eventId },
+        order: [['timestamp', 'DESC']],
+        raw: true,
+      });
+    }
+
+    if (allowedIds.length === 0) {
+      return [];
+    }
+
+    return this.model.findAll({
+      where: {
+        event_id: eventId,
+        student_id: { [this.Op.in]: allowedIds },
+      },
+      order: [['timestamp', 'DESC']],
+      raw: true,
+    });
   }
 
-  // Override create to keep indices in sync if needed
-  async create(newItem) {
-    const created = await super.create(newItem);
-    ImageManager.initializeIndices(); // Refresh indices
-    return created;
-  }
+  /**
+   * Find images within a timestamp range, filtered by user authorization.
+   */
+  async findByTimeRange(startDate, endDate, user) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const allowedIds = await getAuthorizedStudentIds(user);
 
-  // Override delete/update to keep indices in sync
-  async update(id, updatedFields) {
-    const updated = await super.update(id, updatedFields);
-    if (updated) ImageManager.initializeIndices();
-    return updated;
-  }
+    const where = {
+      timestamp: {
+        [this.Op.gte]: start,
+        [this.Op.lte]: end,
+      },
+    };
 
-  async delete(id) {
-    const success = await super.delete(id);
-    if (success) ImageManager.initializeIndices();
-    return success;
+    if (allowedIds !== null) {
+      if (allowedIds.length === 0) {
+        return [];
+      }
+      where.student_id = { [this.Op.in]: allowedIds };
+    }
+
+    return this.model.findAll({
+      where,
+      order: [['timestamp', 'ASC']],
+      raw: true,
+    });
   }
 }
 
-module.exports = new ImageModel();
+const instance = new ImageModel();
+instance.Model = Image;
+module.exports = instance;

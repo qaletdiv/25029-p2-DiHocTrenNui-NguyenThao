@@ -1,7 +1,4 @@
-const accounts = require('../data/accounts');
-
-// Pre-compute lookup map for O(1) access time
-const accountMap = new Map(accounts.map(a => [a.id, a.username]));
+const lookupService = require('./lookupService');
 
 /**
  * Transforms a raw school object by replacing relation IDs with actual string values.
@@ -9,8 +6,10 @@ const accountMap = new Map(accounts.map(a => [a.id, a.username]));
  * - created_by  → creator  (username of whoever created the record)
  * - updated_by  → updater  (username of whoever last updated the record)
  */
-const formatSchoolResponse = (rawSchool) => {
+const formatSchoolResponse = (rawSchool, lookups = null) => {
   if (!rawSchool) return rawSchool;
+
+  const accountMap = (lookups && lookups.accounts) || lookupService.cache.accounts;
 
   const {
     account_id,
@@ -19,9 +18,9 @@ const formatSchoolResponse = (rawSchool) => {
     ...restOfSchoolData
   } = rawSchool;
 
-  const usernameVal = accountMap.get(account_id) || null;
-  const creatorVal  = accountMap.get(created_by)  || null;
-  const updaterVal  = accountMap.get(updated_by)  || null;
+  const usernameVal = (accountMap && accountMap.get(account_id)) || rawSchool.username || null;
+  const creatorVal  = (accountMap && accountMap.get(created_by))  || rawSchool.creator  || null;
+  const updaterVal  = (accountMap && accountMap.get(updated_by))  || rawSchool.updater  || null;
 
   return {
     ...restOfSchoolData,

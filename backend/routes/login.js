@@ -1,20 +1,21 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 const AccountModel = require('../models/AccountModel');
+const PermissionModel = require('../models/PermissionModel');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const bcrypt = require('bcryptjs');
         const user = await AccountModel.findByEmail(email);
         
         let isValidPassword = false;
         if (user) {
             // Support both bcrypt-hashed passwords and plaintext passwords (for seeding or backward compatibility)
-            if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+            if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
                 isValidPassword = await bcrypt.compare(password, user.password);
             } else {
                 isValidPassword = user.password === password;
@@ -24,14 +25,8 @@ router.post('/', async (req, res) => {
         if (user && isValidPassword) {
             const currentUser = { id: user.id, username: user.username, role_id: user.role_id, email: user.email };
             
-            const permissions = require('../data/permissions');
-            const rolePermissions = require('../data/role_permission');
-            const userPermissionIds = rolePermissions
-                .filter(rp => rp.role_id === user.role_id)
-                .map(rp => rp.permission_id);
-            const userPermissions = permissions
-                .filter(p => userPermissionIds.includes(p.id))
-                .map(p => p.code);
+            // Query user permissions directly from TiDB
+            const userPermissions = await PermissionModel.getPermissionCodesByRoleId(user.role_id);
 
             const accessToken = jwt.sign(currentUser, req.app.get('SECRET_KEY'), { expiresIn: '24h' });
             

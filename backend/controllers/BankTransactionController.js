@@ -2,6 +2,7 @@ const BankTransactionModel = require('../models/BankTransactionModel');
 const { validateBankTransaction } = require('../validations/bankTransactionValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 const { paginate } = require('../utils/pagination');
+const lookupService = require('../utils/lookupService');
 
 class BankTransactionController {
   async getAllTransactions(req, res) {
@@ -24,7 +25,7 @@ class BankTransactionController {
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
-        const { sponsorId } = getSponsorLinkedResources(req.user.id);
+        const { sponsorId } = await getSponsorLinkedResources(req.user.id);
         filteredTransactions = filteredTransactions.filter(t => t.sponsor_id === sponsorId);
       }
 
@@ -36,13 +37,13 @@ class BankTransactionController {
 
   async getTransactionById(req, res) {
     try {
-      const transaction = await BankTransactionModel.findById(parseInt(req.params.id));
+      const transaction = await BankTransactionModel.findById(parseInt(req.params.id, 10));
       if (!transaction) return sendError(res, 'Transaction not found', [], 404);
 
       // Sponsor restriction
       if (req.user && req.user.role_id === 4) {
         const { getSponsorLinkedResources } = require('../utils/sponsorAuth');
-        const { sponsorId } = getSponsorLinkedResources(req.user.id);
+        const { sponsorId } = await getSponsorLinkedResources(req.user.id);
         if (transaction.sponsor_id !== sponsorId) {
           return sendError(res, 'Access Denied', [], 403);
         }
@@ -64,10 +65,11 @@ class BankTransactionController {
       const newId = await BankTransactionModel.generateNextId();
       const newTransaction = await BankTransactionModel.create({
         id: newId,
-        ...req.body
+        ...req.body,
+        created_at: new Date(),
       });
 
-
+      lookupService.invalidateCache();
       return sendSuccess(res, newTransaction, 'Transaction created successfully', 201);
     } catch (error) {
       return sendError(res, 'Failed to create transaction', error.message);
@@ -81,10 +83,10 @@ class BankTransactionController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const updatedTransaction = await BankTransactionModel.update(parseInt(req.params.id), req.body);
-
+      const updatedTransaction = await BankTransactionModel.update(parseInt(req.params.id, 10), req.body);
       if (!updatedTransaction) return sendError(res, 'Transaction not found', [], 404);
 
+      lookupService.invalidateCache();
       return sendSuccess(res, updatedTransaction, 'Transaction updated successfully');
     } catch (error) {
       return sendError(res, 'Failed to update transaction', error.message);
@@ -93,9 +95,10 @@ class BankTransactionController {
 
   async deleteTransaction(req, res) {
     try {
-      const success = await BankTransactionModel.delete(parseInt(req.params.id));
+      const success = await BankTransactionModel.delete(parseInt(req.params.id, 10));
       if (!success) return sendError(res, 'Transaction not found', [], 404);
-      
+
+      lookupService.invalidateCache();
       return sendSuccess(res, null, 'Transaction deleted successfully');
     } catch (error) {
       return sendError(res, 'Failed to delete transaction', error.message);

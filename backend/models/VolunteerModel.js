@@ -1,16 +1,34 @@
 const BaseModel = require('./BaseModel');
-const volunteersData = require('../data/volunteers');
+const { Volunteer } = require('./schemas');
 
 class VolunteerModel extends BaseModel {
   constructor() {
-    super(volunteersData);
+    super(
+      'volunteers',
+      'id',
+      [
+        'id',
+        'account_id',
+        'full_name',
+        'phone',
+        'gender',
+        'address',
+        'note',
+        'is_active',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+      ],
+      Volunteer
+    );
   }
 
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const maxId = Math.max(...this.data.map(v => v.id));
-    return maxId + 1;
+  async findByAccountId(accountId) {
+    return this.findOne({ account_id: accountId });
   }
 }
 
-module.exports = new VolunteerModel();
+const instance = new VolunteerModel();
+instance.Model = Volunteer;
+module.exports = instance;

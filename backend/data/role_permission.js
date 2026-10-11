@@ -34,16 +34,16 @@ const ROLE_PERMISSIONS = [
   { id: 64, role_id: 3, permission_id: 34 }, // VOLUNTEER_READ
 
   // Sponsor (Role ID 4)
-  { id: 63, role_id: 4, permission_id: 2 }, // STUDENT_READ
-  { id: 64, role_id: 4, permission_id: 6 }, // SPONSOR_READ
-  { id: 65, role_id: 4, permission_id: 10 }, // SCHOOL_READ
-  { id: 66, role_id: 4, permission_id: 30 }, // TEACHER_READ
-  { id: 67, role_id: 4, permission_id: 34 }, // VOLUNTEER_READ
-  { id: 68, role_id: 4, permission_id: 23 }, // IMAGE_READ
+  { id: 65, role_id: 4, permission_id: 2 }, // STUDENT_READ
+  { id: 66, role_id: 4, permission_id: 6 }, // SPONSOR_READ
+  { id: 67, role_id: 4, permission_id: 10 }, // SCHOOL_READ
+  { id: 68, role_id: 4, permission_id: 30 }, // TEACHER_READ
+  { id: 69, role_id: 4, permission_id: 34 }, // VOLUNTEER_READ
+  { id: 70, role_id: 4, permission_id: 23 }, // IMAGE_READ
 
   // Image Update assignments
-  { id: 69, role_id: 2, permission_id: 37 }, // Volunteer: IMAGE_UPDATE
-  { id: 70, role_id: 3, permission_id: 37 }, // Teacher: IMAGE_UPDATE
+  { id: 71, role_id: 2, permission_id: 37 }, // Volunteer: IMAGE_UPDATE
+  { id: 72, role_id: 3, permission_id: 37 }, // Teacher: IMAGE_UPDATE
 ];
 
 module.exports = ROLE_PERMISSIONS;

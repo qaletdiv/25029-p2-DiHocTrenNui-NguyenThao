@@ -1,15 +1,26 @@
 const BaseModel = require('./BaseModel');
-const schoolsData = require('../data/schools');
+const { School } = require('./schemas');
 
 class SchoolModel extends BaseModel {
   constructor() {
-    super(schoolsData);
-  }
-
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const maxId = Math.max(...this.data.map(s => s.id));
-    return maxId + 1;
+    super(
+      'schools',
+      'id',
+      [
+        'id',
+        'name',
+        'phone',
+        'email',
+        'address',
+        'note',
+        'is_active',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+      ],
+      School
+    );
   }
 
   async findByName(name) {
@@ -17,4 +28,6 @@ class SchoolModel extends BaseModel {
   }
 }
 
-module.exports = new SchoolModel();
+const instance = new SchoolModel();
+instance.Model = School;
+module.exports = instance;

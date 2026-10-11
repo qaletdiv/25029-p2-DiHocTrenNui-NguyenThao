@@ -1,66 +1,73 @@
-const volunteersData = require('../data/volunteers');
-const volunteerStudentsData = require('../data/volunteer_students');
-const studentsData = require('../data/students');
-const teacherStudentsData = require('../data/teacher_students');
-const sponsorStudentsData = require('../data/sponsor_students');
+const db = require('../config/db');
 
 /**
- * Gets IDs of resources linked to the Volunteer account.
+ * Gets IDs of resources linked to the Volunteer account via TiDB direct queries.
  * Returns an object containing the list of authorized IDs for each entity.
  * 
  * @param {number} accountId - The ID of the authenticated account
- * @returns {object} An object containing: volunteerId, studentIds, schoolIds, teacherIds, sponsorIds
+ * @returns {Promise<object>} An object containing: volunteerId, studentIds, schoolIds, teacherIds, sponsorIds
  */
-function getVolunteerLinkedResources(accountId) {
-  const volunteer = volunteersData.find(v => v.account_id === accountId);
-  if (!volunteer) {
+async function getVolunteerLinkedResources(accountId) {
+  const [volunteers] = await db.query('SELECT id FROM volunteers WHERE account_id = ?', [accountId]);
+  if (!volunteers || volunteers.length === 0) {
     return {
       volunteerId: null,
       studentIds: [],
       schoolIds: [],
       teacherIds: [],
-      sponsorIds: []
+      sponsorIds: [],
     };
   }
 
-  const volunteerId = volunteer.id;
-  
-  // Find linked student IDs
-  const studentIds = volunteerStudentsData
-    .filter(rel => rel.volunteer_id === volunteerId)
-    .map(rel => rel.student_id);
+  const volunteerId = volunteers[0].id;
 
-  // Find linked students and get their school IDs
-  const linkedStudents = studentsData.filter(student => studentIds.includes(student.id));
-  const schoolIds = [...new Set(
-    linkedStudents
-      .map(student => student.school_id)
-      .filter(id => id !== null && id !== undefined)
-  )];
+  // 1. Linked student IDs
+  const [studentRows] = await db.query(
+    'SELECT student_id FROM volunteer_students WHERE volunteer_id = ?',
+    [volunteerId]
+  );
+  const studentIds = studentRows.map(r => r.student_id);
 
-  // Find linked teacher IDs from teacher_students
-  const teacherIds = [...new Set(
-    teacherStudentsData
-      .filter(rel => studentIds.includes(rel.student_id))
-      .map(rel => rel.teacher_id)
-  )];
+  if (studentIds.length === 0) {
+    return {
+      volunteerId,
+      studentIds: [],
+      schoolIds: [],
+      teacherIds: [],
+      sponsorIds: [],
+    };
+  }
 
-  // Find linked sponsor IDs from sponsor_students
-  const sponsorIds = [...new Set(
-    sponsorStudentsData
-      .filter(rel => studentIds.includes(rel.student_id))
-      .map(rel => rel.sponsor_id)
-  )];
+  // 2. School IDs of linked students
+  const [schoolRows] = await db.query(
+    'SELECT DISTINCT s.school_id FROM students s JOIN volunteer_students vs ON s.id = vs.student_id WHERE vs.volunteer_id = ? AND s.school_id IS NOT NULL',
+    [volunteerId]
+  );
+  const schoolIds = schoolRows.map(r => r.school_id);
+
+  // 3. Teacher IDs linked through students
+  const [teacherRows] = await db.query(
+    'SELECT DISTINCT ts.teacher_id FROM teacher_students ts JOIN volunteer_students vs ON ts.student_id = vs.student_id WHERE vs.volunteer_id = ?',
+    [volunteerId]
+  );
+  const teacherIds = teacherRows.map(r => r.teacher_id);
+
+  // 4. Sponsor IDs linked through students
+  const [sponsorRows] = await db.query(
+    'SELECT DISTINCT ss.sponsor_id FROM sponsor_students ss JOIN volunteer_students vs ON ss.student_id = vs.student_id WHERE vs.volunteer_id = ?',
+    [volunteerId]
+  );
+  const sponsorIds = sponsorRows.map(r => r.sponsor_id);
 
   return {
     volunteerId,
     studentIds,
     schoolIds,
     teacherIds,
-    sponsorIds
+    sponsorIds,
   };
 }
 
 module.exports = {
-  getVolunteerLinkedResources
+  getVolunteerLinkedResources,
 };

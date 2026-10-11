@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const AccountModel = require('../models/AccountModel');
 const StudentModel = require('../models/StudentModel');
-const ROLES = require('../data/roles');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 
 /**
@@ -49,7 +48,7 @@ router.post('/sponsor', async (req, res) => {
         // Securely hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Save new user account to the database with role_id: 4 (Sponsor), is_active: false
+        // Save new user account to TiDB with role_id: 4 (Sponsor), is_active: false
         const nextId = await AccountModel.generateNextId();
         const newAccount = await AccountModel.create({
             id: nextId,
@@ -89,7 +88,7 @@ router.post('/student', async (req, res) => {
             return sendError(res, 'Định dạng ngày sinh không hợp lệ. Vui lòng sử dụng YYYY-MM-DD.', ['Invalid date of birth format'], 400);
         }
 
-        // Check if student already exists
+        // Check if student already exists in TiDB
         const existingStudent = await StudentModel.findByNameAndInfo(full_name, address, date_of_birth);
         if (existingStudent) {
             return sendError(res, 'Học sinh này đã được đăng ký trên hệ thống.', ['Student already exists'], 400);
@@ -98,7 +97,7 @@ router.post('/student', async (req, res) => {
         // Generate next student ID (e.g. HSXXXX)
         const nextId = await StudentModel.generateNextId();
 
-        // Create student record in-memory
+        // Create student record in TiDB
         const newStudent = await StudentModel.create({
             id: nextId,
             full_name,
@@ -115,7 +114,7 @@ router.post('/student', async (req, res) => {
             is_active: false,
             created_by: null,
             updated_by: null,
-            created_at: new Date().toISOString(),
+            created_at: new Date(),
             updated_at: null
         });
 

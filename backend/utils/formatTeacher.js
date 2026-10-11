@@ -1,9 +1,4 @@
-const accounts = require('../data/accounts');
-const schools = require('../data/schools');
-
-// Pre-compute lookup maps for O(1) access time
-const accountMap = new Map(accounts.map(a => [a.id, a.username]));
-const schoolMap = new Map(schools.map(s => [s.id, s.name]));
+const lookupService = require('./lookupService');
 
 /**
  * Transforms a raw teacher object by replacing relation IDs with actual string values.
@@ -12,8 +7,11 @@ const schoolMap = new Map(schools.map(s => [s.id, s.name]));
  * - created_by  → creator  (username of whoever created the record)
  * - updated_by  → updater  (username of whoever last updated the record)
  */
-const formatTeacherResponse = (rawTeacher) => {
+const formatTeacherResponse = (rawTeacher, lookups = null) => {
   if (!rawTeacher) return rawTeacher;
+
+  const accountMap = (lookups && lookups.accounts) || lookupService.cache.accounts;
+  const schoolMap  = (lookups && lookups.schools)  || lookupService.cache.schools;
 
   const {
     account_id,
@@ -23,10 +21,10 @@ const formatTeacherResponse = (rawTeacher) => {
     ...restOfTeacherData
   } = rawTeacher;
 
-  const usernameVal = accountMap.get(account_id) || null;
-  const schoolVal   = schoolMap.get(school_id) || null;
-  const creatorVal  = accountMap.get(created_by)  || null;
-  const updaterVal  = accountMap.get(updated_by)  || null;
+  const usernameVal = (accountMap && accountMap.get(account_id)) || rawTeacher.username || null;
+  const schoolVal   = (schoolMap  && schoolMap.get(school_id))   || rawTeacher.school   || null;
+  const creatorVal  = (accountMap && accountMap.get(created_by))  || rawTeacher.creator  || null;
+  const updaterVal  = (accountMap && accountMap.get(updated_by))  || rawTeacher.updater  || null;
 
   return {
     ...restOfTeacherData,
@@ -41,8 +39,10 @@ const formatTeacherResponse = (rawTeacher) => {
  * Transforms an enriched/received teacher object from the client back
  * to the database-compatible format (strips virtual fields, parses dates).
  */
-const parseTeacherRequest = (receivedTeacher) => {
+const parseTeacherRequest = (receivedTeacher, lookups = null) => {
   if (!receivedTeacher) return receivedTeacher;
+
+  const schoolMap = (lookups && lookups.schools) || lookupService.cache.schools;
 
   const {
     username,
@@ -64,7 +64,7 @@ const parseTeacherRequest = (receivedTeacher) => {
   if (school !== undefined) {
     if (school === null || school === '') {
       originalTeacher.school_id = null;
-    } else {
+    } else if (schoolMap) {
       let foundSchoolId = null;
       for (const [id, name] of schoolMap.entries()) {
         if (name === school) {

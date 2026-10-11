@@ -1,10 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const port = process.env.PORT;
+const db = require('./config/db');
+const port = process.env.PORT || 5001;
 
 const app = express();
-app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
+app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
 app.use(express.json({ limit: '10mb' }));
 
 // Set global constant
@@ -27,7 +28,6 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
 const disbursementRoutes = require('./routes/disbursementRoutes');
 
-
 // Public Routes
 app.use('/login', loginRoute);
 app.use('/register', registerRoute);
@@ -43,10 +43,20 @@ app.use('/teachers', authenticate, teacherRoutes);
 app.use('/volunteers', authenticate, volunteerRoutes);
 app.use('/disbursements', authenticate, disbursementRoutes);
 
-
-// Home Route
-app.get('/', (req, res) => {
-  res.send('MVC Backend is running!');
+// Home Route & Health Check
+app.get('/', async (req, res) => {
+  try {
+    const isDbConnected = await db.testConnection();
+    res.json({
+      message: 'MVC Backend is running with TiDB!',
+      database: isDbConnected ? 'Connected' : 'Disconnected',
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: 'MVC Backend is running, but database connection failed!',
+      error: err.message,
+    });
+  }
 });
 
 // Global Error Handler
@@ -55,8 +65,31 @@ app.use((err, req, res, next) => {
   return sendError(res, 'Something went wrong!', err.message, 500);
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+let server = null;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(port, async () => {
+    console.log(`Server is running at http://localhost:${port}`);
+    try {
+      await db.testConnection();
+      console.log(`[TiDB] Connected successfully to host: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+    } catch (err) {
+      console.error(`[TiDB Error] Failed to connect to database:`, err.message);
+    }
+  });
+}
+
+// Graceful shutdown
+function handleShutdown() {
+  if (server) {
+    server.close(async () => {
+      console.log('HTTP server closed.');
+      await db.closePool();
+      process.exit(0);
+    });
+  }
+}
+
+process.on('SIGTERM', handleShutdown);
+process.on('SIGINT', handleShutdown);
 
 module.exports = app;

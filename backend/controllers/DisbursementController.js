@@ -3,6 +3,7 @@ const StudentModel = require('../models/StudentModel');
 const SponsorModel = require('../models/SponsorModel');
 const TeacherModel = require('../models/TeacherModel');
 const BankTransactionModel = require('../models/BankTransactionModel');
+const SponsorStudentModel = require('../models/SponsorStudentModel');
 
 const { validateDisbursement } = require('../validations/disbursementValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
@@ -12,9 +13,7 @@ const { formatDisbursementResponse, parseDisbursementRequest } = require('../uti
 const { formatStudentResponse } = require('../utils/formatStudent');
 const { formatSponsorResponse } = require('../utils/formatSponsor');
 const { formatTeacherResponse } = require('../utils/formatTeacher');
-
-const sponsorStudentsData = require('../data/sponsor_students');
-const bankTransactionsData = require('../data/bank_transactions');
+const lookupService = require('../utils/lookupService');
 
 class DisbursementController {
   /**
@@ -23,12 +22,13 @@ class DisbursementController {
    */
   async getAllDisbursements(req, res) {
     try {
+      await lookupService.ensureLoaded();
       let disbursements = await SupportDisbursementModel.findAll();
 
       // Teacher restriction
       if (req.user && req.user.role_id === 3) {
         const { getTeacherLinkedResources } = require('../utils/teacherAuth');
-        const { teacherId } = getTeacherLinkedResources(req.user.id);
+        const { teacherId } = await getTeacherLinkedResources(req.user.id);
         disbursements = disbursements.filter(d => d.teacher_id === teacherId);
       }
 
@@ -47,19 +47,19 @@ class DisbursementController {
         });
       }
 
-      // Compute remaining balance per bank transaction
+      // Compute allocated balance per bank transaction
       const txAllocated = {};
       for (const d of disbursements) {
         if (!txAllocated[d.bank_transaction_id]) {
           txAllocated[d.bank_transaction_id] = 0;
         }
-        txAllocated[d.bank_transaction_id] += d.amount;
+        txAllocated[d.bank_transaction_id] += Number(d.amount) || 0;
       }
 
-      // Build budget summary for each transaction used
+      // Build budget summary for each transaction used by querying TiDB
       const budgetSummary = {};
       for (const txId of Object.keys(txAllocated)) {
-        const tx = bankTransactionsData.find(t => t.id === parseInt(txId));
+        const tx = await BankTransactionModel.findById(parseInt(txId, 10));
         if (tx) {
           budgetSummary[txId] = {
             transaction_code: tx.transaction_code,
@@ -87,13 +87,14 @@ class DisbursementController {
    */
   async getDisbursementById(req, res) {
     try {
-      const disbursement = await SupportDisbursementModel.findById(parseInt(req.params.id));
+      await lookupService.ensureLoaded();
+      const disbursement = await SupportDisbursementModel.findById(parseInt(req.params.id, 10));
       if (!disbursement) return sendError(res, 'Disbursement not found', [], 404);
 
       // Teacher restriction
       if (req.user && req.user.role_id === 3) {
         const { getTeacherLinkedResources } = require('../utils/teacherAuth');
-        const { teacherId } = getTeacherLinkedResources(req.user.id);
+        const { teacherId } = await getTeacherLinkedResources(req.user.id);
         if (disbursement.teacher_id !== teacherId) {
           return sendError(res, 'Access Denied', [], 403);
         }
@@ -110,13 +111,15 @@ class DisbursementController {
         }
       }
 
-      // Fetch full sponsor detail via sponsor_students
+      // Fetch full sponsor detail via sponsor_students in TiDB
       let sponsorObj = null;
-      const sponsorStudentRel = sponsorStudentsData.find(ss => ss.id === disbursement.sponsor_student_id);
-      if (sponsorStudentRel) {
-        const sponsorRaw = await SponsorModel.findById(sponsorStudentRel.sponsor_id);
-        if (sponsorRaw) {
-          sponsorObj = formatSponsorResponse(sponsorRaw);
+      if (disbursement.sponsor_student_id) {
+        const sponsorStudentRel = await SponsorStudentModel.findById(disbursement.sponsor_student_id);
+        if (sponsorStudentRel) {
+          const sponsorRaw = await SponsorModel.findById(sponsorStudentRel.sponsor_id);
+          if (sponsorRaw) {
+            sponsorObj = formatSponsorResponse(sponsorRaw);
+          }
         }
       }
 
@@ -142,7 +145,7 @@ class DisbursementController {
       let budgetInfo = null;
       if (transactionObj) {
         const allForTx = await SupportDisbursementModel.findByBankTransactionId(disbursement.bank_transaction_id);
-        const totalAllocated = allForTx.reduce((sum, d) => sum + d.amount, 0);
+        const totalAllocated = allForTx.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
         budgetInfo = {
           transaction_code: transactionObj.transaction_code,
           total_amount: transactionObj.amount,
@@ -172,6 +175,7 @@ class DisbursementController {
    */
   async createDisbursement(req, res) {
     try {
+      await lookupService.ensureLoaded();
       const parsedBody = parseDisbursementRequest(req.body);
       const validation = validateDisbursement(parsedBody);
       if (!validation.isValid) {
@@ -180,13 +184,18 @@ class DisbursementController {
 
       // Verify the allocation doesn't exceed the bank transaction remaining
       if (parsedBody.bank_transaction_id && parsedBody.amount) {
-        const tx = bankTransactionsData.find(t => t.id === parsedBody.bank_transaction_id);
+        const tx = await BankTransactionModel.findById(parsedBody.bank_transaction_id);
         if (tx) {
           const allForTx = await SupportDisbursementModel.findByBankTransactionId(parsedBody.bank_transaction_id);
-          const totalAllocated = allForTx.reduce((sum, d) => sum + d.amount, 0);
+          const totalAllocated = allForTx.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
           const remaining = tx.amount - totalAllocated;
           if (parsedBody.amount > remaining) {
-            return sendError(res, `Số tiền phân bổ (${parsedBody.amount.toLocaleString('vi-VN')}đ) vượt quá số dư còn lại (${remaining.toLocaleString('vi-VN')}đ)`, [], 400);
+            return sendError(
+              res,
+              `Số tiền phân bổ (${parsedBody.amount.toLocaleString('vi-VN')}đ) vượt quá số dư còn lại (${remaining.toLocaleString('vi-VN')}đ)`,
+              [],
+              400
+            );
           }
         }
       }
@@ -199,6 +208,7 @@ class DisbursementController {
         created_at: new Date(),
       });
 
+      lookupService.invalidateCache();
       return sendSuccess(res, formatDisbursementResponse(newDisbursement), 'Disbursement created successfully', 201);
     } catch (error) {
       return sendError(res, 'Failed to create disbursement', error.message);
@@ -211,13 +221,14 @@ class DisbursementController {
    */
   async updateDisbursement(req, res) {
     try {
+      await lookupService.ensureLoaded();
       const parsedBody = parseDisbursementRequest(req.body);
       const validation = validateDisbursement(parsedBody, true);
       if (!validation.isValid) {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const existing = await SupportDisbursementModel.findById(parseInt(req.params.id));
+      const existing = await SupportDisbursementModel.findById(parseInt(req.params.id, 10));
       if (!existing) return sendError(res, 'Disbursement not found', [], 404);
 
       // If amount or bank_transaction_id changed, re-validate budget
@@ -225,23 +236,29 @@ class DisbursementController {
       const newTxId = parsedBody.bank_transaction_id !== undefined ? parsedBody.bank_transaction_id : existing.bank_transaction_id;
 
       if (newTxId) {
-        const tx = bankTransactionsData.find(t => t.id === newTxId);
+        const tx = await BankTransactionModel.findById(newTxId);
         if (tx) {
           const allForTx = await SupportDisbursementModel.findByBankTransactionId(newTxId);
           // Exclude current record from the sum
           const totalAllocated = allForTx
             .filter(d => d.id !== existing.id)
-            .reduce((sum, d) => sum + d.amount, 0);
+            .reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
           const remaining = tx.amount - totalAllocated;
           if (newAmount > remaining) {
-            return sendError(res, `Số tiền phân bổ (${newAmount.toLocaleString('vi-VN')}đ) vượt quá số dư còn lại (${remaining.toLocaleString('vi-VN')}đ)`, [], 400);
+            return sendError(
+              res,
+              `Số tiền phân bổ (${newAmount.toLocaleString('vi-VN')}đ) vượt quá số dư còn lại (${remaining.toLocaleString('vi-VN')}đ)`,
+              [],
+              400
+            );
           }
         }
       }
 
-      const updatedDisbursement = await SupportDisbursementModel.update(parseInt(req.params.id), parsedBody);
+      const updatedDisbursement = await SupportDisbursementModel.update(parseInt(req.params.id, 10), parsedBody);
       if (!updatedDisbursement) return sendError(res, 'Disbursement not found', [], 404);
 
+      lookupService.invalidateCache();
       return sendSuccess(res, formatDisbursementResponse(updatedDisbursement), 'Disbursement updated successfully');
     } catch (error) {
       return sendError(res, 'Failed to update disbursement', error.message);
@@ -254,9 +271,10 @@ class DisbursementController {
    */
   async deleteDisbursement(req, res) {
     try {
-      const success = await SupportDisbursementModel.delete(parseInt(req.params.id));
+      const success = await SupportDisbursementModel.delete(parseInt(req.params.id, 10));
       if (!success) return sendError(res, 'Disbursement not found', [], 404);
 
+      lookupService.invalidateCache();
       return sendSuccess(res, null, 'Disbursement deleted successfully');
     } catch (error) {
       return sendError(res, 'Failed to delete disbursement', error.message);

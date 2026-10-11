@@ -1,4 +1,5 @@
 const AccountModel = require('../models/AccountModel');
+const PermissionModel = require('../models/PermissionModel');
 const { validateAccount } = require('../validations/accountValidation');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 const { paginate } = require('../utils/pagination');
@@ -15,22 +16,15 @@ class AccountController {
 
   async getAccountById(req, res) {
     try {
-      const account = await AccountModel.findById(parseInt(req.params.id));
+      const account = await AccountModel.findById(parseInt(req.params.id, 10));
       if (!account) return sendError(res, 'Account not found', [], 404);
 
-      const permissions = require('../data/permissions');
-      const rolePermissions = require('../data/role_permission');
-      const userPermissionIds = rolePermissions
-        .filter(rp => rp.role_id === account.role_id)
-        .map(rp => rp.permission_id);
-      
-      const userPermissions = permissions
-        .filter(p => userPermissionIds.includes(p.id))
-        .map(p => p.code);
+      // Fetch user permissions from TiDB
+      const userPermissions = await PermissionModel.getPermissionCodesByRoleId(account.role_id);
 
       return sendSuccess(res, {
         ...account,
-        permissions: userPermissions
+        permissions: userPermissions,
       });
     } catch (error) {
       return sendError(res, 'Failed to fetch account', error.message);
@@ -53,7 +47,7 @@ class AccountController {
       const newAccount = await AccountModel.create({
         id: newId,
         ...req.body,
-        is_active: true
+        is_active: req.body.is_active !== undefined ? req.body.is_active : true,
       });
 
       return sendSuccess(res, newAccount, 'Account created successfully', 201);
@@ -69,7 +63,7 @@ class AccountController {
         return sendError(res, 'Validation failed', validation.errors, 400);
       }
 
-      const updatedAccount = await AccountModel.update(parseInt(req.params.id), req.body);
+      const updatedAccount = await AccountModel.update(parseInt(req.params.id, 10), req.body);
 
       if (!updatedAccount) return sendError(res, 'Account not found', [], 404);
 
@@ -81,9 +75,9 @@ class AccountController {
 
   async deleteAccount(req, res) {
     try {
-      const success = await AccountModel.delete(parseInt(req.params.id));
+      const success = await AccountModel.delete(parseInt(req.params.id, 10));
       if (!success) return sendError(res, 'Account not found', [], 404);
-      
+
       return sendSuccess(res, null, 'Account deleted successfully');
     } catch (error) {
       return sendError(res, 'Failed to delete account', error.message);

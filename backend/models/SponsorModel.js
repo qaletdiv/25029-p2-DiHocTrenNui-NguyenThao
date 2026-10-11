@@ -1,20 +1,38 @@
 const BaseModel = require('./BaseModel');
-const sponsorsData = require('../data/sponsors');
+const { Sponsor } = require('./schemas');
 
 class SponsorModel extends BaseModel {
   constructor() {
-    super(sponsorsData);
-  }
-
-  async generateNextId() {
-    if (this.data.length === 0) return 1;
-    const maxId = Math.max(...this.data.map(s => s.id));
-    return maxId + 1;
+    super(
+      'sponsors',
+      'id',
+      [
+        'id',
+        'account_id',
+        'full_name',
+        'phone',
+        'gender',
+        'address',
+        'note',
+        'is_active',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+      ],
+      Sponsor
+    );
   }
 
   async findByFullName(full_name) {
     return this.findOne({ full_name });
   }
+
+  async findByAccountId(accountId) {
+    return this.findOne({ account_id: accountId });
+  }
 }
 
-module.exports = new SponsorModel();
+const instance = new SponsorModel();
+instance.Model = Sponsor;
+module.exports = instance;

@@ -46,14 +46,10 @@ function formatImageResponse(image, req) {
 
   return {
     ...image,
-    url: proxyUrl
+    url: proxyUrl,
   };
 }
 
-/**
- * Sanitizes input URLs to store only raw filenames in the database,
- * preventing ephemeral proxy/token strings from being saved.
- */
 /**
  * Sanitizes input URLs to store only raw filenames in the database,
  * preventing ephemeral proxy/token strings from being saved.
@@ -72,7 +68,6 @@ function sanitizeInputUrl(url) {
 function saveUploadedFile(filename, fileData) {
   if (!filename || !fileData) return;
 
-  // Extract base64 content safely without regex backtracking on large strings
   const commaIdx = fileData.indexOf(';base64,');
   if (commaIdx === -1) {
     throw new Error('Invalid base64 image data format');
@@ -82,7 +77,6 @@ function saveUploadedFile(filename, fileData) {
   const buffer = Buffer.from(base64Content, 'base64');
   const uploadDir = path.join(__dirname, '../public/upload/event');
 
-  // Ensure upload directory exists
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -96,7 +90,7 @@ class ImageController {
     try {
       let images = await ImageModel.findAll(req.user);
 
-      // Search filter (by student_id or event_id)
+      // Search filter (by student_id, event_id, or month)
       const searchQuery = req.query.search ? req.query.search.toLowerCase().trim() : '';
       if (searchQuery) {
         images = images.filter(img => {
@@ -117,9 +111,9 @@ class ImageController {
 
   async getImageById(req, res) {
     try {
-      const imageId = parseInt(req.params.id);
-      // First check if the image exists in the database
-      const rawImage = await ImageModel.findOne({ id: imageId });
+      const imageId = parseInt(req.params.id, 10);
+      // First check if the image exists in TiDB
+      const rawImage = await ImageModel.findById(imageId);
       if (!rawImage) {
         return sendError(res, 'Image not found', [], 404);
       }
@@ -140,8 +134,8 @@ class ImageController {
     try {
       const studentId = req.params.studentId;
       // If user is not authorized to view this student's data, return a 403 Forbidden error
-      if (req.user && !ImageModel.isStudentAuthorized(studentId, req.user)) {
-        return sendError(res, 'Access Denied: You are not authorized to view this student\'s images', [], 403);
+      if (req.user && !(await ImageModel.isStudentAuthorized(studentId, req.user))) {
+        return sendError(res, "Access Denied: You are not authorized to view this student's images", [], 403);
       }
 
       const images = await ImageModel.findByStudentId(studentId, req.user);
@@ -190,7 +184,8 @@ class ImageController {
       const newImage = await ImageModel.create({
         id: newId,
         ...req.body,
-        metadata: req.body.metadata || {}
+        timestamp: req.body.timestamp || new Date(),
+        metadata: req.body.metadata || {},
       });
 
       return sendSuccess(res, formatImageResponse(newImage, req), 'Image created successfully', 201);
@@ -219,7 +214,7 @@ class ImageController {
         saveUploadedFile(req.body.url, fileData);
       }
 
-      const updatedImage = await ImageModel.update(parseInt(req.params.id), req.body);
+      const updatedImage = await ImageModel.update(parseInt(req.params.id, 10), req.body);
       if (!updatedImage) return sendError(res, 'Image not found', [], 404);
 
       return sendSuccess(res, formatImageResponse(updatedImage, req), 'Image updated successfully');
@@ -230,9 +225,9 @@ class ImageController {
 
   async deleteImage(req, res) {
     try {
-      const success = await ImageModel.delete(parseInt(req.params.id));
+      const success = await ImageModel.delete(parseInt(req.params.id, 10));
       if (!success) return sendError(res, 'Image not found', [], 404);
-      
+
       return sendSuccess(res, null, 'Image deleted successfully');
     } catch (error) {
       return sendError(res, 'Failed to delete image', error.message);
@@ -259,7 +254,7 @@ class ImageController {
         maxAge: '1d', // Cache for 1 day
         immutable: true,
         lastModified: true,
-        etag: true
+        etag: true,
       };
 
       if (fs.existsSync(filePath)) {
